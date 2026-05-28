@@ -1,0 +1,59 @@
+{
+  "name": "ACCA EDU",
+  "short_name": "ACCA",
+  "description": "ACCA EDU — مشاوره تحصیلی تخصصی، پذیرش دانشگاه‌های استانبول، بورسیه ۱۰۰٪ و اقامت دانشجویی در ترکیه. Educational consulting and university placement in Turkey.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "theme_color": "#071A3D",
+  "background_color": "#F7F1E8",
+  "lang": "fa",
+  "dir": "rtl",
+  "categories": ["education", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/pwa/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa/maskable-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "رشته‌ها و شهریه‌ها",
+      "short_name": "رشته‌ها",
+      "description": "Search programs and tuition fees.",
+      "url": "/?page=programs",
+      "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "لیست بورسیه‌ها",
+      "short_name": "بورسیه‌ها",
+      "description": "Browse ACCA scholarship options.",
+      "url": "/?page=scholarships",
+      "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "مشاهده دانشگاه‌ها",
+      "short_name": "دانشگاه‌ها",
+      "description": "View university profiles.",
+      "url": "/?page=universities",
+      "icons": [{ "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

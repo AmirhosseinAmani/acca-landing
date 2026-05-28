@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/*
+ * Suppress the blue/grey tap-highlight flash that iOS Safari shows on every
+ * tapped link, button, or interactive element.  This is purely cosmetic and
+ * has no effect on accessibility or focus outlines.
+ */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

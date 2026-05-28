@@ -1,0 +1,1793 @@
+import { lazy, memo, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Award, BookOpen, Building2, Download, Menu, MessageCircle, UserRound, X } from 'lucide-react';
+import SmartScholarshipCalculator from './components/SmartScholarshipCalculator';
+import GreenScholarshipWidget from "./components/GreenScholarshipWidget";
+import AccaShowcaseSection from "./components/AccaShowcaseSection";
+import ConsultationModal from './components/ConsultationModal';
+import HeroSection from './components/sections/HeroSection';
+import UniversityMarqueeSection from './components/sections/UniversityMarqueeSection';
+import RegistrationProcessSection from './components/sections/RegistrationProcessSection';
+import FeaturedUniversitiesSection from './components/sections/FeaturedUniversitiesSection';
+import PopularMajorsSection from './components/sections/PopularMajorsSection';
+import PartnerScholarshipSection from './components/sections/PartnerScholarshipSection';
+import TestimonialsSection from './components/sections/TestimonialsSection';
+import StatsSection from './components/sections/StatsSection';
+import MigrationBlueprintSection from './components/sections/MigrationBlueprintSection';
+import FaqSection from './components/sections/FaqSection';
+import FinalCtaSection from './components/sections/FinalCtaSection';
+import ContactSection from './components/sections/ContactSection';
+import { COMPANY_WHATSAPP_URL } from './constants/contact';
+
+const ProgramsSearchPage = lazy(() => import('./components/pages/ProgramsSearchPageV2'));
+const UniversitiesPage = lazy(() => import('./components/pages/UniversitiesPage'));
+const ScholarshipsPage = lazy(() => import('./components/pages/ScholarshipsPage'));
+
+const ACCA_LOGO_SRC =
+  'https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/Asset%20171.png';
+
+const DESKTOP_MEDIA_QUERY = '(min-width: 1024px) and (pointer: fine)';
+
+function PageLoadingScreen({ darkMode, isFa }) {
+  return (
+    <div
+      className={`${darkMode ? 'bg-[#050816] text-white' : 'bg-[#F7F1E8] text-neutral-950'} grid min-h-screen place-items-center px-6`}
+      dir={isFa ? 'rtl' : 'ltr'}
+    >
+      <div className={`${darkMode ? 'border-white/10 bg-white/10' : 'border-black/10 bg-white/80'} rounded-[28px] border px-8 py-6 text-sm font-black shadow-[0_18px_60px_rgba(0,0,0,0.10)] backdrop-blur-xl`}>
+        {isFa ? '\u062f\u0631 \u062d\u0627\u0644 \u0628\u0627\u0631\u06af\u0630\u0627\u0631\u06cc...' : 'Loading...'}
+      </div>
+    </div>
+  );
+}
+function InstallAppButton({ darkMode, isFa, onInstall, visible }) {
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={onInstall}
+      className={`${darkMode ? 'border-white/12 bg-[#071A3D]/90 text-white shadow-[0_18px_70px_rgba(0,0,0,0.35)]' : 'border-white/70 bg-[#071A3D] text-white shadow-[0_18px_70px_rgba(7,26,61,0.24)]'} fixed bottom-5 left-4 z-[60] inline-flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-full border px-4 py-3 text-sm font-black backdrop-blur-2xl transition hover:-translate-y-0.5 hover:shadow-[0_22px_80px_rgba(7,26,61,0.32)] sm:left-6 sm:px-5`}
+      aria-label={isFa ? '\u062f\u0633\u062a\u0631\u0633\u06cc \u0633\u0631\u06cc\u0639 \u0628\u0647 \u0622\u06a9\u0627 \u0627\u062f\u0648' : 'Install ACCA EDU'}
+    >
+      <span className="grid h-9 w-9 flex-none place-items-center rounded-full bg-[#C6A768] text-[#071A3D]">
+        <Download size={17} strokeWidth={2.6} />
+      </span>
+      <span className="truncate">
+        {isFa ? '\u062f\u0633\u062a\u0631\u0633\u06cc \u0633\u0631\u06cc\u0639 \u0628\u0647 \u0622\u06a9\u0627 \u0627\u062f\u0648' : 'Install ACCA EDU'}
+      </span>
+    </button>
+  );
+}
+/**
+ * FloatingOrbs – isolated component that drives its own scroll-parallax via
+ * direct DOM mutation (no React state updates) so scrolling never triggers a
+ * re-render of the parent App tree.
+ */
+const FloatingOrbs = memo(function FloatingOrbs({ floatingObjects, darkMode }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    let rAF = 0;
+    let lastScrollY = window.scrollY;
+
+    const update = () => {
+      const curr = window.scrollY;
+      const velocity = curr - lastScrollY;
+      lastScrollY = curr;
+      rAF = 0;
+
+      const container = containerRef.current;
+      if (!container) return;
+      const children = container.children;
+
+      for (let i = 0; i < floatingObjects.length; i++) {
+        const el = children[i];
+        if (!el) continue;
+        const star = floatingObjects[i];
+        const blur = Math.min(Math.abs(velocity) * 0.12, 4);
+        const moveY = curr * (0.045 * star.depth);
+        const moveX = curr * (0.01 * star.depth);
+        el.style.transform = `translate3d(${moveX}px, ${moveY}px, ${star.depth * 40}px)`;
+        el.style.filter = blur > 0.05 ? `blur(${blur}px)` : '';
+      }
+    };
+
+    const onScroll = () => { if (!rAF) rAF = requestAnimationFrame(update); };
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (rAF) cancelAnimationFrame(rAF);
+    };
+  }, [floatingObjects]);
+
+  return (
+    <div ref={containerRef} className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      {floatingObjects.map((star) => (
+        <div
+          key={star.id}
+          className="orb"
+          style={{
+            width:           `${star.size}px`,
+            height:          `${star.size}px`,
+            top:             `${star.top}%`,
+            left:            `${star.left}%`,
+            opacity:         darkMode ? 0.95 : 0.58,
+            animationDuration: `${star.duration}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+});
+
+export default function ACCALandingPage() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [language, setLanguage] = useState('fa');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [consultationOpen, setConsultationOpen] = useState(false);
+  const [installPromptEvent, setInstallPromptEvent] = useState(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+  // mouseOffset is intentionally static (parallax handled via refs in HeroSection)
+  const mouseOffset = useMemo(() => ({ x: 0, y: 0 }), []);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia(DESKTOP_MEDIA_QUERY).matches;
+  });
+  const MODEL_SRC =
+    'https://modelviewer.dev/shared-assets/models/Astronaut.glb';
+  const cursorDotRef = useRef(null);
+  const cursorRingRef = useRef(null);
+  const cursorTargetRef = useRef({ x: 0, y: 0 });
+  const cursorRingPositionRef = useRef({ x: 0, y: 0 });
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const standaloneQuery = window.matchMedia?.('(display-mode: standalone)');
+    const updateInstalledState = () => {
+      setIsAppInstalled(Boolean(standaloneQuery?.matches || window.navigator.standalone));
+    };
+
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      window.__accaInstallPromptAvailable = true;
+      setInstallPromptEvent(event);
+    };
+
+    const handleAppInstalled = () => {
+      window.__accaInstallPromptAvailable = false;
+      setIsAppInstalled(true);
+      setInstallPromptEvent(null);
+    };
+
+    updateInstalledState();
+    standaloneQuery?.addEventListener?.('change', updateInstalledState);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      standaloneQuery?.removeEventListener?.('change', updateInstalledState);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    const updateViewport = () => setIsDesktopViewport(mediaQuery.matches);
+
+    updateViewport();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', updateViewport);
+      return () => mediaQuery.removeEventListener('change', updateViewport);
+    }
+
+    mediaQuery.addListener(updateViewport);
+    return () => mediaQuery.removeListener(updateViewport);
+  }, []);
+
+  useEffect(() => {
+    if (!isDesktopViewport) return undefined;
+
+    const existing = document.querySelector(
+      'script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]'
+    );
+
+    if (!existing) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src =
+        'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
+
+      script.onload = () => {};
+
+      document.head.appendChild(script);
+    }
+  }, [isDesktopViewport]);
+
+  useEffect(() => {
+    if (!isDesktopViewport) return undefined;
+
+    const dot = cursorDotRef.current;
+    const ring = cursorRingRef.current;
+    if (!dot || !ring) return undefined;
+
+    let animationFrame = 0;
+    let cursorVisible = false;
+
+    const stopCursorLoop = () => {
+      if (!animationFrame) return;
+      cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    };
+
+    const animateCursor = () => {
+      const current = cursorRingPositionRef.current;
+      const target = cursorTargetRef.current;
+      const next = {
+        x: current.x + (target.x - current.x) * 0.32,
+        y: current.y + (target.y - current.y) * 0.32,
+      };
+
+      cursorRingPositionRef.current = next;
+      ring.style.transform = `translate3d(${next.x}px, ${next.y}px, 0) translate(-50%, -50%)`;
+      animationFrame = requestAnimationFrame(animateCursor);
+    };
+
+    const startCursorLoop = () => {
+      if (!animationFrame) {
+        animationFrame = requestAnimationFrame(animateCursor);
+      }
+    };
+
+    const setCursorVisibility = (visible) => {
+      if (cursorVisible === visible) return;
+      cursorVisible = visible;
+      dot.style.opacity = visible ? '1' : '0';
+      ring.style.opacity = visible ? '1' : '0';
+
+      if (visible) {
+        startCursorLoop();
+      } else {
+        stopCursorLoop();
+      }
+    };
+
+    const handleMouseMove = (event) => {
+      cursorTargetRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+
+      dot.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`;
+
+      if (!cursorVisible) {
+        cursorRingPositionRef.current = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+        ring.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`;
+      }
+
+      setCursorVisibility(true);
+    };
+
+    const handleMouseLeave = () => setCursorVisibility(false);
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseleave', handleMouseLeave);
+      stopCursorLoop();
+    };
+  }, [isDesktopViewport]);
+
+  useEffect(() => {
+    if (!isDesktopViewport) return undefined;
+
+    const handlePointerHover = (event) => {
+      const interactive = event.target.closest(
+        'a, button, input, textarea, select, label, [role="button"]'
+      );
+      cursorRingRef.current?.classList.toggle('hovered', Boolean(interactive));
+    };
+
+    window.addEventListener('mouseover', handlePointerHover);
+    window.addEventListener('mouseout', handlePointerHover);
+
+    return () => {
+      window.removeEventListener('mouseover', handlePointerHover);
+      window.removeEventListener('mouseout', handlePointerHover);
+    };
+  }, [isDesktopViewport]);
+
+  // Scroll tracking moved into HeroSection (parallax) and FloatingOrbs (orbs)
+  // to prevent full-app re-renders on every scroll frame.
+
+  const isFa = language === 'fa';
+  const search = typeof window !== 'undefined' ? window.location.search : '';
+  const params = new URLSearchParams(search);
+  const page = params.get('page');
+
+  // ── SEO: keep <html lang/dir> in sync with the active language ────────────
+  useEffect(() => {
+    document.documentElement.lang = isFa ? 'fa' : 'en';
+    document.documentElement.dir = isFa ? 'rtl' : 'ltr';
+  }, [isFa]);
+
+  // ── SEO: update <title> and meta description per page ─────────────────────
+  useEffect(() => {
+    const PAGE_TITLES = {
+      programs:     isFa ? 'رشته‌ها و شهریه‌ها | ACCA EDU' : 'Programs & Tuition | ACCA EDU',
+      universities: isFa ? 'دانشگاه‌ها | ACCA EDU'          : 'Universities | ACCA EDU',
+      scholarships: isFa ? 'بورسیه‌ها | ACCA EDU'            : 'Scholarships | ACCA EDU',
+      portal:       isFa ? 'پنل کاربری | ACCA EDU'           : 'Client Portal | ACCA EDU',
+    };
+    const PAGE_DESCS = {
+      programs:     isFa
+        ? 'جستجو در بیش از ۱۶۰۰ رشته دانشگاهی در ترکیه همراه با شهریه، بورسیه و اطلاعات پذیرش.'
+        : 'Search over 1,600 university programs in Turkey with tuition, scholarships and admission info.',
+      universities: isFa
+        ? 'مشاهده پروفایل دانشگاه‌های خصوصی معتبر استانبول و ترکیه.'
+        : 'View profiles of top private universities in Istanbul and Turkey.',
+      scholarships: isFa
+        ? 'لیست کامل بورسیه‌های ACCA برای دانشگاه‌های ترکیه — صرفه‌جویی تا ۶۰٪.'
+        : 'Full list of ACCA scholarships for Turkish universities — save up to 60%.',
+    };
+    document.title = PAGE_TITLES[page] || (isFa
+      ? 'ACCA EDU | مشاوره تحصیلی و پذیرش دانشگاه‌های ترکیه'
+      : 'ACCA EDU | Educational Consulting Turkey');
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && PAGE_DESCS[page]) metaDesc.setAttribute('content', PAGE_DESCS[page]);
+  }, [page, isFa]);
+
+
+  const handleInstallClick = async () => {
+    if (!installPromptEvent) return;
+
+    installPromptEvent.prompt();
+
+    try {
+      await installPromptEvent.userChoice;
+    } finally {
+      window.__accaInstallPromptAvailable = false;
+      setInstallPromptEvent(null);
+    }
+  };
+
+  const installCta = (
+    <InstallAppButton
+      darkMode={darkMode}
+      isFa={isFa}
+      onInstall={handleInstallClick}
+      visible={Boolean(installPromptEvent && !isAppInstalled)}
+    />
+  );
+
+  let pageContent = null;
+
+  if (page === 'programs') {
+    pageContent = (
+      <>
+        <Suspense fallback={<PageLoadingScreen darkMode={darkMode} isFa={isFa} />}>
+        <ProgramsSearchPage
+          darkMode={darkMode}
+          isFa={isFa}
+          ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+          onConsultationClick={() => setConsultationOpen(true)}
+          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+        />
+        </Suspense>
+        <ConsultationModal
+          open={consultationOpen}
+          onClose={() => setConsultationOpen(false)}
+          darkMode={darkMode}
+          isFa={isFa}
+        />
+      </>
+    );
+  } else if (page === 'universities') {
+    pageContent = (
+      <>
+        <Suspense fallback={<PageLoadingScreen darkMode={darkMode} isFa={isFa} />}>
+        <UniversitiesPage
+          darkMode={darkMode}
+          isFa={isFa}
+          ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+          onConsultationClick={() => setConsultationOpen(true)}
+          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+        />
+        </Suspense>
+        <ConsultationModal
+          open={consultationOpen}
+          onClose={() => setConsultationOpen(false)}
+          darkMode={darkMode}
+          isFa={isFa}
+        />
+      </>
+    );
+  } else if (page === 'scholarships') {
+    pageContent = (
+      <>
+        <Suspense fallback={<PageLoadingScreen darkMode={darkMode} isFa={isFa} />}>
+        <ScholarshipsPage
+          darkMode={darkMode}
+          isFa={isFa}
+          ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+          onConsultationClick={() => setConsultationOpen(true)}
+          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+        />
+        </Suspense>
+        <ConsultationModal
+          open={consultationOpen}
+          onClose={() => setConsultationOpen(false)}
+          darkMode={darkMode}
+          isFa={isFa}
+        />
+      </>
+    );
+  } else if (page === 'portal') {
+    pageContent = (
+      <div
+        className={`${darkMode ? 'bg-[#050816] text-white' : 'bg-[#F7F1E8] text-neutral-950'} min-h-screen overflow-hidden px-6 py-8`}
+        dir={isFa ? 'rtl' : 'ltr'}
+      >
+        <div className={`${darkMode ? 'darkGlass' : 'glass'} mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full px-5 py-4 sm:px-7`}>
+          <img
+            src={ACCA_LOGO_SRC}
+            alt="ACCA EDU Logo"
+            width="160"
+            height="44"
+            className="h-10 w-auto object-contain sm:h-11"
+          />
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setLanguage(isFa ? 'en' : 'fa')}
+              className={`${darkMode ? 'bg-white text-black' : 'bg-black text-white'} h-11 rounded-full px-4 text-xs font-black sm:px-5 sm:text-sm`}
+            >
+              {isFa ? 'EN' : 'FA'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDarkMode(!darkMode)}
+              className={`${darkMode ? 'bg-white text-black' : 'bg-black text-white'} grid h-11 w-11 place-items-center rounded-full text-base font-black`}
+            >
+              {darkMode ? '☀' : '☾'}
+            </button>
+
+            <a
+              href="/"
+              className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-black/5 text-black hover:bg-black/10'} rounded-full px-4 py-3 text-xs font-black transition sm:px-6 sm:text-sm`}
+            >
+              {isFa ? 'بازگشت' : 'Back'}
+            </a>
+          </div>
+        </div>
+
+        <main className="mx-auto flex min-h-[calc(100vh-120px)] max-w-5xl flex-col items-center justify-center text-center">
+          <div className={`${darkMode ? 'text-white/40' : 'text-black/40'} mb-6 text-sm font-black uppercase tracking-[0.35em]`}>
+            ACCA EDU
+          </div>
+          <h1 className="text-5xl font-black leading-tight md:text-8xl">
+            {isFa ? 'پنل کاربری' : 'Client Portal'}
+          </h1>
+          <p className={`${darkMode ? 'text-white/60' : 'text-black/55'} mt-8 max-w-2xl text-lg font-medium leading-9 md:text-xl`}>
+            {isFa
+              ? 'این صفحه برای داشبورد دانشجویان و مدیریت پرونده آماده می‌شود.'
+              : 'This page will be used for the student dashboard and case management system.'}
+          </p>
+        </main>
+      </div>
+    );
+  }
+
+  const floatingObjects = useMemo(
+    () =>
+      Array.from({ length: darkMode ? 30 : 18 }, (_, i) => ({
+        id: i,
+        size: 2 + (i % 4) * 2,
+        left: (i * 8) % 100,
+        top: (i * 12) % 100,
+        duration: 8 + i,
+        depth: (i % 5) + 1,
+      })),
+    [darkMode]
+  );
+
+  const registrationSteps = useMemo(
+    () => [
+      {
+        title: isFa ? 'مشاوره اولیه' : 'Initial Consultation',
+        desc: isFa
+          ? 'بررسی شرایط، انتخاب رشته و برنامه‌ریزی مسیر تحصیلی.'
+          : 'Reviewing your profile, selecting a major, and planning your academic path.',
+      },
+      {
+        title: isFa ? 'انتخاب دانشگاه' : 'University Selection',
+        desc: isFa
+          ? 'معرفی بهترین دانشگاه‌ها براساس بودجه و آینده شغلی.'
+          : 'Choosing the best universities based on budget and career goals.',
+      },
+      {
+        title: isFa ? 'اخذ پذیرش' : 'Admission Process',
+        desc: isFa
+          ? 'ترجمه مدارک، اپلای و دریافت پذیرش رسمی.'
+          : 'Document translation, application submission, and official admission.',
+      },
+      {
+        title: isFa ? 'ورود به ترکیه' : 'Arrival in Turkey',
+        desc: isFa
+          ? 'اقامت، خوابگاه و پشتیبانی کامل بعد از ورود.'
+          : 'Residence setup, accommodation, and full post-arrival support.',
+      },
+    ],
+    [isFa]
+  );
+
+  const scholarshipComparison = useMemo(
+    () => [
+      {
+        title: isFa
+          ? 'تخفیف پرداخت نقدی به دانشگاه'
+          : 'Direct University Cash Discount',
+        price: '$10,000',
+        desc: isFa
+          ? 'دانشجو هزینه کامل دوره کارشناسی ۴ ساله به‌همراه ۱ سال دوره زبان را به‌صورت نقدی مستقیم به دانشگاه پرداخت می‌کند و شامل تخفیف ویژه نقدی می‌شود.'
+          : 'The student pays the full tuition for the 4-year bachelor program plus 1 language year directly to the university in cash and receives a special cash-payment discount.',
+        features: isFa
+          ? [
+              'تخفیف پرداخت نقدی',
+              'پرداخت مستقیم به دانشگاه',
+              'هزینه کمتر نسبت به ترمیک',
+            ]
+          : [
+              'Cash Payment Discount',
+              'Direct University Payment',
+              'Lower Cost Than Semester Tuition',
+            ],
+      },
+      {
+        title: isFa ? 'بورسیه 100٪ ACCA' : 'ACCA 100% Scholarship',
+        price: '$4,800',
+        desc: isFa
+          ? 'دانشجو صندلی بورسیه ۱۰۰٪ را به‌صورت نقدی از ACCA خریداری می‌کند و از پرداخت شهریه کل دوره کارشناسی ۴ ساله به‌همراه ۱ سال دوره زبان معاف می‌شود.'
+          : 'The student purchases a 100% scholarship seat directly from ACCA and becomes fully exempt from tuition payments for the entire 4-year bachelor program plus 1 language year.',
+        features: isFa
+          ? [
+              'معافیت کامل از شهریه',
+              'صرفه‌جویی بسیار بالا',
+              'پشتیبانی کامل ACCA',
+            ]
+          : [
+              'Full Tuition Exemption',
+              'Maximum Financial Savings',
+              'Full ACCA Support',
+            ],
+        featured: true,
+      },
+      {
+        title: isFa ? 'پرداخت ترمیک' : 'Semester-Based Tuition',
+        price: '$12,000',
+        desc: isFa
+          ? 'پرداخت شهریه کامل دوره کارشناسی ۴ ساله به‌همراه ۱ سال دوره زبان به‌صورت ترم به ترم و بدون تخفیف بلندمدت یا بورسیه.'
+          : 'The full tuition for the 4-year bachelor program plus 1 language year is paid semester by semester without long-term discounts or scholarship support.',
+        features: isFa
+          ? [
+              'پرداخت اقساطی هر ترم',
+              'بدون بورسیه',
+              'بیشترین هزینه نهایی',
+            ]
+          : [
+              'Semester Installments',
+              'No Scholarship Included',
+              'Highest Final Cost',
+            ],
+      },
+    ],
+    [isFa]
+  );
+
+  const majors = useMemo(
+    () => [
+      {
+        icon: '🩺',
+        title: isFa ? 'پزشکی' : 'Medicine',
+        programFilters: ['Medicine', 'Medicine*'],
+        category: isFa ? 'علوم سلامت' : 'Healthcare',
+        duration: isFa ? '6 سال' : '6 Years',
+        difficulty: isFa ? 'بسیار بالا' : 'Very High',
+        quality: 'Top Tier',
+        color: 'from-red-500/20 to-pink-500/10',
+      },
+      {
+        icon: '🦷',
+        title: isFa ? 'دندانپزشکی' : 'Dentistry',
+        programFilters: ['Dentistry', 'Dentistry*'],
+        category: isFa ? 'علوم سلامت' : 'Healthcare',
+        duration: isFa ? '5 سال' : '5 Years',
+        difficulty: isFa ? 'بالا' : 'High',
+        quality: 'High Demand',
+        color: 'from-cyan-500/20 to-blue-500/10',
+      },
+      {
+        icon: '💻',
+        title: isFa ? 'مهندسی نرم‌افزار' : 'Software Engineering',
+        programFilters: ['Software Engineering'],
+        category: isFa ? 'مهندسی' : 'Engineering',
+        duration: isFa ? '4 سال' : '4 Years',
+        difficulty: isFa ? 'متوسط' : 'Medium',
+        quality: 'Future Proof',
+        color: 'from-indigo-500/20 to-violet-500/10',
+      },
+      {
+        icon: '🤖',
+        title: isFa ? 'هوش مصنوعی' : 'Artificial Intelligence',
+        programFilters: [
+          'Artificial Intelligence',
+          'Artificial Intelligence Engineering',
+          'Artificial Intelligence and Data Engineering',
+          'Artificial Intelligence Engineering and Data Science',
+        ],
+        category: isFa ? 'مهندسی' : 'Engineering',
+        duration: isFa ? '4 سال' : '4 Years',
+        difficulty: isFa ? 'بالا' : 'High',
+        quality: 'Top Trend',
+        color: 'from-fuchsia-500/20 to-purple-500/10',
+      },
+      {
+        icon: '💊',
+        title: isFa ? 'داروسازی' : 'Pharmacy',
+        programFilters: ['Pharmacy', 'Pharmacy*', 'Pharmacy**'],
+        category: isFa ? 'علوم سلامت' : 'Healthcare',
+        duration: isFa ? '5 سال' : '5 Years',
+        difficulty: isFa ? 'بالا' : 'High',
+        quality: 'Clinical Career',
+        color: 'from-emerald-500/20 to-green-500/10',
+      },
+      {
+        icon: '🏗️',
+        title: isFa ? 'معماری' : 'Architecture',
+        programFilters: [
+          'Architecture',
+          'Architecture and Design',
+          'Architecture Design',
+          'Interior Architecture',
+          'Interior Architecture & Environmental Design',
+          'Interior Architecture and Environmental Design',
+        ],
+        category: isFa ? 'مهندسی' : 'Engineering',
+        duration: isFa ? '4 سال' : '4 Years',
+        difficulty: isFa ? 'متوسط' : 'Medium',
+        quality: 'Creative Field',
+        color: 'from-amber-500/20 to-orange-500/10',
+      },
+    ],
+    [isFa]
+  );
+
+  const universityCards = useMemo(
+    () => [
+      {
+        name: 'İstinye University',
+        ranking: '#Top Medical',
+        tuition: '$4.8K - $12K',
+        ministry: isFa ? 'مورد تایید' : 'Approved',
+        image:
+          'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1200&auto=format&fit=crop',
+        description: isFa
+          ? 'یکی از مدرن‌ترین دانشگاه‌های پزشکی و سلامت ترکیه با امکانات بین‌المللی.'
+          : 'One of Turkey’s most modern medical and healthcare universities with international facilities.',
+      },
+      {
+        name: 'Bahçeşehir University',
+        ranking: '#International',
+        tuition: '$5K - $14K',
+        ministry: isFa ? 'مورد تایید' : 'Approved',
+        image:
+          'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop',
+        description: isFa
+          ? 'دانشگاه بین‌المللی استانبول با تمرکز بر رشته‌های مهندسی و بیزینس.'
+          : 'An international Istanbul university focused on engineering and business majors.',
+      },
+      {
+        name: 'Biruni University',
+        ranking: '#Healthcare',
+        tuition: '$4K - $11K',
+        ministry: isFa ? 'مورد تایید' : 'Approved',
+        image:
+          'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200&auto=format&fit=crop',
+        description: isFa
+          ? 'تمرکز تخصصی بر علوم سلامت، پزشکی و دندانپزشکی.'
+          : 'Specialized in healthcare sciences, medicine, and dentistry.',
+      },
+    ],
+    [isFa]
+  );
+
+  if (pageContent) return (<>
+    {pageContent}
+    {installCta}
+  </>);
+
+  return (
+    <>
+      {isDesktopViewport && (
+        <>
+          <div ref={cursorRingRef} className="cursor-ring" />
+          <div ref={cursorDotRef} className="cursor-dot" />
+        </>
+      )}
+
+      <div
+        dir={isFa ? 'rtl' : 'ltr'}
+        className={`min-h-screen overflow-hidden relative ${
+          darkMode
+            ? 'bg-[#050816] text-white'
+            : 'bg-[#f5efe4] text-[#1f1f1f]'
+        } transition-all duration-700`}
+    >
+      <style>{`
+        * {
+          box-sizing: border-box;
+          font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+          margin: 0;
+          overflow-x: hidden;
+        }
+
+        @media (min-width: 1024px) and (pointer: fine) {
+          body {
+            cursor: none;
+          }
+
+          a,
+          button,
+          input,
+          textarea,
+          select,
+          label,
+          [role="button"] {
+            cursor: none !important;
+          }
+        }
+
+        .cursor-ring {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 38px;
+          height: 38px;
+          border-radius: 9999px;
+          border: 1.5px solid rgba(255,255,255,0.65);
+          background: rgba(255,255,255,0.06);
+          backdrop-filter: blur(6px);
+          -webkit-backdrop-filter: blur(6px);
+          box-shadow:
+            0 0 18px rgba(255,255,255,0.18),
+            inset 0 0 10px rgba(255,255,255,0.08);
+          pointer-events: none;
+          z-index: 999999;
+          opacity: 0;
+          transform: translate(-50%, -50%);
+          transition:
+            opacity 0.12s ease,
+            width 0.2s ease,
+            height 0.2s ease,
+            background 0.2s ease,
+            border 0.2s ease;
+          will-change: transform;
+        }
+
+        .cursor-ring.hovered {
+          width: 56px;
+          height: 56px;
+          background: rgba(255,255,255,0.12);
+          border-color: rgba(255,255,255,0.9);
+        }
+
+        .cursor-dot {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 8px;
+          height: 8px;
+          border-radius: 9999px;
+          background: #c0c7d4;
+          box-shadow:
+            0 0 10px rgba(223, 151, 43, 0.9),
+            0 0 20px rgba(255, 135, 56, 0.5);
+          pointer-events: none;
+          z-index: 999999;
+          opacity: 0;
+          transform: translate(-50%, -50%);
+          transition: opacity 0.12s ease;
+          will-change: transform;
+        }
+
+        @media (max-width: 1023px), (pointer: coarse) {
+          .cursor-ring,
+          .cursor-dot {
+            display: none !important;
+          }
+        }
+
+        .glass {
+          background: rgba(255,255,255,0.46);
+          backdrop-filter: blur(34px);
+          -webkit-backdrop-filter: blur(34px);
+          border: 1px solid rgba(255,255,255,0.58);
+          box-shadow:
+            inset 0 1px 1px rgba(255,255,255,0.48),
+            0 10px 32px rgba(0,0,0,0.06),
+            0 0 24px rgba(255,255,255,0.08);
+        }
+
+        .darkGlass {
+          background: rgba(17,24,39,0.42);
+          backdrop-filter: blur(34px);
+          -webkit-backdrop-filter: blur(34px);
+          border: 1px solid rgba(255,255,255,0.10);
+          box-shadow:
+            inset 0 1px 1px rgba(255,255,255,0.08),
+            0 10px 32px rgba(0,0,0,0.18),
+            0 0 28px rgba(120,140,255,0.08);
+        }
+
+        .orb {
+          position: absolute;
+          border-radius: 999px;
+          contain: layout style;
+          background:
+            radial-gradient(circle,
+              rgba(255,248,235,0.95) 0%,
+              rgba(245,220,190,0.72) 24%,
+              rgba(220,180,140,0.22) 52%,
+              rgba(220,180,140,0.04) 74%,
+              transparent 100%);
+          box-shadow:
+            0 0 6px rgba(255,240,220,0.75),
+            0 0 16px rgba(255,210,160,0.32),
+            0 0 36px rgba(255,190,120,0.12);
+          pointer-events: none;
+          animation: orbFloat 16s ease-in-out infinite;
+          will-change: transform;
+          mix-blend-mode: screen;
+        }
+
+        .bg-gradient-layer {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+          z-index: 0;
+        }
+
+        .mesh-gradient {
+          position: absolute;
+          border-radius: 999px;
+          filter: blur(140px);
+          opacity: 0.72;
+          animation: meshFloat 22s ease-in-out infinite;
+          will-change: transform;
+          transform-origin: center;
+          mix-blend-mode: screen;
+        }
+
+        .mesh-one {
+          width: 1100px;
+          height: 720px;
+          top: -260px;
+          right: -320px;
+          transform: rotate(-28deg);
+          background:
+            linear-gradient(135deg,
+              rgba(88,92,255,0.34),
+              rgba(45,55,130,0.18),
+              transparent 78%);
+        }
+
+        .mesh-two {
+          width: 1200px;
+          height: 780px;
+          bottom: -340px;
+          left: -360px;
+          transform: rotate(18deg);
+          background:
+            linear-gradient(120deg,
+              rgba(18,30,70,0.55),
+              rgba(80,100,255,0.12),
+              transparent 82%);
+        }
+
+        .mesh-three {
+          width: 900px;
+          height: 600px;
+          top: 28%;
+          left: 20%;
+          transform: rotate(-16deg);
+          background:
+            linear-gradient(145deg,
+              rgba(120,130,255,0.14),
+              rgba(255,255,255,0.05),
+              transparent 80%);
+        }
+
+        .light-mesh-one {
+          width: 1100px;
+          height: 760px;
+          top: -260px;
+          right: -360px;
+          transform: rotate(-24deg);
+          background:
+            linear-gradient(135deg,
+              rgba(255,248,240,0.92),
+              rgba(236,223,204,0.68),
+              transparent 78%);
+          opacity: 0.92;
+        }
+
+        .light-mesh-two {
+          width: 1300px;
+          height: 860px;
+          bottom: -360px;
+          left: -420px;
+          transform: rotate(18deg);
+          background:
+            linear-gradient(120deg,
+              rgba(228,214,194,0.74),
+              rgba(255,255,255,0.52),
+              transparent 82%);
+          opacity: 0.72;
+        }
+
+        .light-mesh-three {
+          width: 920px;
+          height: 620px;
+          top: 26%;
+          left: 18%;
+          transform: rotate(-14deg);
+          background:
+            linear-gradient(145deg,
+              rgba(250,245,238,0.64),
+              rgba(235,224,208,0.32),
+              transparent 80%);
+          opacity: 0.58;
+        }
+
+        @keyframes meshFloat {
+          0% {
+            transform: translate3d(0px,0px,0px) rotate(-12deg) scale(1);
+          }
+
+          50% {
+            transform: translate3d(60px,-50px,0px) rotate(-6deg) scale(1.08);
+          }
+
+          100% {
+            transform: translate3d(0px,0px,0px) rotate(-12deg) scale(1);
+          }
+        }
+
+        @keyframes orbFloat {
+          0% {
+            transform: translate3d(0,0,0) scale(1);
+          }
+
+          50% {
+            transform: translate3d(-20px,-40px,80px) scale(1.08);
+          }
+
+          100% {
+            transform: translate3d(0,0,0) scale(1);
+          }
+        }
+
+        .hero-title {
+          line-height: 0.9;
+          letter-spacing: -0.06em;
+        }
+
+        .hero-glow {
+          position: absolute;
+          width: 500px;
+          height: 500px;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(255,255,255,0.95), transparent 70%);
+          filter: blur(100px);
+          opacity: 0.4;
+        }
+
+        .hero-image {
+          width: min(560px, 82vw);
+          height: min(560px, 82vw);
+          max-width: 100%;
+          object-fit: contain;
+          background: transparent;
+          animation: heroFloat 8s ease-in-out infinite;
+          will-change: transform;
+        }
+
+        model-viewer::part(default-progress-bar) {
+          display: none;
+        }
+
+        model-viewer {
+          background: transparent !important;
+          contain: layout style size;
+          transform: translateZ(0);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          will-change: transform;
+        }
+
+        model-viewer::part(canvas) {
+          image-rendering: auto;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          transform: translateZ(0);
+        }
+
+        .hero-image {
+          width: 560px;
+          max-width: 100%;
+          object-fit: contain;
+          animation: heroFloat 8s ease-in-out infinite;
+          will-change: transform;
+        }
+
+        .hero-mobile-logo {
+          animation: heroFloat 8s ease-in-out infinite;
+          will-change: transform;
+        }
+
+        @keyframes heroFloat {
+          0% {
+            transform: translateY(0px) rotate(-4deg);
+          }
+
+          50% {
+            transform: translateY(-20px) rotate(4deg);
+          }
+
+          100% {
+            transform: translateY(0px) rotate(-4deg);
+          }
+        }
+
+        @media (max-width: 1023px) {
+          .hero-title {
+            line-height: 0.96;
+            letter-spacing: 0;
+          }
+
+          .hero-glow {
+            width: 260px;
+            height: 260px;
+            filter: blur(72px);
+            opacity: 0.34;
+          }
+        }
+
+        /* ============================================================
+           Mobile / iOS / Touch — performance budget rules
+           Reduces GPU composite cost on low-power devices
+        ============================================================ */
+        @media (max-width: 1023px), (pointer: coarse) {
+          /* Stop heavy mesh-gradient animation and reduce its blur radius */
+          .mesh-gradient {
+            animation: none !important;
+            filter: blur(60px) !important;
+          }
+
+          /* Reduce glass backdrop-filter blur: 34px → 14px */
+          .glass {
+            backdrop-filter: blur(14px) !important;
+            -webkit-backdrop-filter: blur(14px) !important;
+          }
+
+          .darkGlass {
+            backdrop-filter: blur(14px) !important;
+            -webkit-backdrop-filter: blur(14px) !important;
+          }
+
+          /* Suppress heroFloat on mobile – card is already heavy */
+          .hero-mobile-logo {
+            animation: none !important;
+          }
+        }
+
+        /* Respect system "reduce motion" preference (iOS Accessibility) */
+        @media (prefers-reduced-motion: reduce) {
+          .mesh-gradient,
+          .orb,
+          .hero-image,
+          .hero-mobile-logo,
+          .logo-track {
+            animation: none !important;
+            transition: none !important;
+          }
+        }
+
+        .logo-marquee {
+          overflow: hidden;
+          position: relative;
+          width: 100%;
+          display: flex;
+          direction: ltr;
+          /* Safari < 15.4 requires the -webkit- prefix for mask-image */
+          -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+          mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+
+        .logo-track {
+          display: flex;
+          width: max-content;
+          min-width: max-content;
+          animation: marqueeMove 36s linear infinite;
+          will-change: transform;
+        }
+
+        .logo-group {
+          display: flex;
+          flex-shrink: 0;
+          gap: 22px;
+          padding-inline-end: 22px;
+        }
+
+        @keyframes marqueeMove {
+          from {
+            transform: translate3d(0, 0, 0);
+          }
+
+          to {
+            transform: translate3d(-50%, 0, 0);
+          }
+        }
+
+        .university-logo-card {
+          width: 178px;
+          height: 92px;
+          border-radius: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 18px 24px;
+          flex-shrink: 0;
+        }
+
+        .university-logo {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          filter: saturate(0.95);
+        }
+
+        @media (max-width: 640px) {
+          .logo-group {
+            gap: 14px;
+            padding-inline-end: 14px;
+          }
+
+          .logo-track {
+            animation-duration: 30s;
+          }
+
+          .university-logo-card {
+            width: 138px;
+            height: 74px;
+            border-radius: 20px;
+            padding: 14px 18px;
+          }
+        }
+
+        .carousel-wrapper {
+          perspective: 1800px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .carousel {
+          width: 100%;
+          height: 620px;
+          position: relative;
+          transform-style: preserve-3d;
+          will-change: transform;
+          transition: transform 0.008s linear;
+          user-select: none;
+          -webkit-user-select: none;
+        }
+
+        .card3d {
+          position: absolute;
+          user-select: none;
+          -webkit-user-select: none;
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          transform-style: preserve-3d;
+          top: 50%;
+          left: 50%;
+          width: 250px;
+          height: 460px;
+          border-radius: 40px;
+          overflow: hidden;
+          transition:
+            transform 0.45s ease,
+            scale 0.45s ease,
+            box-shadow 0.45s ease;
+          cursor: pointer;
+        }
+
+        .card3d:hover {
+          scale: 1.12;
+          box-shadow:
+            0 14px 42px rgba(0,0,0,0.14),
+            0 0 24px rgba(255,255,255,0.08);
+        }
+
+        .section-title {
+          line-height: 0.95;
+          letter-spacing: -0.05em;
+        }
+
+        .step-card {
+          transition: all 0.45s ease;
+        }
+
+        .step-card:hover {
+          transform: scale(1.03);
+          box-shadow:
+            0 18px 50px rgba(0,0,0,0.12),
+            0 0 24px rgba(255,255,255,0.06);
+        }
+
+        .map-frame {
+          width: 100%;
+          height: 420px;
+          border: 0;
+          border-radius: 32px;
+        }
+
+        .map-card {
+          position: relative;
+          width: 100%;
+          height: 420px;
+          border-radius: 32px;
+          overflow: hidden;
+          background:
+            linear-gradient(rgba(0,0,0,0.18), rgba(0,0,0,0.18)),
+            url('https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1600&auto=format&fit=crop');
+          background-size: cover;
+          background-position: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .map-overlay {
+          position: absolute;
+          inset: 0;
+          backdrop-filter: blur(2px);
+          background: rgba(255,255,255,0.08);
+        }
+
+        .pricing-card {
+          position: relative;
+          overflow: hidden;
+          transition:
+            transform 0.45s ease,
+            box-shadow 0.45s ease,
+            border 0.45s ease;
+        }
+
+        .pricing-card:hover {
+          transform: scale(1.035);
+          box-shadow:
+            0 22px 60px rgba(0,0,0,0.14),
+            0 0 30px rgba(255,255,255,0.08);
+        }
+
+        .pricing-featured {
+          border: 1px solid rgba(255,255,255,0.35);
+          box-shadow:
+            0 0 60px rgba(255,255,255,0.12),
+            0 30px 100px rgba(0,0,0,0.2);
+        }
+
+        .pricing-glow {
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at top, rgba(255,255,255,0.22), transparent 70%);
+          opacity: 0.8;
+          pointer-events: none;
+        }
+
+        .stats-card {
+          transition: all 0.45s ease;
+        }
+
+        .stats-card:hover {
+          transform: scale(1.04);
+          box-shadow:
+            0 18px 50px rgba(0,0,0,0.12),
+            0 0 24px rgba(255,255,255,0.06);
+        }
+
+        .testimonial-card {
+          transition: all 0.45s ease;
+        }
+
+        .testimonial-card:hover {
+          transform: scale(1.035);
+          box-shadow:
+            0 20px 50px rgba(0,0,0,0.12),
+            0 0 26px rgba(255,255,255,0.08);
+        }
+
+        .faq-item {
+          transition: all 0.35s ease;
+        }
+
+        .faq-item:hover {
+          transform: scale(1.015);
+          box-shadow:
+            0 18px 40px rgba(0,0,0,0.10),
+            0 0 22px rgba(255,255,255,0.05);
+        }
+
+        .custom-cursor {
+          position: fixed;
+          width: 34px;
+          height: 34px;
+          border-radius: 999px;
+          pointer-events: none;
+          z-index: 9999;
+          left: 0;
+          top: 0;
+          transform: translate3d(-50%, -50%, 0);
+          background: rgba(255,255,255,0.10);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          border: 1px solid rgba(255,255,255,0.28);
+          outline: 0.6px solid rgba(198,167,125,0.72);
+          box-shadow:
+            0 0 6px rgba(255,255,255,0.04),
+            inset 0 1px 1px rgba(255,255,255,0.35);
+          transition:
+            width 0.25s ease,
+            height 0.25s ease,
+            background 0.25s ease,
+            border 0.25s ease;
+          mix-blend-mode: screen;
+          will-change: transform;
+        }
+
+        .custom-cursor::before {
+          content: '';
+          position: absolute;
+          inset: 7px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.22);
+          filter: blur(0.4px);
+        }
+
+        .custom-cursor::after {
+          content: '';
+          position: absolute;
+          width: 6px;
+          height: 6px;
+          border-radius: 999px;
+          background: rgba(198,167,125,0.96);
+          border: 0.5px solid rgba(198,167,125,0.72);
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          box-shadow:
+            0 0 6px rgba(198,167,125,0.62),
+            0 0 12px rgba(198,167,125,0.24);
+        }
+
+        .floating-dock {
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 100;
+        }
+
+        .timeline-network {
+          position: relative;
+          min-height: 760px;
+        }
+
+        .timeline-node {
+          position: absolute;
+          width: 220px;
+          min-height: 120px;
+          border-radius: 32px;
+          padding: 24px;
+          transition: all 0.45s ease;
+          overflow: hidden;
+        }
+
+        .timeline-node:hover {
+          transform: scale(1.04);
+          box-shadow: 0 24px 70px rgba(0,0,0,0.14);
+        }
+
+        .timeline-node::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+          pointer-events: none;
+        }
+
+        .timeline-svg {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .timeline-path {
+          fill: none;
+          stroke-width: 4;
+          stroke-linecap: round;
+          filter: drop-shadow(0 0 12px rgba(255,120,220,0.45));
+        }
+
+        .timeline-connector {
+          position: absolute;
+          height: 4px;
+          border-radius: 999px;
+          transform-origin: left center;
+          opacity: 0.95;
+          box-shadow:
+            0 0 12px rgba(255,120,220,0.7),
+            0 0 34px rgba(255,120,220,0.35);
+        }
+
+        .timeline-connector.dark {
+          background:
+            linear-gradient(
+              to right,
+              rgba(255,120,220,0.12),
+              rgba(255,120,220,1),
+              rgba(140,120,255,0.92)
+            );
+        }
+
+        .timeline-connector.light {
+          background:
+            linear-gradient(
+              to right,
+              rgba(255,170,210,0.18),
+              rgba(255,110,190,0.95),
+              rgba(255,160,220,0.72)
+            );
+          box-shadow:
+            0 0 10px rgba(255,120,180,0.45),
+            0 0 24px rgba(255,150,210,0.2);
+        }
+
+        .timeline-dot {
+          width: 14px;
+          height: 14px;
+          border-radius: 999px;
+          background: white;
+          box-shadow:
+            0 0 18px rgba(255,255,255,0.9),
+            0 0 42px rgba(120,140,255,0.4);
+        }
+      `}</style>
+
+      <div className="bg-gradient-layer pointer-events-none">
+        {darkMode ? (
+          <>
+            <div className="mesh-gradient mesh-one" />
+            <div className="mesh-gradient mesh-two" />
+            <div className="mesh-gradient mesh-three" />
+          </>
+        ) : (
+          <>
+            <div className="mesh-gradient light-mesh-one" />
+            <div className="mesh-gradient light-mesh-two" />
+            <div className="mesh-gradient light-mesh-three" />
+          </>
+        )}
+      </div>
+
+      {isDesktopViewport && (
+        <FloatingOrbs floatingObjects={floatingObjects} darkMode={darkMode} />
+      )}
+
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 sm:px-6 sm:py-4">
+        <div className={`${darkMode ? 'darkGlass' : 'glass'} relative max-w-7xl mx-auto rounded-full px-5 py-3 sm:px-8 sm:py-4 flex items-center justify-between`}>
+          <div className="flex items-center">
+            <img
+              src={ACCA_LOGO_SRC}
+              alt="ACCA EDU Logo"
+              width="160"
+              height="48"
+              fetchpriority="high"
+              className="h-10 w-auto object-contain sm:h-12"
+            />
+          </div>
+
+          <div className="hidden lg:flex items-center gap-5">
+            <a
+              href={COMPANY_WHATSAPP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <MessageCircle size={17} strokeWidth={2.4} />
+                {isFa ? 'شروع مشاوره' : 'Start Consultation'}
+              </span>
+            </a>
+
+            <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
+
+            <a
+              href="?page=universities"
+              target="_blank"
+              rel="noreferrer"
+              className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <Building2 size={17} strokeWidth={2.4} />
+                {isFa ? 'مشاهده دانشگاه‌ها' : 'View Universities'}
+              </span>
+            </a>
+
+            <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
+
+            <a
+              href="?page=programs"
+              target="_blank"
+              rel="noreferrer"
+              className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <BookOpen size={17} strokeWidth={2.4} />
+                {isFa ? 'رشته‌ها و شهریه‌ها' : 'Programs'}
+              </span>
+            </a>
+
+
+            <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
+
+            <a
+              href="?page=scholarships"
+              target="_blank"
+              rel="noreferrer"
+              className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <Award size={17} strokeWidth={2.4} />
+                {isFa ? 'لیست بورسیه‌ها' : 'Scholarships'}
+              </span>
+            </a>            <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
+
+            <a
+              href="https://www.panel-acca.com/login"
+              target="_blank"
+              rel="noreferrer"
+              className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <UserRound size={17} strokeWidth={2.4} />
+                {isFa ? 'ورود به پنل کاربری' : 'Client Portal'}
+              </span>
+            </a>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setLanguage(isFa ? 'en' : 'fa')}
+              aria-label={isFa ? 'Switch to English' : 'تغییر به فارسی'}
+              className={`${darkMode ? 'bg-white text-black' : 'bg-black text-white'} px-5 h-12 rounded-full text-sm font-black transition-all duration-300`}
+            >
+              {isFa ? 'EN' : 'FA'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setDarkMode(!darkMode)}
+              aria-label={darkMode ? (isFa ? 'حالت روشن' : 'Light mode') : (isFa ? 'حالت تاریک' : 'Dark mode')}
+              className={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-black ${
+                darkMode ? 'bg-white text-black' : 'bg-black text-white'
+              }`}
+            >
+              {darkMode ? '☀' : '☾'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label={isFa ? 'باز کردن منو' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+              className={`${darkMode ? 'bg-white/10 text-white' : 'bg-black/5 text-black'} flex h-12 w-12 items-center justify-center rounded-full transition lg:hidden`}
+            >
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+
+          <div
+            className={`${mobileMenuOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none -translate-y-2 scale-95 opacity-0'} ${darkMode ? 'bg-[#111827]/88 text-white border-white/10' : 'bg-white/88 text-black border-white/70'} absolute left-0 right-0 top-[calc(100%+10px)] z-50 rounded-[30px] border p-3 shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur-3xl transition-all duration-300 lg:hidden`}
+          >
+            <div className="grid gap-2">
+              <a
+                href={COMPANY_WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
+              >
+                <span>{isFa ? 'شروع مشاوره' : 'Start Consultation'}</span>
+                <MessageCircle size={19} />
+              </a>
+
+              <a
+                href="?page=universities"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
+              >
+                <span>{isFa ? 'مشاهده دانشگاه‌ها' : 'View Universities'}</span>
+                <Building2 size={19} />
+              </a>
+
+              <a
+                href="?page=programs"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
+              >
+                <span>{isFa ? 'رشته‌ها و شهریه‌ها' : 'Programs'}</span>
+                <BookOpen size={19} />
+              </a>
+
+
+              <a
+                href="?page=scholarships"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
+              >
+                <span>{isFa ? 'لیست بورسیه‌ها' : 'Scholarships'}</span>
+                <Award size={19} />
+              </a>              <a
+                href="https://www.panel-acca.com/login"
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
+              >
+                <span>{isFa ? 'ورود به پنل کاربری' : 'Client Portal'}</span>
+                <UserRound size={19} />
+              </a>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <HeroSection
+        darkMode={darkMode}
+        isFa={isFa}
+        ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+        isDesktopViewport={isDesktopViewport}
+        MODEL_SRC={MODEL_SRC}
+        mouseOffset={mouseOffset}
+        onConsultationClick={() => setConsultationOpen(true)}
+      />
+
+      <UniversityMarqueeSection
+        darkMode={darkMode}
+        isFa={isFa}
+      />
+
+      <AccaShowcaseSection
+       darkMode={darkMode}
+       isFa={isFa}
+      />
+
+      <SmartScholarshipCalculator
+        darkMode={darkMode}
+        language={language}
+        onConsultationClick={() => setConsultationOpen(true)}
+      />
+
+      <StatsSection
+        darkMode={darkMode}
+        isFa={isFa}
+      />
+
+      <RegistrationProcessSection
+        darkMode={darkMode}
+        isFa={isFa}
+        registrationSteps={registrationSteps}
+      />
+
+      <GreenScholarshipWidget
+        isFa={isFa}
+        darkMode={darkMode}
+        onConsultationClick={() => setConsultationOpen(true)}
+      />
+
+      <FeaturedUniversitiesSection
+        darkMode={darkMode}
+        isFa={isFa}
+        universityCards={universityCards}
+      />
+
+      <PopularMajorsSection
+        darkMode={darkMode}
+        isFa={isFa}
+        majors={majors}
+      />
+
+      <PartnerScholarshipSection
+        darkMode={darkMode}
+        isFa={isFa}
+        scholarshipComparison={scholarshipComparison}
+        onConsultationClick={() => setConsultationOpen(true)}
+      />
+
+      <TestimonialsSection
+        darkMode={darkMode}
+        isFa={isFa}
+      />
+
+      <MigrationBlueprintSection
+        darkMode={darkMode}
+        isFa={isFa}
+      />
+
+      <FaqSection
+        darkMode={darkMode}
+        isFa={isFa}
+      />
+
+      <FinalCtaSection
+        darkMode={darkMode}
+        isFa={isFa}
+        onConsultationClick={() => setConsultationOpen(true)}
+      />
+
+      <ContactSection
+        darkMode={darkMode}
+        isFa={isFa}
+        onConsultationClick={() => setConsultationOpen(true)}
+      />
+      {installCta}
+      <ConsultationModal
+        open={consultationOpen}
+        onClose={() => setConsultationOpen(false)}
+        darkMode={darkMode}
+        isFa={isFa}
+      />
+      </div>
+    </>
+  );
+}

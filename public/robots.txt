@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /pwa/
+Disallow: /sw.js
+Disallow: /offline.html
+
+Sitemap: https://accaco.com/sitemap.xml
