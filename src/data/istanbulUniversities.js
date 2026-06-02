@@ -587,6 +587,20 @@ function rankingLabel(item) {
   return `THE: ${rankingDisplayValue(item)}`;
 }
 
+function rankingNarrativeLabel(item, isFa) {
+  if (!item) return '';
+  const value = rankingDisplayValue(item);
+  if (item.rankingType === 'Impact Rankings') {
+    return isFa ? `\u0631\u062a\u0628\u0647 \u0627\u062b\u0631\u06af\u0630\u0627\u0631\u06cc THE ${value}` : `THE Impact ${value}`;
+  }
+  if (item.rankingType === 'Subject Rankings') {
+    return isFa
+      ? `\u0631\u062a\u0628\u0647 \u0645\u0648\u0636\u0648\u0639\u06cc ${item.subject} ${value}`
+      : `THE ${item.subject} ${value}`;
+  }
+  return isFa ? `\u0631\u062a\u0628\u0647 \u062c\u0647\u0627\u0646\u06cc THE ${value}` : `THE World ${value}`;
+}
+
 function buildTheRankingSummary(theRankings) {
   if (!theRankings?.listed) {
     return {
@@ -633,22 +647,177 @@ function buildTheRankingSummary(theRankings) {
   };
 }
 
-function buildTheSummaryText(theRankings, rankingSummary, isFa) {
-  if (!theRankings?.listed) {
-    return isFa
-      ? 'برای این دانشگاه در منابع عمومی بررسی‌شده Times Higher Education پروفایل قابل اتکا پیدا نشد.'
-      : 'No Times Higher Education profile was found in the selected public sources.';
+function buildUniversityNarrative(record, context, isFa) {
+  const {
+    websiteUrl,
+    calendarUrl,
+    campuses,
+    programCount,
+    medicalSignal,
+    rankingSummary,
+    internationalCredentials,
+    theProfileFacts,
+  } = context;
+  const name = record.name;
+  const city = record.city || defaultInfo.city;
+  const founded = record.foundedIn && record.foundedIn !== NOT_PUBLICLY_AVAILABLE
+    ? record.foundedIn
+    : '';
+  const campusText = buildCampusPositionText(record, campuses, isFa);
+  const programText = buildProgramPositionText(programCount, isFa);
+  const rankingText = buildRankingPositionText(rankingSummary, isFa);
+  const profileFactsText = buildProfileFactsText(theProfileFacts, isFa);
+  const pathwayText = buildPathwayPositionText(internationalCredentials, {
+    calendarUrl,
+    websiteUrl,
+    medicalSignal,
+  }, isFa);
+
+  if (isFa) {
+    const foundedText = founded
+      ? ` \u0627\u0632 \u0633\u0627\u0644 ${founded}`
+      : '';
+    return [
+      `${name}${foundedText} \u062f\u0631 ${city} \u0628\u0631\u0627\u06cc \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646 \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc \u06a9\u0647 \u0645\u06cc\u200c\u062e\u0648\u0627\u0647\u0646\u062f \u0645\u0633\u06cc\u0631 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0631 \u062a\u0631\u06a9\u06cc\u0647 \u0631\u0627 \u0628\u0627 \u062f\u0627\u062f\u0647 \u0648\u0627\u0642\u0639\u06cc \u0645\u0642\u0627\u06cc\u0633\u0647 \u06a9\u0646\u0646\u062f \u0642\u0627\u0628\u0644 \u0628\u0631\u0631\u0633\u06cc \u0627\u0633\u062a.`,
+      campusText,
+      programText,
+      rankingText,
+      profileFactsText,
+      pathwayText,
+    ].filter(Boolean).join(' ');
   }
 
-  if (rankingSummary.items.length) {
-    return isFa
-      ? 'این دانشگاه در پروفایل Times Higher Education ثبت شده و داده‌های رتبه‌بندی/پروفایل آن از منبع THE قابل بررسی است.'
-      : 'This university is listed in Times Higher Education, with ranking/profile data stored from THE.';
+  const foundedText = founded ? `, founded in ${founded},` : '';
+  return [
+    `${name}${foundedText} gives international applicants a concrete ${city} option for comparing admission routes in Turkey.`,
+    campusText,
+    programText,
+    rankingText,
+    profileFactsText,
+    pathwayText,
+  ].filter(Boolean).join(' ');
+}
+
+function buildCampusPositionText(record, campuses, isFa) {
+  const campusCount = campuses.length;
+  const primaryCampus = getPrimaryCampusLabel(campuses[0] || record.address);
+
+  if (isFa) {
+    if (campusCount > 1) {
+      return `\u0627\u0632 \u0646\u0638\u0631 \u0645\u06a9\u0627\u0646\u06cc\u060c ${campusCount} \u06a9\u0645\u067e\u0648\u0633 \u0628\u0631\u0627\u06cc \u0622\u0646 \u062b\u0628\u062a \u0634\u062f\u0647 \u0648 \u06a9\u0645\u067e\u0648\u0633 \u0634\u0627\u062e\u0635 \u062f\u0631 ${primaryCampus} \u062f\u0631 \u062f\u06cc\u062f \u0627\u0648\u0644 \u0642\u0631\u0627\u0631 \u0645\u06cc\u200c\u06af\u06cc\u0631\u062f.`;
+    }
+    if (primaryCampus) {
+      return `\u0646\u0642\u0637\u0647 \u0645\u06a9\u0627\u0646\u06cc \u0627\u0635\u0644\u06cc \u0622\u0646 \u062f\u0631 ${primaryCampus} \u062b\u0628\u062a \u0634\u062f\u0647 \u0648 \u0628\u0631\u0627\u06cc \u0628\u0631\u0631\u0633\u06cc \u0645\u0633\u06cc\u0631 \u062d\u0636\u0648\u0631\u06cc \u0648 \u062e\u062f\u0645\u0627\u062a \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u06cc \u0645\u0647\u0645 \u0627\u0633\u062a.`;
+    }
+    return '';
   }
+
+  if (campusCount > 1) {
+    return `Its footprint is multi-campus, with ${campusCount} recorded campuses and a visible campus reference at ${primaryCampus}.`;
+  }
+  if (primaryCampus) {
+    return `Its main recorded location is ${primaryCampus}, which helps applicants assess commute, housing, and student-service fit.`;
+  }
+  return '';
+}
+
+function buildProgramPositionText(programCount, isFa) {
+  if (!programCount) {
+    return isFa
+      ? '\u062f\u0631 \u06a9\u0627\u062a\u0627\u0644\u0648\u06af \u0641\u0639\u0644\u06cc \u0633\u0627\u06cc\u062a\u060c \u062f\u0627\u062f\u0647 \u0631\u0634\u062a\u0647 \u0628\u0631\u0627\u06cc \u0627\u06cc\u0646 \u062f\u0627\u0646\u0634\u06af\u0627\u0647 \u06a9\u0627\u0645\u0644 \u0646\u06cc\u0633\u062a \u0648 \u067e\u06cc\u0634 \u0627\u0632 \u062a\u0635\u0645\u06cc\u0645 \u0628\u0627\u06cc\u062f \u0628\u0627 \u0645\u0646\u0628\u0639 \u0631\u0633\u0645\u06cc \u0686\u06a9 \u0634\u0648\u062f.'
+      : 'The current ACCA catalog does not expose complete program rows for this university, so applicants should verify the final list against the official source.';
+  }
+
+  if (isFa) {
+    if (programCount >= 200) return `\u0628\u0627 ${programCount} \u0631\u0634\u062a\u0647 \u062b\u0628\u062a\u200c\u0634\u062f\u0647\u060c \u06af\u0632\u06cc\u0646\u0647\u200c\u0627\u06cc \u0645\u0646\u0627\u0633\u0628 \u0628\u0631\u0627\u06cc \u0645\u0642\u0627\u06cc\u0633\u0647 \u06af\u0633\u062a\u0631\u062f\u0647 \u0631\u0634\u062a\u0647\u060c \u0632\u0628\u0627\u0646 \u062a\u062d\u0635\u06cc\u0644 \u0648 \u0634\u0647\u0631\u06cc\u0647 \u0627\u0633\u062a.`;
+    if (programCount >= 100) return `\u0628\u0627 ${programCount} \u0631\u0634\u062a\u0647 \u062b\u0628\u062a\u200c\u0634\u062f\u0647\u060c \u0628\u0631\u0627\u06cc \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646\u06cc \u06a9\u0647 \u0686\u0646\u062f \u0645\u0633\u06cc\u0631 \u067e\u0630\u06cc\u0631\u0634 \u0631\u0627 \u0647\u0645\u200c\u0632\u0645\u0627\u0646 \u0645\u06cc\u200c\u0633\u0646\u062c\u0646\u062f \u06af\u0632\u06cc\u0646\u0647\u200c\u0627\u06cc \u062f\u0627\u062f\u0647\u200c\u0645\u062d\u0648\u0631 \u0627\u0633\u062a.`;
+    if (programCount >= 50) return `${programCount} \u0631\u0634\u062a\u0647 \u062b\u0628\u062a\u200c\u0634\u062f\u0647 \u062f\u0627\u0631\u062f \u0648 \u0628\u0631\u0627\u06cc \u0627\u0646\u062a\u062e\u0627\u0628 \u0647\u062f\u0641\u0645\u0646\u062f \u0631\u0634\u062a\u0647 \u0628\u0627 \u062a\u0645\u0631\u06a9\u0632 \u0645\u062a\u0648\u0633\u0637 \u0645\u0646\u0627\u0633\u0628 \u0627\u0633\u062a.`;
+    return `\u06a9\u0627\u062a\u0627\u0644\u0648\u06af \u0641\u0639\u0644\u06cc ${programCount} \u0631\u0634\u062a\u0647 \u0646\u0634\u0627\u0646 \u0645\u06cc\u200c\u062f\u0647\u062f\u061b \u067e\u0633 \u0627\u06cc\u0646 \u067e\u0631\u0648\u0641\u0627\u06cc\u0644 \u0628\u06cc\u0634\u062a\u0631 \u0628\u0631\u0627\u06cc \u062c\u0633\u062a\u062c\u0648\u06cc \u062f\u0642\u06cc\u0642 \u0631\u0634\u062a\u0647 \u0645\u0641\u06cc\u062f \u0627\u0633\u062a.`;
+  }
+
+  if (programCount >= 200) return `With ${programCount} recorded programs, it is best suited to broad program, language, and tuition comparisons.`;
+  if (programCount >= 100) return `With ${programCount} recorded programs, it works well for applicants comparing several admission routes at once.`;
+  if (programCount >= 50) return `Its ${programCount} recorded programs make it a focused mid-sized catalog for targeted program selection.`;
+  return `Its current catalog shows ${programCount} recorded programs, so it is most useful for focused checks rather than broad search.`;
+}
+
+function buildRankingPositionText(rankingSummary, isFa) {
+  const items = rankingSummary?.items || [];
+  if (!items.length) {
+    return isFa
+      ? '\u062f\u0627\u062f\u0647 \u0631\u062a\u0628\u0647\u200c\u0628\u0646\u062f\u06cc THE \u0628\u0631\u0627\u06cc \u0622\u0646 \u062f\u0631 \u06a9\u0627\u0631\u062a \u062a\u0635\u0645\u06cc\u0645 \u0628\u0647\u200c\u0639\u0646\u0648\u0627\u0646 \u0645\u062f\u0631\u06a9 \u0642\u0637\u0639\u06cc \u0646\u0645\u06cc\u200c\u0622\u06cc\u062f \u0648 \u0628\u0627\u06cc\u062f \u0628\u0627 \u0645\u0646\u0627\u0628\u0639 \u0631\u0633\u0645\u06cc \u0645\u06a9\u0645\u0644 \u0634\u0648\u062f.'
+      : 'THE ranking data is not used as a decisive proof for this card and should be supplemented with official university checks.';
+  }
+
+  const primary = items[0];
+  const secondary = items.find((item) => item.rankingType === 'Subject Rankings');
+  const primaryLabel = rankingNarrativeLabel(primary, isFa);
+  const secondaryLabel = secondary ? rankingNarrativeLabel(secondary, isFa) : '';
+
+  if (isFa) {
+    return secondaryLabel
+      ? `\u062f\u0631 \u062f\u0627\u062f\u0647\u200c\u0647\u0627\u06cc THE\u060c ${primaryLabel} \u0648 ${secondaryLabel} \u0628\u0631\u0627\u06cc \u0645\u0642\u0627\u06cc\u0633\u0647 \u0622\u06a9\u0627\u062f\u0645\u06cc\u06a9 \u0622\u0646 \u062f\u0631 \u062f\u0633\u062a\u0631\u0633 \u0627\u0633\u062a.`
+      : `\u062f\u0631 \u062f\u0627\u062f\u0647\u200c\u0647\u0627\u06cc THE\u060c ${primaryLabel} \u0628\u0631\u0627\u06cc \u0628\u0631\u0631\u0633\u06cc \u0627\u0648\u0644\u06cc\u0647 \u062c\u0627\u06cc\u06af\u0627\u0647 \u0622\u06a9\u0627\u062f\u0645\u06cc \u0622\u0646 \u062b\u0628\u062a \u0634\u062f\u0647 \u0627\u0633\u062a.`;
+  }
+
+  return secondaryLabel
+    ? `For academic positioning, the stored THE data includes ${primaryLabel} and ${secondaryLabel}.`
+    : `For academic positioning, the stored THE data includes ${primaryLabel}.`;
+}
+
+function buildProfileFactsText(theProfileFacts, isFa) {
+  const studentCount = theProfileFacts?.studentCount;
+  const internationalPercent = theProfileFacts?.internationalStudentsPercent;
+
+  if (studentCount && internationalPercent) {
+    return isFa
+      ? `\u067e\u0631\u0648\u0641\u0627\u06cc\u0644 THE \u0647\u0645\u0686\u0646\u06cc\u0646 ${studentCount} \u062f\u0627\u0646\u0634\u062c\u0648 \u0648 ${internationalPercent} \u062f\u0627\u0646\u0634\u062c\u0648\u06cc \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc \u0646\u0634\u0627\u0646 \u0645\u06cc\u200c\u062f\u0647\u062f\u060c \u06a9\u0647 \u0628\u0631\u0627\u06cc \u062a\u0635\u0645\u06cc\u0645 \u062f\u0627\u0646\u0634\u062c\u0648\u06cc \u062e\u0627\u0631\u062c\u06cc \u0627\u0631\u0632\u0634\u0645\u0646\u062f \u0627\u0633\u062a.`
+      : `THE profile facts show ${studentCount} students and ${internationalPercent} international students, which is useful for international-applicant fit.`;
+  }
+
+  if (studentCount) {
+    return isFa
+      ? `\u067e\u0631\u0648\u0641\u0627\u06cc\u0644 THE \u0628\u0631\u0627\u06cc \u0622\u0646 ${studentCount} \u062f\u0627\u0646\u0634\u062c\u0648 \u0646\u0634\u0627\u0646 \u0645\u06cc\u200c\u062f\u0647\u062f.`
+      : `THE profile facts show ${studentCount} students.`;
+  }
+
+  return '';
+}
+
+function buildPathwayPositionText(credentials, { calendarUrl, websiteUrl, medicalSignal }, isFa) {
+  const credentialLabels = (credentials?.cardBadges || [])
+    .filter((badge) => badge.confidence !== 'low')
+    .map((badge) => badge.label)
+    .slice(0, 3);
+  const supportSignals = [
+    credentialLabels.length ? credentialLabels.join(', ') : '',
+    calendarUrl ? (isFa ? '\u062a\u0642\u0648\u06cc\u0645 \u0622\u06a9\u0627\u062f\u0645\u06cc\u06a9 \u0639\u0645\u0648\u0645\u06cc' : 'a public academic calendar') : '',
+    websiteUrl ? (isFa ? '\u0648\u0628\u200c\u0633\u0627\u06cc\u062a \u0631\u0633\u0645\u06cc' : 'an official website') : '',
+    medicalSignal ? (isFa ? '\u0646\u0634\u0627\u0646\u0647\u200c\u0647\u0627\u06cc \u0633\u0644\u0627\u0645\u062a/\u0628\u0627\u0644\u06cc\u0646\u06cc' : 'health or clinical signals') : '',
+  ].filter(Boolean);
+
+  if (!supportSignals.length) return '';
 
   return isFa
-    ? 'برای این دانشگاه پروفایل عمومی در Times Higher Education پیدا شده، اما رتبه مشخصی در منابع بررسی‌شده نمایش داده نشده است.'
-    : 'A public Times Higher Education profile was found, but no specific ranking row is displayed in the reviewed source.';
+    ? `\u0628\u0631\u0627\u06cc \u0645\u0633\u06cc\u0631 \u067e\u0630\u06cc\u0631\u0634\u060c \u0646\u06a9\u0627\u062a \u0642\u0627\u0628\u0644 \u0628\u0631\u0631\u0633\u06cc \u0634\u0627\u0645\u0644 ${supportSignals.join('\u060c ')} \u0627\u0633\u062a.`
+    : `For admission due diligence, useful signals include ${supportSignals.join(', ')}.`;
+}
+
+function getPrimaryCampusLabel(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  return text.split(':')[0].split(',')[0].trim();
+}
+
+export function buildUniversitySlug(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/Ä°/g, 'I')
+    .replace(/ı/g, 'i')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
 }
 
 function buildDecisionProfile(record) {
@@ -765,8 +934,26 @@ function buildDecisionProfile(record) {
     displayBadges,
     specialFeatureFa,
     specialFeatureEn,
-    microSummaryFa: `${buildTheSummaryText(theRankings, rankingSummary, true)} ${specialFeatureFa}`,
-    microSummaryEn: `${buildTheSummaryText(theRankings, rankingSummary, false)} ${specialFeatureEn}`,
+    microSummaryFa: buildUniversityNarrative(record, {
+      websiteUrl,
+      calendarUrl,
+      campuses,
+      programCount,
+      medicalSignal,
+      rankingSummary,
+      internationalCredentials,
+      theProfileFacts,
+    }, true),
+    microSummaryEn: buildUniversityNarrative(record, {
+      websiteUrl,
+      calendarUrl,
+      campuses,
+      programCount,
+      medicalSignal,
+      rankingSummary,
+      internationalCredentials,
+      theProfileFacts,
+    }, false),
     sources,
     filters: {
       hasTheRanking: rankingSummary.status === 'listed',
@@ -792,6 +979,7 @@ export const istanbulUniversities = records.map((record) => {
   return {
     ...defaultInfo,
     ...record,
+    slug: buildUniversitySlug(record.name),
     logo,
     logoStatus: logo ? 'matched' : 'missing',
     decisionProfile,

@@ -740,8 +740,17 @@ function displayProgram(value, isFa) {
 function getUniversityProfileUrl(university) {
   const params = new URLSearchParams();
   params.set('page', 'universities');
-  params.set('university', university);
+  params.set('profile', buildScholarshipUniversitySlug(university));
   return `?${params.toString()}`;
+}
+
+function buildScholarshipUniversitySlug(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
 }
 
 function getProgramSearchUrl(program) {

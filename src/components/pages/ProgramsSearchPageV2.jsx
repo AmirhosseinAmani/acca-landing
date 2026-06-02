@@ -66,7 +66,10 @@ function createInitialFiltersFromUrl() {
 }
 
 function collectFilterParams(params, ...keys) {
-  return keys.flatMap((key) => params.getAll(key)).flatMap(splitFilterParam).filter(Boolean);
+  const uniqueKeys = Array.from(new Set(keys.filter(Boolean)));
+  return dedupeFilterValues(
+    uniqueKeys.flatMap((key) => params.getAll(key)).flatMap(splitFilterParam).filter(Boolean)
+  );
 }
 
 function splitFilterParam(value) {
@@ -78,6 +81,20 @@ function splitFilterParam(value) {
 
 function getEmptyFilterValue() {
   return [];
+}
+
+function dedupeFilterValues(values) {
+  const seen = new Set();
+  const uniqueValues = [];
+
+  values.forEach((value) => {
+    const normalized = normalize(value);
+    if (!normalized || seen.has(normalized)) return;
+    seen.add(normalized);
+    uniqueValues.push(value);
+  });
+
+  return uniqueValues;
 }
 
 function createEmptyPriceRange() {
@@ -95,6 +112,13 @@ function createInitialPriceRangeFromUrl() {
     min: params.get('minPrice') || rangeMin || '',
     max: params.get('maxPrice') || rangeMax || '',
   };
+}
+
+function getInitialSearchQueryFromUrl() {
+  if (typeof window === 'undefined') return '';
+
+  const params = new URLSearchParams(window.location.search);
+  return params.get('search') || params.get('query') || params.get('q') || '';
 }
 
 const copy = {
@@ -231,7 +255,7 @@ function ProgramsSearchWorkspace({
 }) {
   const [rows, setRows] = useState([]);
   const [filters, setFilters] = useState(() => createInitialFiltersFromUrl());
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(() => getInitialSearchQueryFromUrl());
   const [priceRange, setPriceRange] = useState(() => createInitialPriceRangeFromUrl());
   const [pageSize, setPageSize] = useState(25);
   const [page, setPage] = useState(1);
@@ -334,13 +358,16 @@ function ProgramsSearchWorkspace({
   const exportRows = filteredRows.slice(0, EXPORT_LIMIT);
   const activeFilterCount =
     Object.values(filters).reduce(
-      (count, value) => count + (Array.isArray(value) ? value.length : value ? 1 : 0),
+      (count, value) => count + (Array.isArray(value) ? dedupeFilterValues(value).length : value ? 1 : 0),
       0
     ) + (query ? 1 : 0) + (priceRangeActive ? 1 : 0);
 
   const updateFilter = (key, value) => {
     setPage(1);
-    setFilters((current) => ({ ...current, [key]: value }));
+    setFilters((current) => ({
+      ...current,
+      [key]: Array.isArray(value) ? dedupeFilterValues(value) : value,
+    }));
   };
 
   const resetFilters = () => {
@@ -482,23 +509,39 @@ function ProgramsSearchWorkspace({
         </div>
       </div>
 
-      <main className="mx-auto max-w-[1480px] pb-16 pt-10 sm:pt-14">
-        <div className="program-no-print mb-7">
-          <div className={`${darkMode ? 'text-emerald-300' : 'text-emerald-700'} mb-4 text-sm font-black uppercase tracking-[0.35em]`}>
+      <main className="mx-auto max-w-[1480px] pb-14 pt-7 sm:pt-10">
+        <div className="program-no-print mb-5">
+          <div className={`${darkMode ? 'text-emerald-300' : 'text-emerald-700'} mb-3 text-xs font-black uppercase tracking-[0.22em] sm:text-sm sm:tracking-[0.28em]`}>
             {ui.eyebrow}
           </div>
 
-          <h1 className="text-4xl font-black leading-tight md:text-6xl">
+          <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl">
             {ui.title}
           </h1>
 
-          <p className={`${darkMode ? 'text-white/62' : 'text-black/60'} mt-5 max-w-3xl text-base font-medium leading-8 md:text-lg`}>
+          <p className={`${darkMode ? 'text-white/62' : 'text-black/60'} mt-3 max-w-3xl text-sm font-medium leading-7 md:text-base`}>
             {ui.description}
           </p>
         </div>
 
-        <section className={`${darkMode ? 'darkGlass' : 'glass'} program-no-print rounded-[30px] p-4 md:p-6`}>
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+        <section
+          className={`${darkMode ? 'border-white/10 bg-white/[0.045]' : 'border-black/10 bg-white/72'} program-no-print mb-5 rounded-[22px] border px-4 py-4 sm:px-5`}
+          aria-labelledby="program-search-seo-heading"
+        >
+          <h2 id="program-search-seo-heading" className="text-lg font-black leading-7 sm:text-xl">
+            {isFa
+              ? '\u062c\u0633\u062a\u062c\u0648\u06cc \u0631\u0634\u062a\u0647\u060c \u0634\u0647\u0631\u06cc\u0647 \u0648 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u06cc \u062f\u0631 \u062a\u0631\u06a9\u06cc\u0647'
+              : 'Search programs, tuition, and university admission in Turkey'}
+          </h2>
+          <p className={`${darkMode ? 'text-white/60' : 'text-black/60'} mt-2 max-w-5xl text-xs font-bold leading-6 sm:text-sm sm:leading-7`}>
+            {isFa
+              ? '\u0627\u06cc\u0646 \u0644\u06cc\u0633\u062a \u0628\u0631\u0627\u06cc \u0645\u0642\u0627\u06cc\u0633\u0647 \u0631\u0634\u062a\u0647\u200c\u0647\u0627\u06cc \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u06cc \u062a\u0631\u06a9\u06cc\u0647 \u0628\u0627 \u062f\u0627\u062f\u0647\u200c\u0647\u0627\u06cc \u0639\u0645\u0644\u06cc \u0645\u062b\u0644 \u0632\u0628\u0627\u0646 \u062a\u062d\u0635\u06cc\u0644\u060c \u0645\u0642\u0637\u0639\u060c \u0634\u0647\u0631\u06cc\u0647\u060c \u062f\u067e\u0648\u0632\u06cc\u062a \u0648 \u0648\u0628\u200c\u0633\u0627\u06cc\u062a \u0631\u0633\u0645\u06cc \u062f\u0627\u0646\u0634\u06af\u0627\u0647 \u0633\u0627\u062e\u062a\u0647 \u0634\u062f\u0647 \u062a\u0627 \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646 \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc \u0645\u0633\u06cc\u0631 \u067e\u0630\u06cc\u0631\u0634 \u0631\u0627 \u0633\u0631\u06cc\u0639\u200c\u062a\u0631 \u0645\u0642\u0627\u06cc\u0633\u0647 \u06a9\u0646\u0646\u062f.'
+              : 'This program search is built for international students comparing Turkey university admission by study language, degree level, tuition, deposit, and official university website.'}
+          </p>
+        </section>
+
+        <section className={`${darkMode ? 'darkGlass' : 'glass'} program-no-print rounded-[24px] p-3 md:p-5`}>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-black">
                 {ui.filters}
@@ -1112,8 +1155,14 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
   const [search, setSearch] = useState('');
   const rootRef = useRef(null);
   const label = isFa ? field.labelFa : field.labelEn;
-  const selectedValues = useMemo(() => (Array.isArray(value) ? value : []), [value]);
-  const selectedSet = useMemo(() => new Set(selectedValues), [selectedValues]);
+  const selectedValues = useMemo(
+    () => dedupeFilterValues(Array.isArray(value) ? value : []),
+    [value]
+  );
+  const selectedSet = useMemo(
+    () => new Set(selectedValues.map((item) => normalize(item))),
+    [selectedValues]
+  );
   const filteredOptions = useMemo(() => {
     const normalizedSearch = normalize(search);
     const matched = normalizedSearch
@@ -1165,16 +1214,19 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
   }, [closeDropdown, open]);
 
   const toggleOption = (option) => {
-    if (selectedSet.has(option)) {
-      onChange(selectedValues.filter((item) => item !== option));
+    const normalizedOption = normalize(option);
+
+    if (selectedSet.has(normalizedOption)) {
+      onChange(selectedValues.filter((item) => normalize(item) !== normalizedOption));
       return;
     }
 
-    onChange([...selectedValues, option]);
+    onChange(dedupeFilterValues([...selectedValues, option]));
   };
 
   const removeOption = (option) => {
-    onChange(selectedValues.filter((item) => item !== option));
+    const normalizedOption = normalize(option);
+    onChange(selectedValues.filter((item) => normalize(item) !== normalizedOption));
   };
 
   return (
@@ -1221,7 +1273,7 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
           <div className="mt-2 flex flex-wrap gap-2">
             {selectedValues.map((option) => (
               <button
-                key={option}
+                key={normalize(option)}
                 type="button"
                 onClick={() => removeOption(option)}
                 className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-black/5 text-black hover:bg-black/10'} inline-flex max-w-full items-center gap-2 rounded-full px-3 py-1.5 text-xs font-black transition`}
@@ -1252,8 +1304,8 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
           <div className="max-h-80 overflow-y-auto p-2">
             {filteredOptions.map((option) => (
               <FilterOption
-                key={option}
-                active={selectedSet.has(option)}
+                key={normalize(option)}
+                active={selectedSet.has(normalize(option))}
                 darkMode={darkMode}
                 label={displayValue(field.key, option, isFa)}
                 optionValue={option}
@@ -1509,23 +1561,27 @@ function getFieldValues(row, field) {
 }
 
 function getUniqueFieldValues(rows, field) {
-  const values = new Set();
+  const values = new Map();
 
   rows.forEach((row) => {
     getFieldValues(row, field).forEach((value) => {
-      values.add(value);
+      const normalized = normalize(value);
+      if (normalized && !values.has(normalized)) {
+        values.set(normalized, value);
+      }
     });
   });
 
-  return Array.from(values).sort((a, b) =>
+  return Array.from(values.values()).sort((a, b) =>
     String(a).localeCompare(String(b), undefined, { sensitivity: 'base' })
   );
 }
 
 function rowMatchesFilter(row, field, selectedValue) {
   if (Array.isArray(selectedValue)) {
-    if (!selectedValue.length) return true;
-    const selectedValues = new Set(selectedValue.map((value) => normalize(value)));
+    const normalizedSelectedValue = dedupeFilterValues(selectedValue);
+    if (!normalizedSelectedValue.length) return true;
+    const selectedValues = new Set(normalizedSelectedValue.map((value) => normalize(value)));
 
     return getFieldValues(row, field).some((value) => selectedValues.has(normalize(value)));
   }

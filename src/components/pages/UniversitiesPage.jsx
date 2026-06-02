@@ -207,7 +207,7 @@ export default function UniversitiesPage({
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl pb-16 pt-8 sm:pt-14">
+      <main className="mx-auto max-w-7xl pb-14 pt-6 sm:pt-10">
         <section className="grid items-end gap-7 lg:grid-cols-[1fr_360px]">
           <div className="max-w-4xl">
             <div
@@ -216,12 +216,12 @@ export default function UniversitiesPage({
               {ui.eyebrow}
             </div>
 
-            <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-6xl">
+            <h1 className="text-3xl font-black leading-tight sm:text-4xl md:text-5xl">
               {ui.title}
             </h1>
 
             <p
-              className={`${darkMode ? 'text-white/62' : 'text-black/62'} mt-5 max-w-3xl text-base font-medium leading-8 md:text-lg`}
+              className={`${darkMode ? 'text-white/62' : 'text-black/62'} mt-3 max-w-3xl text-sm font-medium leading-7 md:text-base`}
             >
               {ui.description}
             </p>
@@ -243,7 +243,47 @@ export default function UniversitiesPage({
         </section>
 
         <section
-          className={`${darkMode ? 'darkGlass' : 'glass'} mt-7 space-y-4 rounded-[24px] p-3 sm:mt-8 sm:rounded-[28px] sm:p-5`}
+          className={`${darkMode ? 'border-white/10 bg-white/[0.045]' : 'border-black/10 bg-white/72'} mt-6 grid gap-4 rounded-[22px] border px-4 py-4 sm:grid-cols-3 sm:px-5`}
+          aria-labelledby="university-comparison-heading"
+        >
+          <div className="sm:col-span-3">
+            <h2 id="university-comparison-heading" className="text-lg font-black leading-7 sm:text-xl">
+              {isFa
+                ? '\u0645\u0642\u0627\u06cc\u0633\u0647 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062a\u0631\u06a9\u06cc\u0647 \u0628\u0631\u0627\u06cc \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u062c\u0648\u06cc \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc'
+                : 'Compare Turkey universities for international student admission'}
+            </h2>
+          </div>
+          {[
+            {
+              title: isFa ? '\u0631\u0634\u062a\u0647 \u0648 \u0634\u0647\u0631\u06cc\u0647' : 'Programs and tuition',
+              text: isFa
+                ? '\u062a\u0639\u062f\u0627\u062f \u0631\u0634\u062a\u0647\u200c\u0647\u0627\u060c \u062a\u0646\u0648\u0639 \u06a9\u0627\u062a\u0627\u0644\u0648\u06af \u0648 \u0644\u06cc\u0646\u06a9 \u062c\u0633\u062a\u062c\u0648\u06cc \u0634\u0647\u0631\u06cc\u0647 \u0628\u0647 \u0627\u0646\u062a\u062e\u0627\u0628 \u0648\u0627\u0642\u200c\u0628\u06cc\u0646\u0627\u0646\u0647 \u06a9\u0645\u06a9 \u0645\u06cc\u200c\u06a9\u0646\u062f.'
+                : 'Program count, catalog depth, and tuition search links help applicants compare realistic study options.',
+            },
+            {
+              title: isFa ? '\u0645\u06a9\u0627\u0646 \u0648 \u06a9\u0645\u067e\u0648\u0633' : 'Location and campus',
+              text: isFa
+                ? '\u0645\u0648\u0642\u0639\u06cc\u062a \u06a9\u0645\u067e\u0648\u0633\u060c \u0686\u0646\u062f\u06a9\u0645\u067e\u0648\u0633\u06cc \u0628\u0648\u062f\u0646 \u0648 \u062f\u0633\u062a\u0631\u0633\u06cc \u0634\u0647\u0631\u06cc \u0628\u0631\u0627\u06cc \u062e\u0648\u0627\u0628\u06af\u0627\u0647\u060c \u0627\u0642\u0627\u0645\u062a \u0648 \u0631\u0641\u062a\u200c\u0648\u0622\u0645\u062f \u0645\u0647\u0645 \u0627\u0633\u062a.'
+                : 'Campus location and multi-campus footprints matter for housing, residence steps, and daily commute.',
+            },
+            {
+              title: isFa ? '\u0645\u0646\u0628\u0639 \u0648 \u0627\u0639\u062a\u0628\u0627\u0631 \u0622\u06a9\u0627\u062f\u0645\u06cc\u06a9' : 'Sources and academic signals',
+              text: isFa
+                ? '\u0631\u062a\u0628\u0647 THE\u060c \u062a\u0642\u0648\u06cc\u0645 \u0631\u0633\u0645\u06cc\u060c ECTS\u060c Erasmus+ \u0648 \u0645\u0646\u0627\u0628\u0639 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u06cc \u0641\u0642\u0637 \u0628\u0627 \u0630\u06a9\u0631 \u0645\u0646\u0628\u0639 \u062f\u0631 \u067e\u0631\u0648\u0641\u0627\u06cc\u0644 \u0645\u06cc\u200c\u0622\u06cc\u062f.'
+                : 'THE rankings, official calendars, ECTS, Erasmus+, and university sources are separated from unverified claims.',
+            },
+          ].map((item) => (
+            <div key={item.title} className={`${darkMode ? 'bg-white/[0.055]' : 'bg-black/[0.025]'} rounded-[16px] px-4 py-3`}>
+              <h3 className="text-sm font-black">{item.title}</h3>
+              <p className={`${darkMode ? 'text-white/60' : 'text-black/60'} mt-2 text-xs font-bold leading-6`}>
+                {item.text}
+              </p>
+            </div>
+          ))}
+        </section>
+
+        <section
+          className={`${darkMode ? 'darkGlass' : 'glass'} mt-5 space-y-4 rounded-[22px] p-3 sm:rounded-[24px] sm:p-4`}
         >
           <label
             className={`${darkMode ? 'border-white/10 bg-white/10' : 'border-black/10 bg-white/90'} flex items-center gap-3 rounded-[18px] border px-4 py-3.5 sm:rounded-[22px] sm:px-5 sm:py-4`}
@@ -305,7 +345,7 @@ export default function UniversitiesPage({
         {filteredUniversities.length ? (
           <section
             data-university-grid
-            className="mt-7 grid gap-5 md:grid-cols-2 xl:grid-cols-3"
+            className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3"
           >
             {filteredUniversities.map((university) => (
               <UniversityCard
@@ -315,7 +355,6 @@ export default function UniversitiesPage({
                 isFa={isFa}
                 ui={ui}
                 onConsultationClick={onConsultationClick}
-                onDetailsClick={() => setSelectedUniversity(university)}
               />
             ))}
           </section>
@@ -347,7 +386,6 @@ function UniversityCard({
   isFa,
   ui,
   onConsultationClick,
-  onDetailsClick,
 }) {
   const profile = university.decisionProfile;
   const websiteUrl = normalizeUrl(university.website);
@@ -365,7 +403,7 @@ function UniversityCard({
   return (
     <article
       data-university-card
-      className={`${darkMode ? 'border-white/10 bg-white/[0.055]' : 'border-black/10 bg-white/92'} flex min-h-[520px] flex-col rounded-[22px] border p-4 shadow-[0_18px_50px_rgba(0,0,0,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)] sm:rounded-[24px] sm:p-5`}
+      className={`${darkMode ? 'border-white/10 bg-white/[0.055]' : 'border-black/10 bg-white/92'} flex min-h-[490px] flex-col rounded-[20px] border p-4 shadow-[0_18px_50px_rgba(0,0,0,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(0,0,0,0.12)] sm:rounded-[22px]`}
     >
       <div className="flex items-start gap-3 sm:gap-4">
         <LogoBox university={university} darkMode={darkMode} />
@@ -392,7 +430,7 @@ function UniversityCard({
       </div>
 
       <div
-        className={`${darkMode ? 'border-white/10 bg-white/5' : 'border-black/10 bg-black/[0.025]'} mt-5 rounded-[18px] border px-3 py-3`}
+        className={`${darkMode ? 'border-white/10 bg-white/5' : 'border-black/10 bg-black/[0.025]'} mt-4 rounded-[16px] border px-3 py-3`}
       >
         <div className="flex items-center gap-2 text-xs font-black">
           <Award size={15} className={darkMode ? 'text-amber-200' : 'text-amber-700'} />
@@ -445,19 +483,18 @@ function UniversityCard({
         <CredentialBadges credentials={profile?.internationalCredentials} darkMode={darkMode} isFa={isFa} />
       </div>
 
-      <p className={`${darkMode ? 'text-white/62' : 'text-black/62'} mt-4 line-clamp-3 text-sm font-medium leading-7`}>
+      <p className={`${darkMode ? 'text-white/62' : 'text-black/62'} mt-3 line-clamp-3 text-sm font-medium leading-6`}>
         {summary}
       </p>
 
       <div className="mt-auto grid grid-cols-2 gap-2 pt-5 sm:flex sm:flex-wrap">
-        <button
-          type="button"
-          onClick={onDetailsClick}
+        <a
+          href={buildUniversityProfileUrl(university)}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[15px] bg-[#071A3D] px-3 py-3 text-center text-xs font-black text-white transition hover:scale-[1.02] sm:px-4"
         >
           <Sparkles size={15} />
           {ui.details}
-        </button>
+        </a>
 
         <a
           href={buildProgramsUrl(university.name)}
@@ -701,6 +738,11 @@ function getInitialProfileUniversity() {
 
 function buildProgramsUrl(universityName) {
   return `?page=programs&university=${encodeURIComponent(universityName)}`;
+}
+
+function buildUniversityProfileUrl(university) {
+  const profile = university?.slug || university?.name || '';
+  return `?page=universities&profile=${encodeURIComponent(profile)}`;
 }
 
 function TimesHigherEducationSection({ profile, darkMode, isFa, ui }) {
@@ -1175,7 +1217,9 @@ function normalizeText(value) {
     .replace(/ı/g, 'i')
     .replace(/İ/g, 'i')
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 }
 
 function getInitials(name) {

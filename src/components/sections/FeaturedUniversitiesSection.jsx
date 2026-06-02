@@ -1,40 +1,40 @@
 export default function FeaturedUniversitiesSection({ darkMode, isFa, universityCards }) {
   return (
-<section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
-        <div className="mb-16 text-center">
-          <div className={`${darkMode ? 'text-neutral-400' : 'text-neutral-500'} text-sm font-black tracking-[0.3em] uppercase mb-4`}>
+<section className="max-w-7xl mx-auto px-6 pb-16 relative z-10">
+        <div className="mb-10 text-center">
+          <div className={`${darkMode ? 'text-neutral-400' : 'text-neutral-500'} text-xs font-black tracking-[0.22em] uppercase mb-3 sm:text-sm`}>
             University Explorer
           </div>
 
-          <h2 className="section-title text-5xl md:text-7xl font-black mb-8">
+          <h2 className="section-title text-4xl md:text-6xl font-black mb-5">
             {isFa ? 'دانشگاه‌های منتخب ACCA' : 'Featured Universities'}
           </h2>
 
-          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-lg leading-9 font-medium`}>
+          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-base leading-7 font-medium`}>
             {isFa ? 'بررسی دانشگاه‌های محبوب ترکیه براساس شهریه، تاییدیه و کیفیت آموزشی.' : 'Explore popular Turkish universities based on tuition, approvals, and educational quality.'}
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mb-28">
+        <div className="grid lg:grid-cols-3 gap-6 mb-16">
           {universityCards.map((uni) => (
             <a
               key={uni.name}
               href={uni.href || '?page=universities'}
-              className={`${darkMode ? 'darkGlass' : 'glass'} block rounded-[38px] p-8 hover:scale-[1.03] transition-all duration-500`}
+              className={`${darkMode ? 'darkGlass' : 'glass'} block rounded-[28px] p-6 hover:scale-[1.02] transition-all duration-500`}
               aria-label={`${isFa ? 'مشاهده پروفایل' : 'View profile'} ${uni.name}`}
             >
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-5 gap-4">
                 <div>
-                  <div className="text-2xl font-black mb-2">
+                  <div className="text-xl font-black mb-1">
                     {uni.name}
                   </div>
 
-                  <div className="text-emerald-400 font-bold">
+                  <div className="text-sm text-emerald-400 font-bold">
                     {uni.ranking}
                   </div>
                 </div>
 
-                <div className={`${darkMode ? 'bg-white/10 border-white/10' : 'bg-white/85 border-black/10'} flex h-20 w-20 shrink-0 items-center justify-center rounded-[22px] border p-3`}>
+                <div className={`${darkMode ? 'bg-white/10 border-white/10' : 'bg-white/85 border-black/10'} flex h-16 w-16 shrink-0 items-center justify-center rounded-[18px] border p-2.5`}>
                   {uni.logo ? (
                     <img
                       src={uni.logo}
@@ -50,13 +50,17 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
                 </div>
               </div>
 
-              <div className="space-y-5">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} mb-5 text-sm font-medium leading-6`}>
+                {uni.description}
+              </p>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <span className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} font-bold`}>
                     {isFa ? 'شهریه' : 'Tuition'}
                   </span>
 
-                  <span className="font-black text-xl">
+                  <span className="font-black text-lg">
                     {uni.tuition}
                   </span>
                 </div>

@@ -36,15 +36,15 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
   }, [isDesktopViewport]);
 
   return (
-<section className="min-h-[72svh] lg:min-h-[58vh] flex items-start lg:items-center px-5 sm:px-6 pt-[108px] pb-6 sm:pt-[112px] md:pt-[120px] lg:pt-6 lg:pb-0 relative z-10">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-6 lg:gap-16 items-center w-full">
+<section className="min-h-[64svh] lg:min-h-[52vh] flex items-start px-5 sm:px-6 pt-[96px] pb-5 sm:pt-[104px] md:pt-[112px] lg:pt-[72px] lg:pb-6 xl:pt-[78px] relative z-10">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-5 lg:gap-12 items-center w-full">
           <div className="relative z-10 max-w-xl lg:max-w-none">
-            <div className={`${darkMode ? 'darkGlass text-white' : 'glass text-neutral-700'} inline-flex items-center gap-3 px-5 py-3 rounded-full mb-8 text-sm font-bold`}>
+            <div className={`${darkMode ? 'darkGlass text-white' : 'glass text-neutral-700'} inline-flex items-center gap-3 px-4 py-2.5 rounded-full mb-5 text-xs font-bold sm:text-sm`}>
               <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
               {isFa ? 'مشاوره تحصیلی و پذیرش بین‌المللی' : 'International Educational Consulting'}
             </div>
 
-            <h1 className={`hero-title text-[clamp(3rem,16vw,4.25rem)] md:text-[6rem] font-black ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
+            <h1 className={`hero-title text-[clamp(2.55rem,11vw,3.7rem)] md:text-[5rem] font-black ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
               {isFa ? 'تحصیل.' : 'Study.'}
               <br />
               {isFa ? 'انتقالی.' : 'Transfer.'}
@@ -52,14 +52,14 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
               {isFa ? 'آینده.' : 'Future.'}
             </h1>
 
-            <p className={`mt-6 lg:mt-8 text-base lg:text-lg leading-8 max-w-xl font-medium ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
+            <p className={`mt-4 lg:mt-5 text-sm lg:text-base leading-7 max-w-xl font-medium ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
               {isFa ? 'تجربه‌ای مدرن از مشاوره تحصیلی، انتقالی پزشکی و مسیر بین‌المللی دانشجویان در ترکیه و اروپا.' : 'A modern experience in educational consulting, medical transfer, and international student pathways in Turkey and Europe.'}
             </p>
 
             <button
               type="button"
               onClick={onConsultationClick}
-              className="mt-8 lg:mt-10 inline-flex items-center gap-3 bg-emerald-700 hover:bg-emerald-800 text-white px-8 py-4 rounded-full text-base font-black transition-all duration-300 hover:scale-[1.04] shadow-[0_8px_32px_rgba(5,150,105,0.35)]"
+              className="mt-6 lg:mt-7 inline-flex items-center gap-3 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3.5 rounded-full text-sm font-black transition-all duration-300 hover:scale-[1.04] shadow-[0_8px_32px_rgba(5,150,105,0.35)] sm:px-7 sm:text-base"
             >
               {isFa ? 'شروع مشاوره' : 'Start Consultation'}
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={isFa ? 'rotate-180' : ''}>
@@ -68,7 +68,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
             </button>
           </div>
 
-          <div className="relative flex items-center justify-center min-h-[170px] sm:min-h-[220px] lg:min-h-[600px] xl:min-h-[660px] w-full">
+          <div className="relative flex items-center justify-center min-h-[150px] sm:min-h-[190px] lg:min-h-[520px] xl:min-h-[580px] w-full">
             <div className="hero-glow" />
 
             {/* Orbital decoration behind astronaut */}

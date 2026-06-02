@@ -17,6 +17,7 @@ import FaqSection from './components/sections/FaqSection';
 import FinalCtaSection from './components/sections/FinalCtaSection';
 import ContactSection from './components/sections/ContactSection';
 import { COMPANY_WHATSAPP_URL } from './constants/contact';
+import { buildUniversitySlug, istanbulUniversities } from './data/istanbulUniversities';
 import { getUniversityLogo } from './data/universityLogoMap';
 
 const ProgramsSearchPage = lazy(() => import('./components/pages/ProgramsSearchPageV2'));
@@ -29,6 +30,201 @@ const SITE_CANONICAL_ORIGIN = 'https://www.accaco.com';
 const INDEXABLE_PAGES = new Set(['programs', 'universities', 'scholarships']);
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px) and (pointer: fine)';
+
+function getUniversityProfileHref(universityName) {
+  const university = findUniversityByRouteValue(universityName);
+  const profileValue = university?.slug || buildUniversitySlug(universityName);
+  return `?page=universities&profile=${encodeURIComponent(profileValue || universityName)}`;
+}
+
+function findUniversityByRouteValue(value) {
+  const normalizedValue = normalizeRouteValue(value);
+  if (!normalizedValue) return null;
+
+  return istanbulUniversities.find((university) => {
+    const normalizedName = normalizeRouteValue(university.name);
+    const normalizedSlug = normalizeRouteValue(university.slug || buildUniversitySlug(university.name));
+    return normalizedValue === normalizedName ||
+      normalizedValue === normalizedSlug ||
+      normalizedName.includes(normalizedValue) ||
+      normalizedValue.includes(normalizedName);
+  }) || null;
+}
+
+function normalizeRouteValue(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/Ä°/g, 'I')
+    .replace(/ı/g, 'i')
+    .replace(/[^a-zA-Z0-9]+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function getRouteSeo({ page, params, isFa }) {
+  const profileParam = params.get('profile') || params.get('university') || '';
+  const university = page === 'universities' ? findUniversityByRouteValue(profileParam) : null;
+  const programUniversity = page === 'programs'
+    ? findUniversityByRouteValue(params.get('university'))
+    : null;
+  const programQuery = [
+    params.get('department'),
+    params.get('program'),
+    params.get('search'),
+    params.get('query'),
+    params.get('q'),
+  ].filter(Boolean)[0] || '';
+  const defaultTitle = isFa
+    ? 'ACCA EDU | \u0645\u0634\u0627\u0648\u0631\u0647 \u062a\u062d\u0635\u06cc\u0644\u06cc \u0648 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062a\u0631\u06a9\u06cc\u0647'
+    : 'ACCA EDU | Educational Consulting Turkey';
+  const fallback = {
+    title: defaultTitle,
+    description: isFa
+      ? '\u0645\u0634\u0627\u0648\u0631\u0647 \u062a\u062d\u0635\u06cc\u0644\u06cc\u060c \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062a\u0631\u06a9\u06cc\u0647\u060c \u0628\u0648\u0631\u0633\u06cc\u0647\u060c \u0627\u0646\u062a\u0642\u0627\u0644\u06cc \u0648 \u0645\u0633\u06cc\u0631 \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646 \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc.'
+      : 'Educational consulting for university admission, scholarships, transfer, and international student pathways in Turkey.',
+    canonicalUrl: `${SITE_CANONICAL_ORIGIN}/`,
+    shouldIndex: true,
+    structuredData: buildWebPageJsonLd(defaultTitle, `${SITE_CANONICAL_ORIGIN}/`),
+  };
+
+  if (page === 'universities' && university) {
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?page=universities&profile=${encodeURIComponent(university.slug)}`;
+    const programCount = Number(university.programsCount || 0);
+    return {
+      title: isFa
+        ? `${university.name} | \u067e\u0630\u06cc\u0631\u0634\u060c \u0631\u0634\u062a\u0647\u200c\u0647\u0627 \u0648 \u0631\u062a\u0628\u0647 | ACCA EDU`
+        : `${university.name} Admission, Programs & Rankings | ACCA EDU`,
+      description: isFa
+        ? `\u067e\u0631\u0648\u0641\u0627\u06cc\u0644 ${university.name} \u0628\u0631\u0627\u06cc \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646 \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc: ${programCount || '\u0686\u0646\u062f\u06cc\u0646'} \u0631\u0634\u062a\u0647\u060c \u06a9\u0645\u067e\u0648\u0633\u060c \u0631\u062a\u0628\u0647 THE\u060c \u0645\u0646\u0627\u0628\u0639 \u0631\u0633\u0645\u06cc \u0648 \u0645\u0633\u06cc\u0631 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0631 \u062a\u0631\u06a9\u06cc\u0647.`
+        : `${university.name} profile for international students: ${programCount || 'multiple'} programs, campus data, THE ranking signals, official sources, and Turkey admission review.`,
+      canonicalUrl,
+      shouldIndex: true,
+      structuredData: buildUniversityJsonLd(university, canonicalUrl),
+    };
+  }
+
+  if (page === 'universities') {
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?page=universities`;
+    return {
+      title: isFa
+        ? '\u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062e\u0635\u0648\u0635\u06cc \u0627\u0633\u062a\u0627\u0646\u0628\u0648\u0644 \u0648 \u062a\u0631\u06a9\u06cc\u0647 | ACCA EDU'
+        : 'Private Universities in Istanbul & Turkey | ACCA EDU',
+      description: isFa
+        ? '\u0645\u0642\u0627\u06cc\u0633\u0647 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062e\u0635\u0648\u0635\u06cc \u0627\u0633\u062a\u0627\u0646\u0628\u0648\u0644 \u0648 \u062a\u0631\u06a9\u06cc\u0647 \u0628\u0631 \u0627\u0633\u0627\u0633 \u0631\u0634\u062a\u0647\u060c \u06a9\u0645\u067e\u0648\u0633\u060c \u0631\u062a\u0628\u0647 THE\u060c \u062a\u0642\u0648\u06cc\u0645 \u0622\u06a9\u0627\u062f\u0645\u06cc\u06a9 \u0648 \u0645\u0633\u06cc\u0631 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646 \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc.'
+        : 'Compare private universities in Istanbul and Turkey by programs, campus data, THE ranking signals, academic calendar, and international admission fit.',
+      canonicalUrl,
+      shouldIndex: true,
+      structuredData: buildItemListJsonLd(canonicalUrl),
+    };
+  }
+
+  if (page === 'programs') {
+    const canonicalParams = new URLSearchParams({ page: 'programs' });
+    if (programUniversity?.name) {
+      canonicalParams.set('university', programUniversity.name);
+    }
+    if (programQuery) {
+      canonicalParams.set('program', programQuery);
+    }
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?${canonicalParams.toString()}`;
+    const target = programUniversity?.name || programQuery;
+    return {
+      title: target
+        ? (isFa
+          ? `${target} | \u0631\u0634\u062a\u0647\u200c\u0647\u0627\u060c \u0634\u0647\u0631\u06cc\u0647 \u0648 \u067e\u0630\u06cc\u0631\u0634 \u062a\u0631\u06a9\u06cc\u0647 | ACCA EDU`
+          : `${target} Programs, Tuition & Admission in Turkey | ACCA EDU`)
+        : (isFa
+          ? '\u0631\u0634\u062a\u0647\u200c\u0647\u0627\u060c \u0634\u0647\u0631\u06cc\u0647 \u0648 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u06cc \u062a\u0631\u06a9\u06cc\u0647 | ACCA EDU'
+          : 'Programs, Tuition & University Admission in Turkey | ACCA EDU'),
+      description: target
+        ? (isFa
+          ? `\u062c\u0633\u062a\u062c\u0648\u06cc ${target} \u062f\u0631 \u0644\u06cc\u0633\u062a \u0631\u0634\u062a\u0647\u200c\u0647\u0627\u06cc \u062a\u0631\u06a9\u06cc\u0647 \u0628\u0627 \u0634\u0647\u0631\u06cc\u0647\u060c \u0632\u0628\u0627\u0646 \u062a\u062d\u0635\u06cc\u0644\u060c \u0645\u0642\u0637\u0639\u060c \u062f\u067e\u0648\u0632\u06cc\u062a \u0648 \u0645\u0634\u0627\u0648\u0631\u0647 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646 \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc.`
+          : `Search ${target} in Turkey program listings with tuition, language, degree, deposit, and admission guidance for international students.`)
+        : (isFa
+          ? '\u062c\u0633\u062a\u062c\u0648 \u062f\u0631 \u0631\u0634\u062a\u0647\u200c\u0647\u0627\u06cc \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u06cc \u062a\u0631\u06a9\u06cc\u0647 \u0628\u0627 \u0634\u0647\u0631\u06cc\u0647\u060c \u0628\u0648\u0631\u0633\u06cc\u0647\u060c \u0632\u0628\u0627\u0646 \u062a\u062d\u0635\u06cc\u0644\u060c \u0645\u0642\u0637\u0639 \u0648 \u0627\u0637\u0644\u0627\u0639\u0627\u062a \u067e\u0630\u06cc\u0631\u0634.'
+          : 'Search university programs in Turkey with tuition, scholarship, language, degree, and admission information.'),
+      canonicalUrl,
+      shouldIndex: true,
+      structuredData: buildWebPageJsonLd(target || 'Programs in Turkey', canonicalUrl),
+    };
+  }
+
+  if (page === 'scholarships') {
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?page=scholarships`;
+    return {
+      title: isFa ? '\u0628\u0648\u0631\u0633\u06cc\u0647\u200c\u0647\u0627\u06cc \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u06cc \u062a\u0631\u06a9\u06cc\u0647 | ACCA EDU' : 'Turkey University Scholarships | ACCA EDU',
+      description: isFa
+        ? '\u0644\u06cc\u0633\u062a \u0628\u0648\u0631\u0633\u06cc\u0647\u200c\u0647\u0627\u06cc ACCA \u0628\u0631\u0627\u06cc \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062a\u0631\u06a9\u06cc\u0647 \u0628\u0627 \u0642\u06cc\u0645\u062a\u060c \u0631\u0634\u062a\u0647\u060c \u0645\u0642\u0637\u0639 \u0648 \u0645\u0634\u0627\u0648\u0631\u0647 \u067e\u0630\u06cc\u0631\u0634.'
+        : 'ACCA scholarship listings for Turkish universities with price, program, degree, and admission guidance.',
+      canonicalUrl,
+      shouldIndex: true,
+      structuredData: buildWebPageJsonLd('Turkey University Scholarships', canonicalUrl),
+    };
+  }
+
+  return {
+    ...fallback,
+    shouldIndex: !page,
+  };
+}
+
+function buildWebPageJsonLd(name, url) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name,
+    url,
+    isPartOf: {
+      '@type': 'WebSite',
+      name: 'ACCA EDU',
+      url: SITE_CANONICAL_ORIGIN,
+    },
+  };
+}
+
+function buildUniversityJsonLd(university, url) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollegeOrUniversity',
+    name: university.name,
+    url,
+    sameAs: university.website || undefined,
+    address: university.address ? {
+      '@type': 'PostalAddress',
+      streetAddress: university.address,
+      addressLocality: university.city || 'Istanbul',
+      addressCountry: university.country || 'Turkey',
+    } : undefined,
+  };
+}
+
+function buildItemListJsonLd(url) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Private universities in Istanbul and Turkey',
+    url,
+    itemListElement: istanbulUniversities.slice(0, 24).map((university, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: university.name,
+      url: `${SITE_CANONICAL_ORIGIN}/?page=universities&profile=${encodeURIComponent(university.slug)}`,
+    })),
+  };
+}
+
+function upsertJsonLd(id, data) {
+  const existing = document.getElementById(id);
+  const script = existing || document.createElement('script');
+  script.id = id;
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify(data);
+
+  if (!existing) {
+    document.head.appendChild(script);
+  }
+}
 
 function PageLoadingScreen({ darkMode, isFa }) {
   return (
@@ -314,7 +510,7 @@ export default function ACCALandingPage() {
 
   const isFa = language === 'fa';
   const search = typeof window !== 'undefined' ? window.location.search : '';
-  const params = new URLSearchParams(search);
+  const params = useMemo(() => new URLSearchParams(search), [search]);
   const page = params.get('page');
 
   // ── SEO: keep <html lang/dir> in sync with the active language ────────────
@@ -325,6 +521,7 @@ export default function ACCALandingPage() {
 
   // ── SEO: update <title> and meta description per page ─────────────────────
   useEffect(() => {
+    const routeSeo = getRouteSeo({ page, params, isFa });
     const PAGE_TITLES = {
       programs:     isFa ? 'رشته‌ها و شهریه‌ها | ACCA EDU' : 'Programs & Tuition | ACCA EDU',
       universities: isFa ? 'دانشگاه‌ها | ACCA EDU'          : 'Universities | ACCA EDU',
@@ -376,7 +573,28 @@ export default function ACCALandingPage() {
     setElementAttr('meta[property="og:description"]', 'content', currentDescription);
     setElementAttr('meta[name="twitter:title"]', 'content', document.title);
     setElementAttr('meta[name="twitter:description"]', 'content', currentDescription);
-  }, [page, isFa]);
+    document.title = routeSeo.title;
+    if (metaDesc) metaDesc.setAttribute('content', routeSeo.description);
+    setElementAttr('link[rel="canonical"]', 'href', routeSeo.canonicalUrl);
+    setElementAttr('link[hreflang="fa"]', 'href', routeSeo.canonicalUrl);
+    setElementAttr('link[hreflang="en"]', 'href', routeSeo.canonicalUrl);
+    setElementAttr('link[hreflang="x-default"]', 'href', routeSeo.canonicalUrl);
+    setElementAttr('meta[property="og:url"]', 'content', routeSeo.canonicalUrl);
+    setElementAttr('meta[property="og:title"]', 'content', routeSeo.title);
+    setElementAttr('meta[property="og:description"]', 'content', routeSeo.description);
+    setElementAttr('meta[name="twitter:title"]', 'content', routeSeo.title);
+    setElementAttr('meta[name="twitter:description"]', 'content', routeSeo.description);
+    setElementAttr('meta[name="robots"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
+      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+      : 'noindex, nofollow');
+    setElementAttr('meta[name="googlebot"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
+      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+      : 'noindex, nofollow');
+    setElementAttr('meta[name="bingbot"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
+      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+      : 'noindex, nofollow');
+    upsertJsonLd('acca-route-structured-data', routeSeo.structuredData);
+  }, [page, isFa, params]);
 
 
   const handleInstallClick = async () => {
@@ -723,7 +941,7 @@ export default function ACCALandingPage() {
         tuition: '$4.8K - $12K',
         ministry: isFa ? 'مورد تایید' : 'Approved',
         logo: getUniversityLogo('ISTINYE UNIVERSITY'),
-        href: `?page=universities&profile=${encodeURIComponent('ISTINYE UNIVERSITY')}`,
+        href: getUniversityProfileHref('ISTINYE UNIVERSITY'),
         description: isFa
           ? 'یکی از مدرن‌ترین دانشگاه‌های پزشکی و سلامت ترکیه با امکانات بین‌المللی.'
           : 'One of Turkey’s most modern medical and healthcare universities with international facilities.',
@@ -735,7 +953,7 @@ export default function ACCALandingPage() {
         tuition: '$5K - $14K',
         ministry: isFa ? 'مورد تایید' : 'Approved',
         logo: getUniversityLogo('BAHCESEHIR UNIVERSITY'),
-        href: `?page=universities&profile=${encodeURIComponent('BAHCESEHIR UNIVERSITY')}`,
+        href: getUniversityProfileHref('BAHCESEHIR UNIVERSITY'),
         description: isFa
           ? 'دانشگاه بین‌المللی استانبول با تمرکز بر رشته‌های مهندسی و بیزینس.'
           : 'An international Istanbul university focused on engineering and business majors.',
@@ -747,7 +965,7 @@ export default function ACCALandingPage() {
         tuition: '$4K - $11K',
         ministry: isFa ? 'مورد تایید' : 'Approved',
         logo: getUniversityLogo('BIRUNI UNIVERSITY'),
-        href: `?page=universities&profile=${encodeURIComponent('BIRUNI UNIVERSITY')}`,
+        href: getUniversityProfileHref('BIRUNI UNIVERSITY'),
         description: isFa
           ? 'تمرکز تخصصی بر علوم سلامت، پزشکی و دندانپزشکی.'
           : 'Specialized in healthcare sciences, medicine, and dentistry.',
@@ -1036,8 +1254,8 @@ export default function ACCALandingPage() {
         }
 
         .hero-title {
-          line-height: 0.9;
-          letter-spacing: -0.06em;
+          line-height: 0.96;
+          letter-spacing: 0;
         }
 
         .hero-glow {
@@ -1308,8 +1526,8 @@ export default function ACCALandingPage() {
         }
 
         .section-title {
-          line-height: 0.95;
-          letter-spacing: -0.05em;
+          line-height: 1;
+          letter-spacing: 0;
         }
 
         .step-card {
