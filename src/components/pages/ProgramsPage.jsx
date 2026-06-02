@@ -115,11 +115,13 @@ export default function ProgramsPage({
       dir={isFa ? 'rtl' : 'ltr'}
     >
       <div className={`${darkMode ? 'darkGlass' : 'glass'} mx-auto flex max-w-7xl items-center justify-between rounded-full px-5 py-3 sm:px-7 sm:py-4`}>
-        <img
-          src={ACCA_LOGO_SRC}
-          alt="ACCA EDU Logo"
-          className="h-10 w-auto object-contain sm:h-11"
-        />
+        <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
+          <img
+            src={ACCA_LOGO_SRC}
+            alt="ACCA EDU Logo"
+            className="h-10 w-auto object-contain sm:h-11"
+          />
+        </a>
 
         <a
           href="/"

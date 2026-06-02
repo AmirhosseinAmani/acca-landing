@@ -213,7 +213,7 @@ export default function ScholarshipsPage({
       className={`${darkMode ? 'bg-[#050816] text-white' : 'bg-[#F7F1E8] text-neutral-950'} min-h-screen overflow-hidden px-4 py-6 sm:px-6 sm:py-8`}
     >
       <div className={`${darkMode ? 'darkGlass' : 'glass'} mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full px-5 py-4 sm:px-7`}>
-        <a href="/" className="flex items-center gap-3">
+        <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'} className="flex items-center gap-3">
           <img src={ACCA_LOGO_SRC} alt="ACCA EDU Logo" className="h-10 w-auto object-contain sm:h-11" />
         </a>
 

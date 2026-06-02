@@ -475,11 +475,13 @@ function ProgramsSearchWorkspace({
       `}</style>
 
       <div className={`${darkMode ? 'darkGlass' : 'glass'} program-no-print mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 rounded-full px-5 py-3 sm:px-7 sm:py-4`}>
-        <img
-          src={ACCA_LOGO_SRC}
-          alt="ACCA EDU Logo"
-          className="h-10 w-auto object-contain sm:h-11"
-        />
+        <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
+          <img
+            src={ACCA_LOGO_SRC}
+            alt="ACCA EDU Logo"
+            className="h-10 w-auto object-contain sm:h-11"
+          />
+        </a>
 
         <div className="flex items-center gap-2">
           <button

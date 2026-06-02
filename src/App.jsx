@@ -694,13 +694,15 @@ export default function ACCALandingPage() {
         dir={isFa ? 'rtl' : 'ltr'}
       >
         <div className={`${darkMode ? 'darkGlass' : 'glass'} mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full px-5 py-4 sm:px-7`}>
-          <img
-            src={ACCA_LOGO_SRC}
-            alt="ACCA EDU Logo"
-            width="160"
-            height="44"
-            className="h-10 w-auto object-contain sm:h-11"
-          />
+          <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
+            <img
+              src={ACCA_LOGO_SRC}
+              alt="ACCA EDU Logo"
+              width="160"
+              height="44"
+              className="h-10 w-auto object-contain sm:h-11"
+            />
+          </a>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <button
@@ -1810,14 +1812,16 @@ export default function ACCALandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 sm:px-6 sm:py-4">
         <div className={`${darkMode ? 'darkGlass' : 'glass'} relative max-w-7xl mx-auto rounded-full px-5 py-3 sm:px-8 sm:py-4 flex items-center justify-between`}>
           <div className="flex items-center">
-            <img
-              src={ACCA_LOGO_SRC}
-              alt="ACCA EDU Logo"
-              width="160"
-              height="48"
-              fetchPriority="high"
-              className="h-10 w-auto object-contain sm:h-12"
-            />
+            <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
+              <img
+                src={ACCA_LOGO_SRC}
+                alt="ACCA EDU Logo"
+                width="160"
+                height="48"
+                fetchPriority="high"
+                className="h-10 w-auto object-contain sm:h-12"
+              />
+            </a>
           </div>
 
           <div className="hidden lg:flex items-center gap-5">
@@ -1837,8 +1841,6 @@ export default function ACCALandingPage() {
 
             <a
               href="?page=universities"
-              target="_blank"
-              rel="noreferrer"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -1851,8 +1853,6 @@ export default function ACCALandingPage() {
 
             <a
               href="?page=programs"
-              target="_blank"
-              rel="noreferrer"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -1866,8 +1866,6 @@ export default function ACCALandingPage() {
 
             <a
               href="?page=scholarships"
-              target="_blank"
-              rel="noreferrer"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -1938,8 +1936,6 @@ export default function ACCALandingPage() {
 
               <a
                 href="?page=universities"
-                target="_blank"
-                rel="noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
@@ -1949,8 +1945,6 @@ export default function ACCALandingPage() {
 
               <a
                 href="?page=programs"
-                target="_blank"
-                rel="noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
@@ -1961,8 +1955,6 @@ export default function ACCALandingPage() {
 
               <a
                 href="?page=scholarships"
-                target="_blank"
-                rel="noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
