@@ -39,9 +39,11 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
 <section className="min-h-[64svh] lg:min-h-[52vh] flex items-start px-5 sm:px-6 pt-[96px] pb-5 sm:pt-[104px] md:pt-[112px] lg:pt-[72px] lg:pb-6 xl:pt-[78px] relative z-10">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-5 lg:gap-12 items-center w-full">
           <div className="relative z-10 max-w-xl lg:max-w-none">
-            <div className={`${darkMode ? 'darkGlass text-white' : 'glass text-neutral-700'} inline-flex items-center gap-3 px-4 py-2.5 rounded-full mb-5 text-xs font-bold sm:text-sm`}>
-              <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-              {isFa ? 'مشاوره تحصیلی و پذیرش بین‌المللی' : 'International Educational Consulting'}
+            <div className={`${darkMode ? 'darkGlass text-white' : 'glass text-neutral-700'} inline-flex max-w-full items-center gap-3 px-4 py-2.5 rounded-full mb-5 text-xs font-bold sm:text-sm`}>
+              <div className="w-3 h-3 shrink-0 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="min-w-0 leading-tight">
+                {isFa ? 'ACCA EDU — Study in Turkey & International Student Placement' : 'ACCA EDU — Study in Turkey & International Student Placement'}
+              </span>
             </div>
 
             <h1 className={`hero-title text-[clamp(2.55rem,11vw,3.7rem)] md:text-[5rem] font-black ${darkMode ? 'text-white' : 'text-neutral-900'}`}>

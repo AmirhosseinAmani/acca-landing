@@ -711,6 +711,53 @@ const PP_NAVY = '#0D1B3E';
 const PP_NAVY_MID = '#162248';
 const PP_GOLD = '#C9A84C';
 const PP_CREAM = '#FAF8F3';
+const PRINT_IMAGE_READY_TIMEOUT_MS = 7000;
+
+function withTimeout(promise, timeoutMs) {
+  return Promise.race([
+    promise,
+    new Promise((resolve) => {
+      window.setTimeout(resolve, timeoutMs);
+    }),
+  ]);
+}
+
+function waitForImageReady(image) {
+  if (!image?.src) return Promise.resolve();
+
+  const decodeImage = () => (
+    typeof image.decode === 'function'
+      ? image.decode().catch(() => undefined)
+      : Promise.resolve()
+  );
+
+  if (image.complete) {
+    return image.naturalWidth > 0 ? decodeImage() : Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const finish = () => {
+      image.removeEventListener('load', finish);
+      image.removeEventListener('error', finish);
+      decodeImage().finally(resolve);
+    };
+
+    image.addEventListener('load', finish, { once: true });
+    image.addEventListener('error', finish, { once: true });
+  });
+}
+
+async function waitForPrintAssets(root) {
+  if (typeof document === 'undefined') return;
+
+  await (document.fonts?.ready ?? Promise.resolve()).catch(() => undefined);
+
+  const images = Array.from(root?.querySelectorAll?.('img') || []);
+  await withTimeout(
+    Promise.all(images.map(waitForImageReady)),
+    PRINT_IMAGE_READY_TIMEOUT_MS
+  ).catch(() => undefined);
+}
 
 function ProgramsPrintPreview({
   darkMode,
@@ -730,7 +777,7 @@ function ProgramsPrintPreview({
         filters: 'فیلترهای فعال',
         generated: 'زمان ساخت',
         total: 'تعداد رشته‌ها',
-        report: 'گزارش رشته‌ها — ACCA EDU',
+        report: 'ACCA EDU — Study in Turkey & International Student Placement',
         dep: 'دپوزیت',
         prep: 'دوره زبان',
         cash: 'نقدی',
@@ -744,7 +791,7 @@ function ProgramsPrintPreview({
         filters: 'Active filters',
         generated: 'Generated',
         total: 'Programs',
-        report: 'ACCA EDU — Programs Report',
+        report: 'ACCA EDU — Study in Turkey & International Student Placement',
         dep: 'Dep',
         prep: 'Prep',
         cash: 'Cash',
@@ -752,23 +799,36 @@ function ProgramsPrintPreview({
 
   const rows = payload?.rows || [];
 
-  // Auto-open Save-as-PDF dialog — wait for web fonts to finish loading first
+  const printAfterAssetsReady = async () => {
+    const printRoot = document.querySelector('.pp-sheet') || document;
+    await waitForPrintAssets(printRoot);
+    window.print();
+  };
+
+  // Auto-open Save-as-PDF dialog after fonts and print logos are ready.
   useEffect(() => {
     if (!rows.length) return undefined;
     let cancelled = false;
+    let printed = false;
     const doPrint = () => {
-      if (!cancelled) window.print();
+      if (cancelled || printed) return;
+      printed = true;
+      window.print();
     };
-    // document.fonts.ready resolves once all @font-face fonts have loaded
-    const ready = document?.fonts?.ready ?? Promise.resolve();
-    ready.then(() => {
-      if (!cancelled) setTimeout(doPrint, 400);
-    });
-    // Hard fallback in case fonts.ready never resolves (e.g. old browsers)
-    const fallback = setTimeout(doPrint, 2500);
+
+    const prepareAndPrint = async () => {
+      const printRoot = document.querySelector('.pp-sheet') || document;
+      await waitForPrintAssets(printRoot);
+      if (!cancelled) window.setTimeout(doPrint, 250);
+    };
+
+    prepareAndPrint();
+
+    // Hard fallback in case an external university logo never resolves.
+    const fallback = window.setTimeout(doPrint, PRINT_IMAGE_READY_TIMEOUT_MS + 2800);
     return () => {
       cancelled = true;
-      clearTimeout(fallback);
+      window.clearTimeout(fallback);
     };
   }, [rows.length]);
 
@@ -867,7 +927,7 @@ function ProgramsPrintPreview({
       <div className="pp-toolbar sticky top-0 z-20 border-b border-black/[0.07] bg-white/88 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8">
           <div className="flex items-center gap-3">
-            <img src={ACCA_LOGO_SRC} alt="ACCA EDU" className="h-9 w-auto object-contain" />
+            <img src={ACCA_LOGO_SRC} alt="ACCA EDU" className="h-9 w-auto object-contain" loading="eager" decoding="sync" />
             <div>
               <div className="text-[10px] font-black uppercase tracking-[0.22em]" style={{ color: PP_GOLD }}>
                 ACCA EDU
@@ -890,7 +950,7 @@ function ProgramsPrintPreview({
               <ArrowLeft size={15} className={isFa ? 'rotate-180' : ''} />
               {previewUi.back}
             </a>
-            <button type="button" onClick={() => window.print()}
+            <button type="button" onClick={printAfterAssetsReady}
               className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-black text-white transition hover:scale-[1.03]"
               style={{ background: `linear-gradient(135deg, ${PP_NAVY}, ${PP_NAVY_MID})`, boxShadow: `0 4px 16px ${PP_NAVY}44` }}>
               <Download size={15} />
@@ -930,10 +990,12 @@ function ProgramsPrintPreview({
                     src={ACCA_LOGO_SRC}
                     alt="ACCA EDU"
                     className="h-11 w-auto object-contain"
+                    loading="eager"
+                    decoding="sync"
                     style={{ filter: 'brightness(0) invert(1)' }}
                   />
                   <div>
-                    <div className="text-[10px] font-black uppercase tracking-[0.28em]" style={{ color: PP_GOLD }}>
+                    <div className="text-[10px] font-black uppercase leading-tight tracking-[0.08em]" style={{ color: PP_GOLD }}>
                       {previewUi.report}
                     </div>
                     <h1 className="mt-0.5 text-xl font-black text-white sm:text-2xl">
@@ -992,7 +1054,7 @@ function ProgramsPrintPreview({
             {/* ── Navy footer ───────────────────────────────── */}
             <div className="pp-ftr flex flex-wrap items-center justify-between gap-3 px-7 py-4"
               style={{ background: PP_NAVY }}>
-              <span className="text-[11px] font-bold text-white/80">ACCA EDU — accaedu.com</span>
+              <span className="text-[11px] font-bold text-white/80">ACCA EDU — Study in Turkey & International Student Placement</span>
               <span className="text-[11px] font-bold text-white/65">{formatDateTime(payload.generatedAt, isFa)}</span>
             </div>
           </div>
@@ -1037,7 +1099,7 @@ function PrintCard({ row, index, isFa, previewUi }) {
         style={{ background: '#EDE8DF', border: '1px solid rgba(13,27,62,0.10)' }}
       >
         {logo ? (
-          <img src={logo} alt={row.university} className="h-8 w-8 object-contain" loading="lazy" />
+          <img src={logo} alt={row.university} className="h-8 w-8 object-contain" loading="eager" decoding="sync" />
         ) : (
           <span
             className="text-[9px] font-black uppercase leading-none"
@@ -1228,6 +1290,13 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
     const normalizedOption = normalize(option);
     onChange(selectedValues.filter((item) => normalize(item) !== normalizedOption));
   };
+  const selectedSummary = selectedValues.length
+    ? selectedValues.length <= 2
+      ? selectedValues.map((option) => displayValue(field.key, option, isFa)).join(isFa ? '، ' : ', ')
+      : isFa
+        ? `${formatNumber(selectedValues.length, isFa)} مورد انتخاب شده`
+        : `${selectedValues.length} selected`
+    : ui.all(label);
 
   return (
     <div ref={rootRef} data-filter-key={field.key} className={`relative ${className}`}>
@@ -1245,11 +1314,7 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
             className="flex min-w-0 flex-1 items-center justify-between gap-2 px-2 py-1.5 text-start"
           >
             <span className={`${selectedValues.length ? 'opacity-100' : 'opacity-42'} min-w-0 truncate text-sm font-black`}>
-              {selectedValues.length
-                ? isFa
-                  ? `${formatNumber(selectedValues.length, isFa)} مورد انتخاب شده`
-                  : `${selectedValues.length} selected`
-                : ui.all(label)}
+              {selectedSummary}
             </span>
             <ChevronDown
               size={16}
@@ -1269,7 +1334,7 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
           )}
         </div>
 
-        {selectedValues.length > 0 && (
+        {selectedValues.length > 2 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {selectedValues.map((option) => (
               <button

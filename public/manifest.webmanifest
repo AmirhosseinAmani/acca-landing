@@ -1,7 +1,7 @@
 {
-  "name": "ACCA EDU",
-  "short_name": "ACCA",
-  "description": "ACCA EDU — مشاوره تحصیلی تخصصی، پذیرش دانشگاه‌های استانبول، بورسیه ۱۰۰٪ و اقامت دانشجویی در ترکیه. Educational consulting and university placement in Turkey.",
+  "name": "ACCA EDU — Study in Turkey",
+  "short_name": "ACCA EDU",
+  "description": "ACCA EDU — Study in Turkey & International Student Placement. مشاوره تحصیلی تخصصی، پذیرش دانشگاه‌های ترکیه، بورسیه و اقامت دانشجویی.",
   "id": "/",
   "start_url": "/",
   "scope": "/",

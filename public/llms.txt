@@ -1,6 +1,6 @@
-# ACCA EDU
+# ACCA EDU — Study in Turkey & International Student Placement
 
-ACCA EDU is a Persian-first educational consulting and academic resource platform based in Istanbul, Turkey. The public website helps students compare university programs, private universities, scholarship options, admission paths, medical transfer options, and student residence support related to Turkey and selected partner destinations.
+ACCA EDU — Study in Turkey & International Student Placement is a Persian-first educational consulting and academic resource platform based in Istanbul, Turkey. The public website helps students compare university programs, private universities, scholarship options, admission paths, medical transfer options, and student residence support related to Turkey and selected partner destinations.
 
 Canonical site: https://www.accaco.com/
 Primary language: Persian
