@@ -1279,155 +1279,6 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
   );
 }
 
-function FilterSelect({ field, value, options, darkMode, isFa, ui, onChange }) {
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
-  const rootRef = useRef(null);
-  const label = isFa ? field.labelFa : field.labelEn;
-  const filteredOptions = useMemo(() => {
-    const normalizedSearch = normalize(search);
-    const matched = normalizedSearch
-      ? options.filter((option) =>
-          normalize(option).includes(normalizedSearch) ||
-          normalize(displayValue(field.key, option, isFa)).includes(normalizedSearch)
-        )
-      : options;
-
-    return matched.slice(0, 160);
-  }, [field.key, isFa, options, search]);
-
-  const closeDropdown = useCallback(() => {
-    setOpen(false);
-    setSearch('');
-  }, []);
-
-  const toggleDropdown = () => {
-    if (open) {
-      closeDropdown();
-      return;
-    }
-
-    setOpen(true);
-  };
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const handlePointerDown = (event) => {
-      if (!rootRef.current?.contains(event.target)) {
-        closeDropdown();
-      }
-    };
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        closeDropdown();
-      }
-    };
-
-    document.addEventListener('mousedown', handlePointerDown);
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [closeDropdown, open]);
-
-  return (
-    <div ref={rootRef} data-filter-key={field.key} className="relative">
-      <div className={`${darkMode ? 'text-white/45' : 'text-black/45'} mb-2 flex items-center justify-between gap-2 text-xs font-black uppercase tracking-[0.13em]`}>
-        <span>{label}</span>
-        <span>{formatNumber(options.length, isFa)}</span>
-      </div>
-
-      <div className={`${darkMode ? 'bg-white/8 border-white/10' : 'bg-white/85 border-black/10'} flex h-12 items-center gap-1 rounded-[18px] border px-2`}>
-          <button
-            type="button"
-            data-filter-trigger={field.key}
-            onClick={toggleDropdown}
-            className="flex min-w-0 flex-1 items-center justify-between gap-2 px-2 text-start"
-          >
-          <span className={`${value ? 'opacity-100' : 'opacity-42'} min-w-0 truncate text-sm font-black`}>
-            {value ? displayValue(field.key, value, isFa) : ui.all(label)}
-          </span>
-          <ChevronDown
-            size={16}
-            className={`${open ? 'rotate-180' : ''} shrink-0 opacity-55 transition`}
-          />
-        </button>
-
-        {value && (
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            aria-label={ui.clearFilter}
-            className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition`}
-          >
-            <X size={15} />
-          </button>
-        )}
-      </div>
-
-      {open && (
-        <div className={`${darkMode ? 'bg-[#101624] text-white border-white/10' : 'bg-white text-black border-black/10'} absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-[20px] border shadow-[0_24px_70px_rgba(0,0,0,0.20)]`}>
-          <div className={`${darkMode ? 'border-white/10' : 'border-black/10'} border-b p-3`}>
-            <label className={`${darkMode ? 'bg-white/8' : 'bg-black/[0.035]'} flex items-center gap-2 rounded-[14px] px-3 py-2`}>
-              <Search size={16} className="opacity-45" />
-              <input
-                autoFocus
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder={ui.search}
-                className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:opacity-45"
-              />
-            </label>
-          </div>
-
-          <div className="max-h-72 overflow-y-auto p-2">
-            <FilterOption
-              active={!value}
-              darkMode={darkMode}
-              label={ui.all(label)}
-              optionValue=""
-              onClick={() => {
-                onChange('');
-                setOpen(false);
-              }}
-            />
-
-            {filteredOptions.map((option) => (
-              <FilterOption
-                key={option}
-                active={option === value}
-                darkMode={darkMode}
-                label={displayValue(field.key, option, isFa)}
-                optionValue={option}
-                onClick={() => {
-                  onChange(option);
-                  setOpen(false);
-                }}
-              />
-            ))}
-
-            {options.length > filteredOptions.length && (
-              <div className={`${darkMode ? 'text-white/42' : 'text-black/42'} px-3 py-2 text-xs font-bold`}>
-                {ui.moreOptions}
-              </div>
-            )}
-
-            {!filteredOptions.length && (
-              <div className={`${darkMode ? 'text-white/42' : 'text-black/42'} px-3 py-4 text-center text-xs font-bold`}>
-                {ui.noOptions}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function FilterOption({ active, darkMode, label, optionValue, onClick }) {
   return (
     <button
@@ -1570,14 +1421,6 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-function CompactCell({ children, className = '' }) {
-  return (
-    <td className={`${className} px-3 py-3 leading-5`}>
-      {children}
-    </td>
-  );
-}
-
 function StatusBadge({ status, isFa }) {
   return (
     <div className="inline-flex rounded-full border border-emerald-500/25 bg-emerald-500/14 px-2.5 py-1 text-[10px] font-black text-emerald-600">
@@ -1652,7 +1495,7 @@ function normalizeProgramRow(row) {
   return {
     ...row,
     status: AVAILABLE_STATUS,
-    // Replace any StudyFans logo URL with our Supabase logo, or empty string
+      // Replace any StudyFans logo URL with our verified logo map, or empty string
     universityLogo: getUniversityLogo(row.university) || '',
     // Replace StudyFans programme/profile links with the university's own website
     universityUrl: isStudyFansUrl(row.universityUrl)

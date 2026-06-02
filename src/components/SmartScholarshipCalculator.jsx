@@ -72,7 +72,7 @@ const labels = {
     scholarshipUnavailableNote: '\u0628\u0631\u0627\u06cc \u0627\u06cc\u0646 \u0627\u0646\u062a\u062e\u0627\u0628 \u062f\u0631 \u0644\u06cc\u0633\u062a \u0628\u0648\u0631\u0633\u06cc\u0647 ACCA 100 \u0642\u06cc\u0645\u062a\u06cc \u062b\u0628\u062a \u0646\u0634\u062f\u0647 \u0627\u0633\u062a.',
     loading: 'در حال بارگذاری دیتا...',
     empty: 'دیتایی برای این انتخاب پیدا نشد',
-    consultation: 'دریافت مشاوره تخصصی',
+    programsList: 'لیست تخصصی رشته‌ها و شهریه‌ها',
     options: {
       scholarship: 'بورسیه ACCA 100%',
       cash: 'پرداخت نقدی',
@@ -95,7 +95,7 @@ const labels = {
     scholarshipUnavailableNote: 'No ACCA 100 scholarship price is registered for this selection yet.',
     loading: 'Loading data...',
     empty: 'No tuition data found for this selection',
-    consultation: 'Get Professional Consultation',
+    programsList: 'Specialized Programs & Tuition List',
     options: {
       scholarship: 'ACCA 100% Scholarship',
       cash: 'Direct Payment',
@@ -149,7 +149,7 @@ const currencyTranslations = {
 export default function SmartScholarshipCalculator({
   darkMode = false,
   language = 'fa',
-  onConsultationClick,
+  programsHref = '?page=programs',
 }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -449,15 +449,14 @@ export default function SmartScholarshipCalculator({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={onConsultationClick}
+                <a
+                  href={programsHref}
                   className={`w-full rounded-[22px] py-4 text-base font-black transition-all ${
                     darkMode ? 'bg-white text-black' : 'bg-[#121726] text-white'
-                  }`}
+                  } inline-flex items-center justify-center text-center`}
                 >
-                  {t.consultation}
-                </button>
+                  {t.programsList}
+                </a>
               </div>
             </div>
 

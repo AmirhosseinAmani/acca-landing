@@ -1,0 +1,5 @@
+Contact: https://wa.me/905354585440
+Canonical: https://www.accaco.com/.well-known/security.txt
+Preferred-Languages: fa, en, tr
+Policy: https://www.accaco.com/
+Expires: 2027-06-02T00:00:00Z

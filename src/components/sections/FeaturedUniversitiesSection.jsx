@@ -16,10 +16,12 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-28">
-          {universityCards.map((uni, index) => (
-            <div
-              key={index}
-              className={`${darkMode ? 'darkGlass' : 'glass'} rounded-[38px] p-8 hover:scale-[1.03] transition-all duration-500`}
+          {universityCards.map((uni) => (
+            <a
+              key={uni.name}
+              href={uni.href || '?page=universities'}
+              className={`${darkMode ? 'darkGlass' : 'glass'} block rounded-[38px] p-8 hover:scale-[1.03] transition-all duration-500`}
+              aria-label={`${isFa ? 'مشاهده پروفایل' : 'View profile'} ${uni.name}`}
             >
               <div className="flex items-center justify-between mb-8">
                 <div>
@@ -32,8 +34,19 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
                   </div>
                 </div>
 
-                <div className="text-5xl">
-                  🏛️
+                <div className={`${darkMode ? 'bg-white/10 border-white/10' : 'bg-white/85 border-black/10'} flex h-20 w-20 shrink-0 items-center justify-center rounded-[22px] border p-3`}>
+                  {uni.logo ? (
+                    <img
+                      src={uni.logo}
+                      alt={`${uni.name} logo`}
+                      className="max-h-full max-w-full object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-2xl font-black">
+                      {uni.name.slice(0, 2).toUpperCase()}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -58,7 +71,7 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
                   </span>
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </section>

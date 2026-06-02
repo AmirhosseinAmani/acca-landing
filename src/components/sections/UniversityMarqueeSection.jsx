@@ -49,9 +49,9 @@ const marqueeRows = [0, 1];
 
 export default function UniversityMarqueeSection({ darkMode, isFa }) {
   return (
-<section className="relative z-20 -mt-8 overflow-hidden pb-8 pt-2 sm:-mt-4 lg:-mt-10 lg:pb-10">
-        <div className="max-w-7xl mx-auto px-6 mb-5 md:mb-7">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-none mb-4">
+<section className="relative z-20 overflow-hidden pb-8 pt-1 sm:pt-3 lg:-mt-10 lg:pb-10">
+        <div className="sr-only">
+          <h2>
             {isFa ? 'دانشگاه‌های خصوصی استانبول' : 'Private Universities of Istanbul'}
           </h2>
         </div>

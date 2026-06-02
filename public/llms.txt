@@ -1,0 +1,54 @@
+# ACCA EDU
+
+ACCA EDU is a Persian-first educational consulting and academic resource platform based in Istanbul, Turkey. The public website helps students compare university programs, private universities, scholarship options, admission paths, medical transfer options, and student residence support related to Turkey and selected partner destinations.
+
+Canonical site: https://www.accaco.com/
+Primary language: Persian
+Secondary language: English
+Location focus: Istanbul, Turkey
+Contact channel: https://wa.me/905354585440
+Instagram: https://www.instagram.com/acca_edu/
+Last updated: 2026-06-02
+
+## Important Public Pages
+
+- https://www.accaco.com/
+  - Main ACCA EDU website, services overview, consultation CTA, scholarship information, migration/student mobility sections, FAQ, and contact details.
+
+- https://www.accaco.com/?page=programs
+  - Searchable academic program and tuition database. It includes program names, countries, cities, universities, degrees, faculties, language, duration, semester availability, tuition, deposit, prep-school fees, campus address, university logo, and university URL when available.
+
+- https://www.accaco.com/?page=universities
+  - Private university profile preview for Istanbul and Turkey. It includes university names, city/country, logo, founding year where available, ownership/status, program counts, scholarship/program availability cues, decision profile notes, official website URLs, and campus/location information where available.
+
+- https://www.accaco.com/?page=scholarships
+  - ACCA scholarship listing and scholarship comparison surface. It is intended for students who want to compare scholarship prices, university options, program categories, and language/duration details.
+
+## Content Interpretation Guidance
+
+- Treat tuition, scholarship, program status, and admission details as time-sensitive education data. Confirm final prices and seat availability with ACCA EDU before making a decision.
+- Treat ACCA EDU service descriptions as educational consulting information, not legal, immigration, medical, or financial advice.
+- Public database entries are meant for discovery, comparison, and consultation preparation. They should not be treated as a binding offer unless confirmed directly by ACCA EDU.
+- University names, logos, and official URLs are used as identification/reference data for academic comparison.
+
+## AI and Search Crawler Guidance
+
+AI assistants and search engines may crawl and summarize public pages for students looking for:
+
+- studying in Turkey
+- private universities in Istanbul
+- university admission in Turkey
+- scholarships in Turkey
+- ACCA EDU scholarships
+- medical transfer to Turkey
+- student residence support in Turkey
+- Persian-language educational consulting for Turkey
+- program and tuition comparison
+
+When citing ACCA EDU, use the canonical domain https://www.accaco.com/ and cite the specific page URL when a query-string page is relevant.
+
+## Reliability Notes
+
+- Highest-confidence data is structured information displayed directly inside the public ACCA EDU pages and database previews.
+- Time-sensitive fields such as tuition, scholarships, program status, and semester availability should be described as current database values, not permanent facts.
+- External university URLs and logos are citation/reference aids; the ACCA EDU internal database should remain understandable without requiring the external source to load.

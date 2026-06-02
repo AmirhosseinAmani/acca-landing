@@ -1,28 +1,28 @@
 import { useEffect, useRef } from 'react';
 
+const MOBILE_ASTRONAUT_SRC =
+  'https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/astronaut.png';
+
 /**
  * HeroSection owns its own scroll tracking so the parent App never re-renders
  * on scroll.  The model-viewer transform is applied via direct DOM mutation.
  */
-export default function HeroSection({ darkMode, isFa, ACCA_LOGO_SRC, isDesktopViewport, MODEL_SRC, mouseOffset, onConsultationClick }) {
+export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_SRC, onConsultationClick }) {
   const modelViewerRef = useRef(null);
 
   useEffect(() => {
     if (!isDesktopViewport) return undefined;
 
     let rAF = 0;
-    let lastY = window.scrollY;
 
     const update = () => {
       const curr = window.scrollY;
-      const velocity = curr - lastY;
-      lastY = curr;
       rAF = 0;
 
       const el = modelViewerRef.current;
       if (!el) return;
-      el.style.transform = `translate3d(0px,${curr * 0.02}px,0px) scale(1.18) rotate(${curr * 0.006}deg)`;
-      el.style.filter    = `drop-shadow(0 40px 120px rgba(255,255,255,0.22)) blur(${Math.min(Math.abs(velocity) * 0.018, 1.2)}px)`;
+      el.style.transform = `translate3d(0px,${curr * 0.015}px,0px) scale(1.04) rotate(${curr * 0.004}deg)`;
+      el.style.filter = 'none';
     };
 
     const onScroll = () => { if (!rAF) rAF = requestAnimationFrame(update); };
@@ -107,34 +107,29 @@ export default function HeroSection({ darkMode, isFa, ACCA_LOGO_SRC, isDesktopVi
                 interpolation-decay="120"
                 max-camera-orbit="auto 95deg auto"
                 min-camera-orbit="auto 45deg auto"
-                render-scale="1"
+                render-scale="0.9"
                 src={MODEL_SRC}
                 auto-rotate
                 camera-controls
-                camera-orbit="0deg 78deg 115%"
-                field-of-view="18deg"
+                camera-orbit="0deg 78deg 128%"
+                field-of-view="19deg"
                 disable-zoom
                 exposure="1.1"
-                shadow-intensity="1.4"
+                shadow-intensity="0"
                 className="hero-image relative z-10 lg:mt-32"
                 style={{ background: 'transparent' }}
               />
             ) : (
-              <div
-                className={`hero-mobile-logo relative z-10 flex h-44 w-44 sm:h-52 sm:w-52 items-center justify-center rounded-[36px] border p-6 shadow-2xl backdrop-blur-2xl ${
-                  darkMode
-                    ? 'border-white/10 bg-white/10 shadow-black/35'
-                    : 'border-white/70 bg-white/55 shadow-black/10'
-                }`}
-              >
+              <div className="hero-mobile-astronaut-wrap relative z-10 flex items-center justify-center">
                 <img
-                  src={ACCA_LOGO_SRC}
-                  alt="ACCA EDU Logo"
-                  width="176"
-                  height="176"
+                  src={MOBILE_ASTRONAUT_SRC}
+                  alt="ACCA EDU astronaut"
+                  width="320"
+                  height="320"
                   fetchpriority="high"
-                  className="h-full w-full object-contain"
                   loading="eager"
+                  decoding="async"
+                  className="hero-mobile-astronaut"
                 />
               </div>
             )}

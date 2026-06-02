@@ -1,6 +1,6 @@
-export const COMPANY_PHONE_DISPLAY = '+90 536 273 61 51';
-export const COMPANY_WHATSAPP_URL = 'https://wa.me/905362736151';
-export const COMPANY_WEBSITE_URL = 'https://accaco.com';
+export const COMPANY_PHONE_DISPLAY = '+90 535 458 54 40';
+export const COMPANY_WHATSAPP_URL = 'https://wa.me/905354585440';
+export const COMPANY_WEBSITE_URL = 'https://www.accaco.com';
 export const COMPANY_INSTAGRAM_URL = 'https://www.instagram.com/acca_edu/';
 export const COMPANY_OFFICE_ADDRESS =
   'NAMIK KEMAL MAH. 68. SK. TERRACE LOTUS NO:110 Kat:25 ESENYURT / ISTANBUL';

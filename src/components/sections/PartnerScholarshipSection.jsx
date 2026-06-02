@@ -1,4 +1,4 @@
-export default function PartnerScholarshipSection({ darkMode, isFa, scholarshipComparison, onConsultationClick }) {
+export default function PartnerScholarshipSection({ darkMode, isFa, scholarshipComparison }) {
   return (
 <section className="max-w-7xl mx-auto px-6 pb-32 relative z-10">
 
@@ -117,13 +117,12 @@ export default function PartnerScholarshipSection({ darkMode, isFa, scholarshipC
                   ))}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={onConsultationClick}
-                  className="w-full bg-black text-white py-4 rounded-2xl font-black text-lg"
+                <a
+                  href={item.ctaHref || '?page=programs'}
+                  className="inline-flex w-full items-center justify-center bg-black text-white py-4 rounded-2xl font-black text-lg"
                 >
-                  {isFa ? 'دریافت مشاوره' : 'Get Consultation'}
-                </button>
+                  {item.ctaLabel || (isFa ? 'لیست شهریه‌ها' : 'Tuition List')}
+                </a>
               </div>
             </div>
           ))}

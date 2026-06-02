@@ -1,7 +1,29 @@
+# Public academic pages are open to search and AI crawlers.
+# Non-content app shell files and duplicate print/portal views are excluded.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 User-agent: *
 Allow: /
 Disallow: /pwa/
 Disallow: /sw.js
 Disallow: /offline.html
+Disallow: /*print=1
+Disallow: /*page=portal
 
-Sitemap: https://accaco.com/sitemap.xml
+Sitemap: https://www.accaco.com/sitemap.xml

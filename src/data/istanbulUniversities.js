@@ -1,3 +1,10 @@
+import { getUniversityLogo } from './universityLogoMap';
+import { buildInternationalCredentials } from './universityCredentials';
+import { getTheRankings } from './theRankings';
+
+const LAST_CHECKED = '2026-06-01';
+const NOT_PUBLICLY_AVAILABLE = 'Not publicly available';
+
 const defaultInfo = {
   city: 'İstanbul',
   country: 'Turkey',
@@ -524,9 +531,269 @@ const records = [
   },
 ];
 
-export const istanbulUniversities = records.map((record) => ({
-  ...defaultInfo,
-  ...record,
-  logo: record.logo || '',
-  logoStatus: record.logo ? 'matched' : 'missing',
-}));
+function normalizeExternalUrl(value) {
+  if (!value) return '';
+  const firstUrl = String(value).split(/\s+\/\s+|\s+/).find(Boolean);
+  if (!firstUrl) return '';
+  return /^https?:\/\//i.test(firstUrl) ? firstUrl : `https://${firstUrl}`;
+}
+
+function asNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function source(label, url, scope) {
+  if (!url) return null;
+
+  return {
+    label,
+    sourceUrl: url,
+    scope,
+    lastChecked: LAST_CHECKED,
+  };
+}
+
+function compactNumberLabel(value, fallback) {
+  if (value === null) return fallback;
+  if (value >= 200) return '200+ Programs';
+  if (value >= 150) return '150+ Programs';
+  if (value >= 100) return '100+ Programs';
+  if (value >= 50) return '50+ Programs';
+  return `${value} Programs`;
+}
+
+function hasMedicalSignal(record) {
+  const text = [
+    record.name,
+    record.address,
+    ...(record.campuses || []),
+  ].join(' ').toLowerCase();
+
+  return /hospital|clinic|health|medical|medicine|dental|np health|sağlık|saglik/.test(text);
+}
+
+function rankingDisplayValue(item) {
+  if (!item) return '';
+  return item.rankRange || item.rank || '';
+}
+
+function rankingLabel(item) {
+  if (!item) return '';
+  if (item.rankingType === 'Impact Rankings') return `THE Impact: ${rankingDisplayValue(item)}`;
+  if (item.rankingType === 'Subject Rankings') {
+    return `THE ${item.subject}: ${rankingDisplayValue(item)}`;
+  }
+  return `THE: ${rankingDisplayValue(item)}`;
+}
+
+function buildTheRankingSummary(theRankings) {
+  if (!theRankings?.listed) {
+    return {
+      status: 'not_listed',
+      badgeFa: 'در THE ثبت نشده',
+      badgeEn: 'THE: Not listed',
+      noteFa: 'پروفایل THE در منابع عمومی منتخب پیدا نشد.',
+      noteEn: 'THE profile not found in selected public sources',
+      items: [],
+      cardItems: [],
+      needsHumanReview: false,
+    };
+  }
+
+  const items = [...(theRankings.rankings || [])].sort(
+    (a, b) => Number(a.displayPriority || 99) - Number(b.displayPriority || 99)
+  );
+
+  if (!items.length) {
+    return {
+      status: 'profile',
+      badgeFa: 'پروفایل THE',
+      badgeEn: 'THE Profile',
+      noteFa: 'برای این دانشگاه پروفایل عمومی در Times Higher Education پیدا شده، اما رتبه مشخصی در منابع بررسی‌شده نمایش داده نشده است.',
+      noteEn: 'A public Times Higher Education profile was found, but no specific ranking row is displayed in the reviewed source.',
+      items,
+      cardItems: [],
+      needsHumanReview: false,
+    };
+  }
+
+  return {
+    status: 'listed',
+    badgeFa: 'دارای رتبه THE',
+    badgeEn: 'THE Listed',
+    noteFa: 'بر اساس داده‌های Times Higher Education، این دانشگاه در یکی از رتبه‌بندی‌های منتخب THE ثبت شده است.',
+    noteEn: 'According to Times Higher Education data, this university is listed in at least one THE ranking.',
+    items,
+    cardItems: items.slice(0, 2).map((item) => ({
+      label: rankingLabel(item),
+      sourceUrl: item.sourceUrl,
+    })),
+    needsHumanReview: Boolean(theRankings.dataQuality?.needsHumanReview),
+  };
+}
+
+function buildTheSummaryText(theRankings, rankingSummary, isFa) {
+  if (!theRankings?.listed) {
+    return isFa
+      ? 'برای این دانشگاه در منابع عمومی بررسی‌شده Times Higher Education پروفایل قابل اتکا پیدا نشد.'
+      : 'No Times Higher Education profile was found in the selected public sources.';
+  }
+
+  if (rankingSummary.items.length) {
+    return isFa
+      ? 'این دانشگاه در پروفایل Times Higher Education ثبت شده و داده‌های رتبه‌بندی/پروفایل آن از منبع THE قابل بررسی است.'
+      : 'This university is listed in Times Higher Education, with ranking/profile data stored from THE.';
+  }
+
+  return isFa
+    ? 'برای این دانشگاه پروفایل عمومی در Times Higher Education پیدا شده، اما رتبه مشخصی در منابع بررسی‌شده نمایش داده نشده است.'
+    : 'A public Times Higher Education profile was found, but no specific ranking row is displayed in the reviewed source.';
+}
+
+function buildDecisionProfile(record) {
+  const websiteUrl = normalizeExternalUrl(record.website);
+  const calendarUrl = normalizeExternalUrl(record.academicCalendar);
+  const campuses = (record.campuses || []).filter(Boolean);
+  const programCount = asNumber(record.programsCount);
+  const announcementsCount = asNumber(record.announcementsCount);
+  const medicalSignal = hasMedicalSignal(record);
+  const theRankings = getTheRankings(record.name);
+  const rankingSummary = buildTheRankingSummary(theRankings);
+  const theProfileFacts = theRankings?.profileFacts || {};
+  const rankingItems = rankingSummary.items || [];
+  const internationalCredentials = buildInternationalCredentials(record.name);
+  const hasWorldRanking = rankingItems.some((item) => item.rankingType === 'World University Rankings');
+  const hasImpactRanking = rankingItems.some((item) => item.rankingType === 'Impact Rankings');
+  const hasSubjectRanking = rankingItems.some((item) => item.rankingType === 'Subject Rankings');
+
+  const sources = [
+    theRankings?.listed
+      ? source('Times Higher Education Profile', theRankings.profileUrl, 'ranking profile')
+      : null,
+    source('Official university website', websiteUrl, 'institutional profile'),
+    source('Academic calendar', calendarUrl, 'academic calendar'),
+  ].filter(Boolean);
+
+  const keyNumbers = [
+    {
+      id: 'founded',
+      labelFa: 'تاسیس',
+      labelEn: 'Founded',
+      value: record.foundedIn || NOT_PUBLICLY_AVAILABLE,
+      sourceUrl: websiteUrl,
+      lastChecked: LAST_CHECKED,
+    },
+    {
+      id: 'programs',
+      labelFa: 'رشته‌ها',
+      labelEn: 'Programs',
+      value: programCount,
+      sourceUrl: websiteUrl,
+      lastChecked: LAST_CHECKED,
+    },
+    {
+      id: 'campuses',
+      labelFa: 'کمپوس‌ها',
+      labelEn: 'Campuses',
+      value: campuses.length || null,
+      sourceUrl: websiteUrl,
+      lastChecked: LAST_CHECKED,
+    },
+    {
+      id: 'announcements',
+      labelFa: 'اعلان‌ها',
+      labelEn: 'Announcements',
+      value: announcementsCount,
+      sourceUrl: websiteUrl,
+      lastChecked: LAST_CHECKED,
+    },
+  ];
+
+  const practicalFacilities = [
+    websiteUrl ? 'Official website available' : null,
+    calendarUrl ? 'Academic calendar available' : null,
+    theRankings?.listed ? 'Times Higher Education profile available' : null,
+    campuses.length > 1 ? 'Multi-campus profile' : null,
+    medicalSignal ? 'Health or clinical campus signal' : null,
+  ].filter(Boolean);
+
+  const displayBadges = [
+    rankingSummary.status === 'listed' ? 'THE Listed' : null,
+    rankingSummary.status === 'profile' ? 'THE Profile' : null,
+    compactNumberLabel(programCount, null),
+    campuses.length > 1 ? `${campuses.length} Campuses` : null,
+    websiteUrl ? 'Official Website' : null,
+    calendarUrl ? 'Academic Calendar' : null,
+    medicalSignal ? 'Clinical Signal' : null,
+  ].filter(Boolean).slice(0, 6);
+
+  const missingData = [
+    'QS/CWUR/URAP ranking verification',
+    'Erasmus+ office and partner counts',
+    'ECTS / Diploma Supplement verification',
+    'USMLE-related pathway verification',
+    'Accreditation and certificate program verification',
+    'Hospital / clinic / practical facility count verification',
+  ];
+
+  const specialFeatureFa = medicalSignal
+    ? 'در داده‌های عمومی موجود، نشانه‌هایی از فضای سلامت یا آموزش بالینی دیده می‌شود و نیازمند بررسی منبع رسمی است.'
+    : programCount && programCount >= 150
+      ? 'تنوع بالای برنامه‌ها این دانشگاه را برای مقایسه رشته‌ها گزینه‌ای قابل بررسی می‌کند.'
+      : 'این دانشگاه برای بررسی اولیه پذیرش، برنامه‌ها و مسیرهای رسمی قابل مقایسه است.';
+
+  const specialFeatureEn = medicalSignal
+    ? 'Public profile data includes health or clinical signals that should be verified against official sources.'
+    : programCount && programCount >= 150
+      ? 'A broad program portfolio makes this university useful for program comparison.'
+      : 'This university is suitable for an initial admission and pathway review.';
+
+  return {
+    lastChecked: LAST_CHECKED,
+    theRankings,
+    dataQuality: {
+      confidence: theRankings?.listed ? 'high' : sources.length ? 'medium' : 'low',
+      needsHumanReview: Boolean(theRankings?.dataQuality?.needsHumanReview),
+      missingData: [...(theRankings?.dataQuality?.missingData || []), ...missingData],
+    },
+    rankingSummary,
+    profileFacts: theProfileFacts,
+    keyNumbers,
+    practicalFacilities,
+    internationalCredentials,
+    displayBadges,
+    specialFeatureFa,
+    specialFeatureEn,
+    microSummaryFa: `${buildTheSummaryText(theRankings, rankingSummary, true)} ${specialFeatureFa}`,
+    microSummaryEn: `${buildTheSummaryText(theRankings, rankingSummary, false)} ${specialFeatureEn}`,
+    sources,
+    filters: {
+      hasTheRanking: rankingSummary.status === 'listed',
+      hasWorldRanking,
+      hasImpactRanking,
+      hasSubjectRanking,
+      hasTheProfile: Boolean(theRankings?.listed),
+      hasVerifiedCredentials: Boolean(internationalCredentials?.hasVerifiedCredentials),
+      hasWebsite: Boolean(websiteUrl),
+      hasAcademicCalendar: Boolean(calendarUrl),
+      highProgramCount: Boolean(programCount && programCount >= 100),
+      multiCampus: campuses.length > 1,
+      medicalSignal,
+      hasSourceCoverage: sources.length > 0,
+    },
+  };
+}
+
+export const istanbulUniversities = records.map((record) => {
+  const logo = record.logo || getUniversityLogo(record.name);
+  const decisionProfile = buildDecisionProfile(record);
+
+  return {
+    ...defaultInfo,
+    ...record,
+    logo,
+    logoStatus: logo ? 'matched' : 'missing',
+    decisionProfile,
+  };
+});

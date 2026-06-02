@@ -17,6 +17,7 @@ import FaqSection from './components/sections/FaqSection';
 import FinalCtaSection from './components/sections/FinalCtaSection';
 import ContactSection from './components/sections/ContactSection';
 import { COMPANY_WHATSAPP_URL } from './constants/contact';
+import { getUniversityLogo } from './data/universityLogoMap';
 
 const ProgramsSearchPage = lazy(() => import('./components/pages/ProgramsSearchPageV2'));
 const UniversitiesPage = lazy(() => import('./components/pages/UniversitiesPage'));
@@ -24,6 +25,8 @@ const ScholarshipsPage = lazy(() => import('./components/pages/ScholarshipsPage'
 
 const ACCA_LOGO_SRC =
   'https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/Asset%20171.png';
+const SITE_CANONICAL_ORIGIN = 'https://www.accaco.com';
+const INDEXABLE_PAGES = new Set(['programs', 'universities', 'scholarships']);
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px) and (pointer: fine)';
 
@@ -344,6 +347,35 @@ export default function ACCALandingPage() {
       : 'ACCA EDU | Educational Consulting Turkey');
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc && PAGE_DESCS[page]) metaDesc.setAttribute('content', PAGE_DESCS[page]);
+    const canonicalPage = INDEXABLE_PAGES.has(page) ? page : null;
+    const canonicalUrl = canonicalPage
+      ? `${SITE_CANONICAL_ORIGIN}/?page=${canonicalPage}`
+      : `${SITE_CANONICAL_ORIGIN}/`;
+    const currentDescription = metaDesc?.getAttribute('content') || '';
+    const shouldIndex = !page || INDEXABLE_PAGES.has(page);
+    const setElementAttr = (selector, attr, value) => {
+      const element = document.querySelector(selector);
+      if (element) element.setAttribute(attr, value);
+    };
+
+    setElementAttr('link[rel="canonical"]', 'href', canonicalUrl);
+    setElementAttr('link[hreflang="fa"]', 'href', canonicalUrl);
+    setElementAttr('link[hreflang="en"]', 'href', canonicalUrl);
+    setElementAttr('link[hreflang="x-default"]', 'href', canonicalUrl);
+    setElementAttr('meta[name="robots"]', 'content', shouldIndex
+      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+      : 'noindex, nofollow');
+    setElementAttr('meta[name="googlebot"]', 'content', shouldIndex
+      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+      : 'noindex, nofollow');
+    setElementAttr('meta[name="bingbot"]', 'content', shouldIndex
+      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+      : 'noindex, nofollow');
+    setElementAttr('meta[property="og:url"]', 'content', canonicalUrl);
+    setElementAttr('meta[property="og:title"]', 'content', document.title);
+    setElementAttr('meta[property="og:description"]', 'content', currentDescription);
+    setElementAttr('meta[name="twitter:title"]', 'content', document.title);
+    setElementAttr('meta[name="twitter:description"]', 'content', currentDescription);
   }, [page, isFa]);
 
 
@@ -556,6 +588,8 @@ export default function ACCALandingPage() {
               'Direct University Payment',
               'Lower Cost Than Semester Tuition',
             ],
+        ctaLabel: isFa ? 'لیست شهریه‌های عادی' : 'Regular Tuition List',
+        ctaHref: '?page=programs',
       },
       {
         title: isFa ? 'بورسیه 100٪ ACCA' : 'ACCA 100% Scholarship',
@@ -575,6 +609,8 @@ export default function ACCALandingPage() {
               'Full ACCA Support',
             ],
         featured: true,
+        ctaLabel: isFa ? 'لیست قیمت‌های بورسیه' : 'Scholarship Price List',
+        ctaHref: '?page=scholarships',
       },
       {
         title: isFa ? 'پرداخت ترمیک' : 'Semester-Based Tuition',
@@ -593,6 +629,8 @@ export default function ACCALandingPage() {
               'No Scholarship Included',
               'Highest Final Cost',
             ],
+        ctaLabel: isFa ? 'لیست شهریه‌های عادی' : 'Regular Tuition List',
+        ctaHref: '?page=programs',
       },
     ],
     [isFa]
@@ -680,33 +718,36 @@ export default function ACCALandingPage() {
     () => [
       {
         name: 'İstinye University',
+        profileName: 'ISTINYE UNIVERSITY',
         ranking: '#Top Medical',
         tuition: '$4.8K - $12K',
         ministry: isFa ? 'مورد تایید' : 'Approved',
-        image:
-          'https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1200&auto=format&fit=crop',
+        logo: getUniversityLogo('ISTINYE UNIVERSITY'),
+        href: `?page=universities&profile=${encodeURIComponent('ISTINYE UNIVERSITY')}`,
         description: isFa
           ? 'یکی از مدرن‌ترین دانشگاه‌های پزشکی و سلامت ترکیه با امکانات بین‌المللی.'
           : 'One of Turkey’s most modern medical and healthcare universities with international facilities.',
       },
       {
         name: 'Bahçeşehir University',
+        profileName: 'BAHCESEHIR UNIVERSITY',
         ranking: '#International',
         tuition: '$5K - $14K',
         ministry: isFa ? 'مورد تایید' : 'Approved',
-        image:
-          'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop',
+        logo: getUniversityLogo('BAHCESEHIR UNIVERSITY'),
+        href: `?page=universities&profile=${encodeURIComponent('BAHCESEHIR UNIVERSITY')}`,
         description: isFa
           ? 'دانشگاه بین‌المللی استانبول با تمرکز بر رشته‌های مهندسی و بیزینس.'
           : 'An international Istanbul university focused on engineering and business majors.',
       },
       {
         name: 'Biruni University',
+        profileName: 'BIRUNI UNIVERSITY',
         ranking: '#Healthcare',
         tuition: '$4K - $11K',
         ministry: isFa ? 'مورد تایید' : 'Approved',
-        image:
-          'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200&auto=format&fit=crop',
+        logo: getUniversityLogo('BIRUNI UNIVERSITY'),
+        href: `?page=universities&profile=${encodeURIComponent('BIRUNI UNIVERSITY')}`,
         description: isFa
           ? 'تمرکز تخصصی بر علوم سلامت، پزشکی و دندانپزشکی.'
           : 'Specialized in healthcare sciences, medicine, and dentistry.',
@@ -1010,11 +1051,12 @@ export default function ACCALandingPage() {
         }
 
         .hero-image {
-          width: min(560px, 82vw);
-          height: min(560px, 82vw);
+          width: min(500px, 76vw);
+          height: min(500px, 76vw);
           max-width: 100%;
           object-fit: contain;
           background: transparent;
+          filter: none !important;
           animation: heroFloat 8s ease-in-out infinite;
           will-change: transform;
         }
@@ -1026,6 +1068,7 @@ export default function ACCALandingPage() {
         model-viewer {
           background: transparent !important;
           contain: layout style size;
+          filter: none !important;
           transform: translateZ(0);
           -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
@@ -1040,16 +1083,40 @@ export default function ACCALandingPage() {
         }
 
         .hero-image {
-          width: 560px;
+          width: 500px;
+          height: 500px;
           max-width: 100%;
           object-fit: contain;
+          filter: none !important;
           animation: heroFloat 8s ease-in-out infinite;
           will-change: transform;
         }
 
-        .hero-mobile-logo {
-          animation: heroFloat 8s ease-in-out infinite;
-          will-change: transform;
+        .hero-mobile-astronaut-wrap {
+          width: min(320px, 82vw);
+          aspect-ratio: 1;
+          border-radius: 999px;
+          background:
+            radial-gradient(circle at 50% 58%, rgba(16,185,129,0.18), transparent 56%),
+            radial-gradient(circle at 50% 48%, rgba(255,255,255,0.34), transparent 70%);
+          filter: drop-shadow(0 26px 54px rgba(5,150,105,0.18));
+          transform: translateZ(0);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+        }
+
+        .hero-mobile-astronaut {
+          display: block;
+          width: min(300px, 78vw);
+          height: auto;
+          max-height: 310px;
+          object-fit: contain;
+          filter:
+            drop-shadow(0 18px 28px rgba(7,26,61,0.18))
+            drop-shadow(0 0 30px rgba(16,185,129,0.16));
+          transform: translateZ(0);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
         }
 
         @keyframes heroFloat {
@@ -1103,8 +1170,10 @@ export default function ACCALandingPage() {
           }
 
           /* Suppress heroFloat on mobile – card is already heavy */
-          .hero-mobile-logo {
+          .hero-mobile-astronaut,
+          .hero-mobile-astronaut-wrap {
             animation: none !important;
+            transition: none !important;
           }
         }
 
@@ -1113,7 +1182,8 @@ export default function ACCALandingPage() {
           .mesh-gradient,
           .orb,
           .hero-image,
-          .hero-mobile-logo,
+          .hero-mobile-astronaut,
+          .hero-mobile-astronaut-wrap,
           .logo-track {
             animation: none !important;
             transition: none !important;
@@ -1538,7 +1608,7 @@ export default function ACCALandingPage() {
             >
               <span className="inline-flex items-center gap-2">
                 <MessageCircle size={17} strokeWidth={2.4} />
-                {isFa ? 'شروع مشاوره' : 'Start Consultation'}
+                {isFa ? 'ارتباط مستقیم' : 'Direct Contact'}
               </span>
             </a>
 
@@ -1641,7 +1711,7 @@ export default function ACCALandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
-                <span>{isFa ? 'شروع مشاوره' : 'Start Consultation'}</span>
+                <span>{isFa ? 'ارتباط مستقیم' : 'Direct Contact'}</span>
                 <MessageCircle size={19} />
               </a>
 
@@ -1715,7 +1785,6 @@ export default function ACCALandingPage() {
       <SmartScholarshipCalculator
         darkMode={darkMode}
         language={language}
-        onConsultationClick={() => setConsultationOpen(true)}
       />
 
       <StatsSection
@@ -1751,7 +1820,6 @@ export default function ACCALandingPage() {
         darkMode={darkMode}
         isFa={isFa}
         scholarshipComparison={scholarshipComparison}
-        onConsultationClick={() => setConsultationOpen(true)}
       />
 
       <TestimonialsSection
