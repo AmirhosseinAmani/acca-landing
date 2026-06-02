@@ -981,10 +981,10 @@ export default function ACCALandingPage() {
     [isFa]
   );
 
-  if (pageContent) return (<>
-    {pageContent}
-    {floatingActions}
-  </>);
+  // Floating actions (PWA install + WhatsApp + Instagram) are intentionally
+  // landing-page only — sub-pages (universities / programs / scholarships)
+  // render without them.
+  if (pageContent) return pageContent;
 
   return (
     <>
