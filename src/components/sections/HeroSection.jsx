@@ -22,7 +22,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
       const el = modelViewerRef.current;
       if (!el) return;
       el.style.transform = `translate3d(0px,${curr * 0.015}px,0px) scale(1.04) rotate(${curr * 0.004}deg)`;
-      el.style.filter = 'none';
+      el.style.filter = 'saturate(1.16) contrast(1.06)';
     };
 
     const onScroll = () => { if (!rAF) rAF = requestAnimationFrame(update); };
@@ -102,19 +102,19 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
                 loading="eager"
                 interaction-prompt="none"
                 seamless-poster
-                tone-mapping="neutral"
-                environment-image="legacy"
+                tone-mapping="aces"
+                environment-image="neutral"
                 interpolation-decay="120"
                 max-camera-orbit="auto 95deg auto"
                 min-camera-orbit="auto 45deg auto"
-                render-scale="0.9"
+                render-scale="1"
                 src={MODEL_SRC}
                 auto-rotate
                 camera-controls
                 camera-orbit="0deg 78deg 128%"
                 field-of-view="19deg"
                 disable-zoom
-                exposure="1.1"
+                exposure="0.9"
                 shadow-intensity="0"
                 className="hero-image relative z-10 lg:mt-32"
                 style={{ background: 'transparent' }}
@@ -126,7 +126,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
                   alt="ACCA EDU astronaut"
                   width="320"
                   height="320"
-                  fetchpriority="high"
+                  fetchPriority="high"
                   loading="eager"
                   decoding="async"
                   className="hero-mobile-astronaut"

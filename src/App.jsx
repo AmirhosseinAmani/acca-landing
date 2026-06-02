@@ -1056,7 +1056,7 @@ export default function ACCALandingPage() {
           max-width: 100%;
           object-fit: contain;
           background: transparent;
-          filter: none !important;
+          filter: saturate(1.16) contrast(1.06) !important;
           animation: heroFloat 8s ease-in-out infinite;
           will-change: transform;
         }
@@ -1068,7 +1068,7 @@ export default function ACCALandingPage() {
         model-viewer {
           background: transparent !important;
           contain: layout style size;
-          filter: none !important;
+          filter: saturate(1.16) contrast(1.06) !important;
           transform: translateZ(0);
           -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
@@ -1087,7 +1087,7 @@ export default function ACCALandingPage() {
           height: 500px;
           max-width: 100%;
           object-fit: contain;
-          filter: none !important;
+          filter: saturate(1.16) contrast(1.06) !important;
           animation: heroFloat 8s ease-in-out infinite;
           will-change: transform;
         }
@@ -1594,7 +1594,7 @@ export default function ACCALandingPage() {
               alt="ACCA EDU Logo"
               width="160"
               height="48"
-              fetchpriority="high"
+              fetchPriority="high"
               className="h-10 w-auto object-contain sm:h-12"
             />
           </div>
