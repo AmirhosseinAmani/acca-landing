@@ -1,9 +1,13 @@
 import {
+  COMPANY_EMAIL,
+  COMPANY_EMAIL_URL,
   COMPANY_INSTAGRAM_URL,
+  COMPANY_LINKEDIN_URL,
   COMPANY_MAP_EMBED_URL,
   COMPANY_MAPS_URL,
   COMPANY_OFFICE_ADDRESS,
   COMPANY_PHONE_DISPLAY,
+  COMPANY_TELEGRAM_URL,
   COMPANY_WEBSITE_URL,
   COMPANY_WHATSAPP_URL,
 } from '../../constants/contact';
@@ -37,7 +41,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 <a
                   href={COMPANY_MAPS_URL}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={cardClass}
                 >
                   <div className="text-3xl mb-4">📍</div>
@@ -50,7 +54,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 <a
                   href={COMPANY_WHATSAPP_URL}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={cardClass}
                 >
                   <div className="text-3xl mb-4">📞</div>
@@ -63,7 +67,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 <a
                   href={COMPANY_WEBSITE_URL}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={cardClass}
                 >
                   <div className="text-3xl mb-4">🌐</div>
@@ -76,7 +80,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 <a
                   href={COMPANY_INSTAGRAM_URL}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={cardClass}
                 >
                   <div className="text-3xl mb-4">📷</div>
@@ -85,6 +89,48 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                     @Acca_edu
                   </div>
                 </a>
+
+                <a
+                  href={COMPANY_TELEGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={isFa ? 'کانال تلگرام ACCA EDU' : 'ACCA EDU Telegram channel'}
+                  className={cardClass}
+                >
+                  <div className="text-3xl mb-4">✈️</div>
+                  <div className="font-black text-lg mb-3">Telegram</div>
+                  <div className={`${mutedTextClass} leading-8 text-sm font-medium`}>
+                    @Acca_edu_tr
+                  </div>
+                </a>
+
+                <a
+                  href={COMPANY_EMAIL_URL}
+                  aria-label={isFa ? 'ارسال ایمیل به ACCA EDU' : 'Email ACCA EDU'}
+                  className={cardClass}
+                >
+                  <div className="text-3xl mb-4">✉️</div>
+                  <div className="font-black text-lg mb-3">Email</div>
+                  <div className={`${mutedTextClass} leading-8 text-sm font-medium break-all`}>
+                    {COMPANY_EMAIL}
+                  </div>
+                </a>
+
+                {COMPANY_LINKEDIN_URL && (
+                  <a
+                    href={COMPANY_LINKEDIN_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={isFa ? 'لینکدین ACCA EDU' : 'ACCA EDU on LinkedIn'}
+                    className={cardClass}
+                  >
+                    <div className="text-3xl mb-4">💼</div>
+                    <div className="font-black text-lg mb-3">LinkedIn</div>
+                    <div className={`${mutedTextClass} leading-8 text-sm font-medium`}>
+                      ACCA EDU
+                    </div>
+                  </a>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-5">
@@ -99,7 +145,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 <a
                   href={COMPANY_WHATSAPP_URL}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={`${darkMode ? 'darkGlass text-white' : 'glass text-black'} px-9 py-5 rounded-[24px] font-black text-lg hover:scale-105 transition-all duration-300`}
                 >
                   {isFa ? 'ارتباط واتساپ' : 'WhatsApp Contact'}
@@ -143,7 +189,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 <a
                   href={COMPANY_MAPS_URL}
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className={`${darkMode ? 'bg-white text-black shadow-[0_20px_80px_rgba(255,255,255,0.18)]' : 'bg-black text-white shadow-[0_20px_80px_rgba(0,0,0,0.16)]'} inline-flex items-center gap-3 px-10 py-5 rounded-[24px] font-black text-lg hover:scale-105 transition-all duration-300`}
                 >
                   {isFa ? 'مشاهده در Google Maps' : 'Open in Google Maps'}

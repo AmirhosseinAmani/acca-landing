@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Award, BookOpen, Building2, Download, Menu, MessageCircle, UserRound, X } from 'lucide-react';
+import { Award, BookOpen, Building2, Menu, MessageCircle, UserRound, X } from 'lucide-react';
 import SmartScholarshipCalculator from './components/SmartScholarshipCalculator';
 import GreenScholarshipWidget from "./components/GreenScholarshipWidget";
 import AccaShowcaseSection from "./components/AccaShowcaseSection";
@@ -16,6 +16,7 @@ import MigrationBlueprintSection from './components/sections/MigrationBlueprintS
 import FaqSection from './components/sections/FaqSection';
 import FinalCtaSection from './components/sections/FinalCtaSection';
 import ContactSection from './components/sections/ContactSection';
+import FloatingActions from './components/FloatingActions';
 import { COMPANY_WHATSAPP_URL } from './constants/contact';
 import { buildUniversitySlug, istanbulUniversities } from './data/istanbulUniversities';
 import { getUniversityLogo } from './data/universityLogoMap';
@@ -241,25 +242,6 @@ function PageLoadingScreen({ darkMode, isFa }) {
     </div>
   );
 }
-function InstallAppButton({ darkMode, isFa, onInstall, visible }) {
-  if (!visible) return null;
-
-  return (
-    <button
-      type="button"
-      onClick={onInstall}
-      className={`${darkMode ? 'border-white/12 bg-[#071A3D]/90 text-white shadow-[0_18px_70px_rgba(0,0,0,0.35)]' : 'border-white/70 bg-[#071A3D] text-white shadow-[0_18px_70px_rgba(7,26,61,0.24)]'} fixed bottom-5 left-4 z-[60] inline-flex max-w-[calc(100vw-2rem)] items-center gap-3 rounded-full border px-4 py-3 text-sm font-black backdrop-blur-2xl transition hover:-translate-y-0.5 hover:shadow-[0_22px_80px_rgba(7,26,61,0.32)] sm:left-6 sm:px-5`}
-      aria-label={isFa ? '\u062f\u0633\u062a\u0631\u0633\u06cc \u0633\u0631\u06cc\u0639 \u0628\u0647 \u0622\u06a9\u0627 \u0627\u062f\u0648' : 'Install ACCA EDU'}
-    >
-      <span className="grid h-9 w-9 flex-none place-items-center rounded-full bg-[#C6A768] text-[#071A3D]">
-        <Download size={17} strokeWidth={2.6} />
-      </span>
-      <span className="truncate">
-        {isFa ? '\u062f\u0633\u062a\u0631\u0633\u06cc \u0633\u0631\u06cc\u0639 \u0628\u0647 \u0622\u06a9\u0627 \u0627\u062f\u0648' : 'Install ACCA EDU'}
-      </span>
-    </button>
-  );
-}
 /**
  * FloatingOrbs – isolated component that drives its own scroll-parallax via
  * direct DOM mutation (no React state updates) so scrolling never triggers a
@@ -330,6 +312,17 @@ export default function ACCALandingPage() {
   const [consultationOpen, setConsultationOpen] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  // PWA install prompt dismissal — persisted so it stays hidden for 14 days
+  // after the user closes it (no aggressive re-prompting on every visit).
+  const [installDismissed, setInstallDismissed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const ts = Number(window.localStorage.getItem('acca:pwa-install-dismissed-at'));
+      return Boolean(ts) && Date.now() - ts < 14 * 24 * 60 * 60 * 1000;
+    } catch {
+      return false;
+    }
+  });
   // mouseOffset is intentionally static (parallax handled via refs in HeroSection)
   const mouseOffset = useMemo(() => ({ x: 0, y: 0 }), []);
   const [isDesktopViewport, setIsDesktopViewport] = useState(() => {
@@ -613,12 +606,21 @@ export default function ACCALandingPage() {
     }
   };
 
-  const installCta = (
-    <InstallAppButton
-      darkMode={darkMode}
+  const handleDismissInstall = () => {
+    setInstallDismissed(true);
+    try {
+      window.localStorage.setItem('acca:pwa-install-dismissed-at', String(Date.now()));
+    } catch {
+      /* localStorage unavailable (e.g. private mode) — dismissed for this session only */
+    }
+  };
+
+  const floatingActions = (
+    <FloatingActions
       isFa={isFa}
+      installVisible={Boolean(installPromptEvent && !isAppInstalled && !installDismissed)}
       onInstall={handleInstallClick}
-      visible={Boolean(installPromptEvent && !isAppInstalled)}
+      onDismissInstall={handleDismissInstall}
     />
   );
 
@@ -981,7 +983,7 @@ export default function ACCALandingPage() {
 
   if (pageContent) return (<>
     {pageContent}
-    {installCta}
+    {floatingActions}
   </>);
 
   return (
@@ -1828,7 +1830,7 @@ export default function ACCALandingPage() {
             <a
               href={COMPANY_WHATSAPP_URL}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -1877,7 +1879,7 @@ export default function ACCALandingPage() {
             <a
               href="https://www.panel-acca.com/login"
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -1926,7 +1928,7 @@ export default function ACCALandingPage() {
               <a
                 href={COMPANY_WHATSAPP_URL}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
@@ -1963,7 +1965,7 @@ export default function ACCALandingPage() {
               </a>              <a
                 href="https://www.panel-acca.com/login"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
@@ -2061,7 +2063,7 @@ export default function ACCALandingPage() {
         isFa={isFa}
         onConsultationClick={() => setConsultationOpen(true)}
       />
-      {installCta}
+      {floatingActions}
       <ConsultationModal
         open={consultationOpen}
         onClose={() => setConsultationOpen(false)}

@@ -23,3 +23,26 @@ export const COMPANY_MAPS_URL = 'https://share.google/vPr2ZIqZWTKpgNmht';
 export const COMPANY_MAP_EMBED_URL =
   `https://www.google.com/maps?q=ACCA+EDU+Esenyurt+Istanbul+Turkey` +
   `&ll=${COMPANY_MAP_COORDINATES}&z=17&t=m&output=embed`;
+
+/* ------------------------------------------------------------------ *
+ * Social & messaging channels — single source of truth.
+ * Header, contact section and the floating buttons all import from here,
+ * so a link is changed in exactly one place. Do NOT hardcode links in
+ * components. Add real links only — leave empty + TODO if unknown.
+ * ------------------------------------------------------------------ */
+
+// Official Telegram channel.
+export const COMPANY_TELEGRAM_URL = 'https://t.me/Acca_edu_tr';
+
+// Primary contact email (kept as raw value + ready-to-use mailto link).
+export const COMPANY_EMAIL = 'arshia@accaco.com';
+export const COMPANY_EMAIL_URL = `mailto:${COMPANY_EMAIL}`;
+
+// Secondary brand domain (credit-transfer service).
+export const COMPANY_TRANSFER_WEBSITE_URL = 'https://www.accatransfer.com';
+
+// TODO(acca-links): the official ACCA EDU LinkedIn company URL was not found
+// in the codebase or site content. The brand name is "ACCA EDU". Once the real
+// linkedin.com/company/<slug> URL is confirmed, set it here and it will appear
+// automatically in the contact section. Empty string = hidden (never invented).
+export const COMPANY_LINKEDIN_URL = '';
