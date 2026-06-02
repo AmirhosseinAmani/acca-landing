@@ -93,7 +93,7 @@ export default function FloatingActions({
               rel="noopener noreferrer"
               aria-label={label}
               title={label}
-              className={`${btn} grid h-12 w-12 place-items-center rounded-full shadow-[0_10px_30px_rgba(7,26,61,0.28)] outline-none ring-0 transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 hover:shadow-[0_16px_40px_rgba(7,26,61,0.34)] focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 active:scale-95 sm:h-14 sm:w-14`}
+              className={`${btn} grid h-12 w-12 place-items-center rounded-full outline-none ring-0 transition-all duration-300 hover:-translate-y-0.5 hover:scale-105 focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 active:scale-95 sm:h-14 sm:w-14`}
             >
               <Icon size={22} />
               <span className="sr-only">{label}</span>
