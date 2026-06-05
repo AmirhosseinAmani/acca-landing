@@ -1,25 +1,25 @@
 export default function PartnerScholarshipSection({ darkMode, isFa, scholarshipComparison }) {
   return (
-<section id="partners" className="max-w-7xl mx-auto px-6 pb-32 relative z-10">
+<section id="partners" className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
 
-      <div className="pb-28 pt-10">
+      <div>
         <div className="mb-20 text-center">
           <div className={`${darkMode ? 'text-neutral-400' : 'text-neutral-500'} text-sm font-black tracking-[0.3em] uppercase mb-4`}>
             B2B Partner Network
           </div>
 
-          <h2 className="section-title text-5xl md:text-7xl font-black mb-8">
+          <h2 className="section-title text-4xl md:text-6xl font-black mb-8">
             {isFa ? 'شبکه همکاری بین‌المللی ACCA' : 'International Partner Ecosystem'}
           </h2>
 
-          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-4xl mx-auto text-lg leading-9 font-medium`}>
+          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-4xl mx-auto text-lg leading-9 font-semibold`}>
             {isFa
               ? 'ACCA تنها یک شرکت مشاوره تحصیلی نیست؛ بلکه یک زیرساخت عملیاتی بین‌المللی برای آژانس‌ها، دانشگاه‌ها، نمایندگان منطقه‌ای و شبکه‌های جذب دانشجو است.'
               : 'ACCA is not just an educational agency — it is an operational infrastructure connecting universities, agencies, regional representatives, and international student recruitment networks.'}
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mb-28">
+        <div className="grid lg:grid-cols-3 gap-8 mb-20">
           {[
             {
               icon: '🌍',
@@ -69,11 +69,11 @@ export default function PartnerScholarshipSection({ darkMode, isFa, scholarshipC
             Scholarship Comparison
           </div>
 
-          <h2 className="section-title text-5xl md:text-7xl font-black mb-8">
+          <h2 className="section-title text-4xl md:text-6xl font-black mb-8">
             {isFa ? 'مقایسه پرداخت شهریه' : 'Tuition Comparison'}
           </h2>
 
-          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-lg leading-9 font-medium`}>
+          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-lg leading-9 font-semibold`}>
             {isFa ? 'مقایسه هزینه کل دوره کارشناسی ۴ ساله به‌همراه ۱ سال دوره زبان؛ از پرداخت ترمیک عادی تا خرید صندلی بورسیه ۱۰۰٪ و پرداخت نقدی مستقیم به دانشگاه.' : 'Compare the total cost of a 4-year bachelor program plus 1 year of language preparation, from regular semester tuition to ACCA 100% scholarship seats and direct cash payment discounts.'}
           </p>
         </div>

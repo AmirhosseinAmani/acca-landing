@@ -1,12 +1,12 @@
 export default function RegistrationProcessSection({ darkMode, isFa, registrationSteps }) {
   return (
-<section className="max-w-7xl mx-auto px-6 pb-32 relative z-10">
+<section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
         <div className="mb-16">
           <div className={`${darkMode ? 'text-neutral-400' : 'text-neutral-500'} text-sm font-black tracking-[0.3em] uppercase mb-4`}>
             Registration Process
           </div>
 
-          <h2 className="section-title text-5xl md:text-7xl font-black">
+          <h2 className="section-title text-4xl md:text-6xl font-black">
             {isFa ? 'مراحل ثبت‌نام' : 'Registration Process'}
           </h2>
         </div>

@@ -1,6 +1,6 @@
 export default function PopularMajorsSection({ darkMode, isFa, majors }) {
   return (
-<section className="max-w-7xl mx-auto px-6 pb-20 relative z-10">
+<section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
         <div className="mb-10 text-center">
           <div className={`${darkMode ? 'text-neutral-400' : 'text-neutral-500'} text-xs font-black tracking-[0.22em] uppercase mb-3 sm:text-sm`}>
             Popular Majors
@@ -10,7 +10,7 @@ export default function PopularMajorsSection({ darkMode, isFa, majors }) {
             {isFa ? 'معرفی رشته‌های محبوب' : 'Popular Majors'}
           </h2>
 
-          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-base leading-7 font-medium`}>
+          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-base leading-7 font-semibold`}>
             {isFa ? 'مقایسه رشته‌های محبوب مهندسی و علوم سلامت براساس مدت تحصیل، سختی مسیر آموزشی و آینده شغلی.' : 'Compare popular engineering and healthcare majors based on study duration, academic difficulty, and career potential.'}
           </p>
         </div>

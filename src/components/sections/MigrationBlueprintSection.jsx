@@ -119,7 +119,7 @@ export default function MigrationBlueprintSection({ darkMode, isFa }) {
   };
 
   return (
-    <section className="max-w-7xl mx-auto px-6 pb-32 relative z-10">
+    <section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
       <div className="mb-20 text-center">
         <div
           className={`${
@@ -129,7 +129,7 @@ export default function MigrationBlueprintSection({ darkMode, isFa }) {
           Migration Blueprint
         </div>
 
-        <h2 className="section-title text-5xl md:text-7xl font-black mb-8">
+        <h2 className="section-title text-4xl md:text-6xl font-black mb-8">
           {isFa
             ? "نقشه مهاجرت تحصیلی"
             : "Educational Migration Roadmap"}
@@ -138,7 +138,7 @@ export default function MigrationBlueprintSection({ darkMode, isFa }) {
         <p
           className={`${
             darkMode ? "text-neutral-300" : "text-neutral-700"
-          } max-w-3xl mx-auto text-lg leading-9 font-medium`}
+          } max-w-3xl mx-auto text-lg leading-9 font-semibold`}
         >
           {isFa
             ? "مسیر مهاجرت تحصیلی به‌صورت یک برد استراتژیک و نقشه عملیاتی طراحی شده تا دانشجو دقیقاً بداند در هر مرحله چه اتفاقی می‌افتد."

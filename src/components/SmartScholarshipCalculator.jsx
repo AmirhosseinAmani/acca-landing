@@ -365,7 +365,7 @@ export default function SmartScholarshipCalculator({
       ref={sectionRef}
       onFocusCapture={() => setShouldLoadData(true)}
       dir={isFa ? 'rtl' : 'ltr'}
-      className="relative overflow-visible px-4 py-20"
+      className="relative overflow-visible px-4 pb-24"
     >
       <div className="flex items-center justify-center">
         <section className={`${darkMode ? 'darkGlass' : 'glass'} w-full max-w-5xl rounded-[42px] p-4 md:p-6`}>
@@ -494,7 +494,7 @@ export default function SmartScholarshipCalculator({
                 {t.badge}
               </div>
 
-              <h1 className="max-w-xl whitespace-pre-line text-6xl font-black leading-[1.1] tracking-tight xl:text-7xl">
+              <h1 className="max-w-xl whitespace-pre-line text-5xl font-black leading-[1.1] tracking-tight md:text-6xl">
                 {t.title}
               </h1>
 

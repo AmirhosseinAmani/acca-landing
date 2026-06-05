@@ -1,6 +1,6 @@
 export default function FinalCtaSection({ darkMode, isFa, onConsultationClick }) {
   return (
-<section className="max-w-7xl mx-auto px-6 pb-32 relative z-10">
+<section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
         <div className={`${darkMode ? 'darkGlass' : 'glass'} rounded-[48px] p-14 md:p-20 text-center relative overflow-hidden`}>
           <div className="absolute inset-0 opacity-20 blur-3xl bg-gradient-to-r from-white/20 to-transparent" />
 
@@ -9,13 +9,13 @@ export default function FinalCtaSection({ darkMode, isFa, onConsultationClick })
               Future Starts Here
             </div>
 
-            <h2 className="section-title text-5xl md:text-8xl font-black leading-none">
+            <h2 className="section-title text-4xl md:text-6xl font-black leading-tight">
               {isFa ? 'آینده تحصیلی خودتو' : 'Start Your Academic Future'}
               <br />
               {isFa ? 'با ACCA شروع کن.' : 'With ACCA.'}
             </h2>
 
-            <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto mt-10 text-xl leading-9 font-medium`}>
+            <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto mt-10 text-xl leading-9 font-semibold`}>
               {isFa ? 'تجربه‌ای مدرن از مشاوره تحصیلی، انتقالی پزشکی، اخذ پذیرش و توسعه مسیر بین‌المللی دانشجویان در ترکیه و اروپا.' : 'A modern experience in educational consulting, medical transfer, admissions, and international student pathway development in Turkey and Europe.'}
             </p>
 
