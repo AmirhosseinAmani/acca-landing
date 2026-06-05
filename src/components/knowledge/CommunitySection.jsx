@@ -15,6 +15,7 @@ import { tt, timeAgo } from './knowledgeUtils';
 import { Reveal } from './KnowledgeKit';
 import {
   TRANSLATE_LANGS,
+  detectLang,
   fetchComments,
   fetchRating,
   submitComment,
@@ -52,13 +53,28 @@ function CommentItem({ comment, darkMode, isFa }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
 
+  // Smart detection: prefer the language stored at submit time, otherwise
+  // detect it from the body. This drives a one-tap "translate into the language
+  // you're reading the site in" action.
+  const pageLang = isFa ? 'fa' : 'en';
+  const sourceLang = comment.lang || detectLang(comment.body);
+  const sourceMeta = TRANSLATE_LANGS.find((l) => l.code === sourceLang);
+  // Default target = the reader's language, unless the comment is already in it
+  // (then offer the other site language so the button is never a no-op).
+  const defaultTarget = sourceLang !== pageLang ? pageLang : (pageLang === 'fa' ? 'en' : 'fa');
+  const defaultTargetMeta = TRANSLATE_LANGS.find((l) => l.code === defaultTarget);
+  // Languages a reader can translate INTO — never the comment's own language.
+  const otherTargets = TRANSLATE_LANGS.filter((l) => l.code !== sourceLang);
+
   const isLong = comment.body.length > 160;
   const badge = [labelFor(ROLES, comment.role, isFa), labelFor(LOCATIONS, comment.location, isFa)]
     .filter(Boolean)
     .join(' · ');
   const shown = translation ? translation.text : comment.body;
+  const shownLang = translation ? translation.lang : sourceLang;
+  const translatedMeta = translation ? TRANSLATE_LANGS.find((l) => l.code === translation.lang) : null;
 
-  const handleTranslate = async (lang) => {
+  const runTranslate = async (lang) => {
     setMenuOpen(false);
     setError(false);
     if (translation?.lang === lang) {
@@ -77,6 +93,15 @@ function CommentItem({ comment, darkMode, isFa }) {
     }
   };
 
+  // Primary action: toggle between original and the smart default translation.
+  const handlePrimary = () => {
+    if (translation) {
+      setTranslation(null);
+      return;
+    }
+    runTranslate(defaultTarget);
+  };
+
   return (
     <div className={`${darkMode ? 'border-white/10' : 'border-black/[0.07]'} border-t py-5 first:border-t-0 first:pt-0`}>
       <div className="flex items-center gap-3">
@@ -91,6 +116,14 @@ function CommentItem({ comment, darkMode, isFa }) {
             <span>{timeAgo(comment.created_at, isFa)}</span>
           </p>
         </div>
+        {sourceMeta && (
+          <span
+            className={`${darkMode ? 'bg-white/8 text-white/55' : 'bg-black/[0.05] text-neutral-500'} shrink-0 rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide`}
+            title={tt('زبان تشخیص‌داده‌شده', 'Detected language', isFa)}
+          >
+            {sourceMeta.label}
+          </span>
+        )}
       </div>
 
       <p
@@ -98,17 +131,19 @@ function CommentItem({ comment, darkMode, isFa }) {
           !expanded && isLong ? 'line-clamp-2' : ''
         }`}
         dir="auto"
+        lang={shownLang}
       >
         {shown}
       </p>
 
       {translation && (
-        <p className={`${darkMode ? 'text-white/40' : 'text-neutral-400'} mt-1 text-[11px] font-bold`}>
-          {tt('ترجمه‌شده توسط ماشین', 'Machine translated', isFa)}
+        <p className={`${darkMode ? 'text-white/40' : 'text-neutral-400'} mt-1 inline-flex items-center gap-1 text-[11px] font-bold`}>
+          <Languages size={12} />
+          {tt(`ترجمه ماشینی به ${translatedMeta?.label || ''}`, `Machine translated to ${translatedMeta?.label || ''}`, isFa)}
         </p>
       )}
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px] font-black">
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[12px] font-black">
         {isLong && (
           <button
             type="button"
@@ -120,23 +155,43 @@ function CommentItem({ comment, darkMode, isFa }) {
           </button>
         )}
 
-        <div className="relative">
+        {/* Primary, one-tap translate into the language you're reading in. */}
+        <div className="relative inline-flex items-center">
           <button
             type="button"
-            onClick={() => setMenuOpen((v) => !v)}
-            className={`${darkMode ? 'text-white/55 hover:text-white' : 'text-neutral-500 hover:text-neutral-900'} inline-flex items-center gap-1 transition`}
+            onClick={handlePrimary}
+            disabled={busy}
+            className={`${
+              translation
+                ? (darkMode ? 'text-white/55 hover:text-white' : 'text-neutral-500 hover:text-neutral-900')
+                : 'text-[#C6A768] hover:opacity-80'
+            } inline-flex items-center gap-1.5 transition disabled:opacity-60`}
           >
-            {busy ? <Loader size={14} className="animate-spin" /> : <Languages size={14} />}
-            {translation ? tt('زبان دیگر', 'Translate', isFa) : tt('ترجمه', 'Translate', isFa)}
-            <ChevronDown size={13} className={`transition ${menuOpen ? 'rotate-180' : ''}`} />
+            {busy ? <Loader size={14} className="animate-spin" /> : (translation ? <Globe size={14} /> : <Languages size={14} />)}
+            {translation
+              ? tt('نمایش متن اصلی', 'Show original', isFa)
+              : tt(`ترجمه به ${defaultTargetMeta?.label || ''}`, `Translate to ${defaultTargetMeta?.label || ''}`, isFa)}
           </button>
+
+          {/* Secondary: choose a different target language. */}
+          {otherTargets.length > 1 && (
+            <button
+              type="button"
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label={tt('زبان‌های دیگر', 'Other languages', isFa)}
+              className={`${darkMode ? 'text-white/45 hover:text-white' : 'text-neutral-400 hover:text-neutral-900'} ms-1 inline-flex items-center transition`}
+            >
+              <ChevronDown size={13} className={`transition ${menuOpen ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+
           {menuOpen && (
-            <div className={`${darkMode ? 'border-white/10 bg-[#0a1424]' : 'border-black/10 bg-white'} absolute z-20 mt-1.5 flex gap-1 rounded-xl border p-1 shadow-[0_14px_40px_rgba(7,26,61,0.18)] ltr:left-0 rtl:right-0`}>
-              {TRANSLATE_LANGS.map((lang) => (
+            <div className={`${darkMode ? 'border-white/10 bg-[#0a1424]' : 'border-black/10 bg-white'} absolute top-full z-20 mt-1.5 flex gap-1 rounded-xl border p-1 shadow-[0_14px_40px_rgba(7,26,61,0.18)] ltr:left-0 rtl:right-0`}>
+              {otherTargets.map((lang) => (
                 <button
                   key={lang.code}
                   type="button"
-                  onClick={() => handleTranslate(lang.code)}
+                  onClick={() => runTranslate(lang.code)}
                   className={`rounded-lg px-2.5 py-1.5 text-[11px] font-black transition ${
                     translation?.lang === lang.code
                       ? 'bg-[#C6A768] text-[#071A3D]'
@@ -149,17 +204,6 @@ function CommentItem({ comment, darkMode, isFa }) {
             </div>
           )}
         </div>
-
-        {translation && (
-          <button
-            type="button"
-            onClick={() => setTranslation(null)}
-            className={`${darkMode ? 'text-white/45 hover:text-white/80' : 'text-neutral-400 hover:text-neutral-700'} inline-flex items-center gap-1 transition`}
-          >
-            <Globe size={13} />
-            {tt('متن اصلی', 'Original', isFa)}
-          </button>
-        )}
 
         {error && <span className="text-rose-500">{tt('ترجمه ناموفق بود', 'Translation failed', isFa)}</span>}
       </div>

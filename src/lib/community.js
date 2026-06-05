@@ -237,23 +237,58 @@ export const TRANSLATE_LANGS = [
   { code: 'tr', label: 'Türkçe' },
 ];
 
+/** Best-effort client-side language detection (fa / tr / en).
+ *  Used for the UI hint and for the fallback provider; the primary provider
+ *  detects the source itself, so this only needs to be good, not perfect. */
 export function detectLang(text) {
-  if (/[؀-ۿ]/.test(text)) return 'fa';
-  if (/[ğşıİçÇĞŞ]/.test(text)) return 'tr';
+  const t = text || '';
+  // Persian / Arabic script. This audience is Persian-first, so any
+  // Arabic-script run is treated as Persian.
+  if (/[؀-ۿݐ-ݿࢠ-ࣿﭐ-﷿ﹰ-ﻼ]/.test(t)) return 'fa';
+  // Turkish-specific Latin letters (dotless i, İ, ğ, ş).
+  if (/[ğĞışŞİ]/.test(t)) return 'tr';
   return 'en';
 }
 
-/** Free MyMemory translation (TR/FA/EN). Swap this one function to use
- *  Google/DeepL later — callers only depend on (text, target) → string. */
+/**
+ * Smart, reliable comment translation (TR / FA / EN).
+ *  1. Primary — Google's free endpoint with automatic source detection
+ *     (`sl=auto`). High quality for Persian/Turkish/English, no API key.
+ *  2. Fallback — MyMemory, with client-side source detection.
+ * Resolves to the translated string, or throws so the UI can show a graceful
+ * "translation failed" state. Callers only depend on (text, target) → string.
+ */
 export async function translateText(text, target) {
-  const source = detectLang(text);
-  if (source === target) return text;
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${source}|${target}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('translate request failed');
-  const data = await res.json();
-  const translated = data?.responseData?.translatedText;
-  if (!translated || /MYMEMORY WARNING|INVALID/i.test(translated)) {
+  const clean = (text || '').trim();
+  if (!clean) return '';
+
+  // 1) Google Translate (gtx) — detects the source server-side, so a Persian,
+  //    Turkish or English comment is translated correctly without us guessing.
+  try {
+    const url =
+      'https://translate.googleapis.com/translate_a/single?client=gtx' +
+      `&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(clean)}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      const data = await res.json();
+      const out = Array.isArray(data?.[0])
+        ? data[0].map((seg) => (Array.isArray(seg) ? seg[0] : '')).join('')
+        : '';
+      if (out && out.trim()) return out;
+    }
+  } catch {
+    /* network / CORS hiccup — fall through to the secondary provider */
+  }
+
+  // 2) MyMemory fallback.
+  const source = detectLang(clean);
+  if (source === target) return clean;
+  const mmUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=${source}|${target}`;
+  const mmRes = await fetch(mmUrl);
+  if (!mmRes.ok) throw new Error('translate request failed');
+  const mmData = await mmRes.json();
+  const translated = mmData?.responseData?.translatedText;
+  if (!translated || /MYMEMORY WARNING|INVALID|QUERY LENGTH LIMIT/i.test(translated)) {
     throw new Error('translation unavailable');
   }
   return translated;

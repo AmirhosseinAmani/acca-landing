@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion';
-import { ArrowUp, GraduationCap, List, Moon, Sparkles, Sun } from 'lucide-react';
+import { ArrowUp, GraduationCap, List, MessageCircle, Moon, Sparkles, Sun } from 'lucide-react';
 import { scrollToId, tt } from './knowledgeUtils';
 import { BackButton, MainNav } from '../SiteNav';
+import { COMPANY_WHATSAPP_URL } from '../../constants/contact';
 
 /* ----------------------------------------------------------------------------
  * KnowledgeKit — shared, Safari-friendly UI building blocks for the ACCA EDU
@@ -238,14 +239,25 @@ export function LeadCta({ darkMode, isFa, onConsultationClick, topic }) {
             )}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onConsultationClick}
-          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-[#C6A768] px-6 py-3.5 text-sm font-black text-[#071A3D] shadow-[0_16px_40px_rgba(198,167,104,0.3)] transition hover:brightness-105"
-        >
-          <GraduationCap size={18} />
-          {tt('شروع بررسی رایگان', 'Start free review', isFa)}
-        </button>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          <button
+            type="button"
+            onClick={onConsultationClick}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#C6A768] px-6 py-3.5 text-sm font-black text-[#071A3D] shadow-[0_16px_40px_rgba(198,167,104,0.3)] transition hover:brightness-105"
+          >
+            <GraduationCap size={18} />
+            {tt('شروع بررسی رایگان', 'Start free review', isFa)}
+          </button>
+          <a
+            href={COMPANY_WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-emerald-500/15 px-6 py-3.5 text-sm font-black text-white ring-1 ring-emerald-300/30 backdrop-blur-sm transition hover:bg-emerald-500/25"
+          >
+            <MessageCircle size={18} />
+            {tt('ارتباط از طریق واتساپ', 'Contact on WhatsApp', isFa)}
+          </a>
+        </div>
       </div>
     </Reveal>
   );

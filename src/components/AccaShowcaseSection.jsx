@@ -195,7 +195,7 @@ export default function AccaShowcaseSection({ darkMode = false, isFa = true }) {
     <section
       dir={isFa ? "rtl" : "ltr"}
       style={isFa ? persianFontStyle : undefined}
-      className={`relative overflow-hidden px-4 py-20 transition-all duration-700 sm:px-6 lg:px-10 ${
+      className={`relative overflow-hidden px-4 pb-24 pt-12 transition-all duration-700 sm:px-6 lg:px-10 ${
         darkMode ? "text-white" : "text-[#1f1f1f]"
       }`}
     >
@@ -232,7 +232,7 @@ export default function AccaShowcaseSection({ darkMode = false, isFa = true }) {
 
           <h2
             style={isFa ? persianFontStyle : undefined}
-            className="text-balance text-[clamp(2.7rem,11vw,5.5rem)] font-black leading-[0.96] tracking-[-0.06em]"
+            className="text-balance text-[clamp(2.25rem,7vw,3.75rem)] font-black leading-[1.05] tracking-[-0.035em]"
           >
             {isFa ? "اسلایدشوهای شرکت آکا" : "ACCA Showcase Slides"}
           </h2>

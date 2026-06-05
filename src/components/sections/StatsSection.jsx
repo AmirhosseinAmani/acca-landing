@@ -1,6 +1,6 @@
 export default function StatsSection({ darkMode, isFa }) {
   return (
-<section className="max-w-7xl mx-auto px-6 pb-20 relative z-10">
+<section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
         <div className="mb-10 text-center">
           <div className={`${darkMode ? 'text-neutral-400' : 'text-neutral-500'} text-xs font-black tracking-[0.22em] uppercase mb-3 sm:text-sm`}>
             ACCA Statistics

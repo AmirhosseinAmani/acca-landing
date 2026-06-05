@@ -1,12 +1,12 @@
 export default function TestimonialsSection({ darkMode, isFa }) {
   return (
-<section id="testimonials" className="py-24 px-6 lg:px-10 relative z-10">
+<section id="testimonials" className="pb-24 px-6 lg:px-10 relative z-10">
         <div className="max-w-6xl mx-auto text-center">
           <div className="text-[#C6A77D] tracking-[0.35em] uppercase text-sm mb-5 font-black">
             <span>Student Stories</span>
           </div>
 
-          <h2 className={`text-4xl lg:text-6xl font-black leading-tight ${darkMode ? 'text-white' : 'text-[#0D1B2A]'}`}>
+          <h2 className={`text-4xl md:text-6xl font-black leading-tight ${darkMode ? 'text-white' : 'text-[#0D1B2A]'}`}>
             {isFa ? 'تجربه دانشجویان ACCA' : 'ACCA Student Experiences'}
           </h2>
 

@@ -1,6 +1,6 @@
 export default function FeaturedUniversitiesSection({ darkMode, isFa, universityCards }) {
   return (
-<section className="max-w-7xl mx-auto px-6 pb-16 relative z-10">
+<section className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
         <div className="mb-10 text-center">
           <div className={`${darkMode ? 'text-neutral-400' : 'text-neutral-500'} text-xs font-black tracking-[0.22em] uppercase mb-3 sm:text-sm`}>
             University Explorer
@@ -10,12 +10,12 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
             {isFa ? 'دانشگاه‌های منتخب ACCA' : 'Featured Universities'}
           </h2>
 
-          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-base leading-7 font-medium`}>
+          <p className={`${darkMode ? 'text-neutral-300' : 'text-neutral-700'} max-w-3xl mx-auto text-base leading-7 font-semibold`}>
             {isFa ? 'بررسی دانشگاه‌های محبوب ترکیه براساس شهریه، تاییدیه و کیفیت آموزشی.' : 'Explore popular Turkish universities based on tuition, approvals, and educational quality.'}
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mb-16">
+        <div className="grid lg:grid-cols-3 gap-6">
           {universityCards.map((uni) => (
             <a
               key={uni.name}

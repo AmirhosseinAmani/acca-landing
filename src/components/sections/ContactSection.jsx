@@ -17,7 +17,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
   const mutedTextClass = darkMode ? 'text-neutral-300' : 'text-black/78';
 
   return (
-<section id="contact" className="max-w-7xl mx-auto px-6 pb-40 relative z-10">
+<section id="contact" className="max-w-7xl mx-auto px-6 pb-24 relative z-10">
         <div className={`${darkMode ? 'darkGlass' : 'glass'} rounded-[52px] overflow-hidden relative`}>
           <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-white/10 via-transparent to-emerald-400/10" />
 
@@ -27,13 +27,13 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 Contact ACCA
               </div>
 
-              <h2 className={`${darkMode ? 'text-white' : 'text-black'} section-title text-5xl md:text-7xl font-black mb-10 leading-none`}>
+              <h2 className={`${darkMode ? 'text-white' : 'text-black'} section-title text-4xl md:text-6xl font-black mb-10 leading-tight`}>
                 {isFa ? 'ارتباط با' : 'Contact'}
                 <br />
                 {isFa ? 'شرکت ما' : 'Our Company'}
               </h2>
 
-              <p className={`${mutedTextClass} text-lg leading-9 font-medium max-w-2xl mb-12`}>
+              <p className={`${mutedTextClass} text-lg leading-9 font-semibold max-w-2xl mb-12`}>
                 {isFa ? 'برای دریافت مشاوره تخصصی، بررسی شرایط پذیرش و انتخاب بهترین مسیر تحصیلی با تیم ACCA در ارتباط باشید.' : 'Contact the ACCA team for professional consultation, admission evaluation, and selecting the best academic pathway.'}
               </p>
 

@@ -76,7 +76,7 @@ export default function GreenScholarshipWidget({
     <section
       id="scholarship"
       dir={isFa ? "rtl" : "ltr"}
-      className={`py-28 px-6 lg:px-10 relative z-10 overflow-hidden ${
+      className={`pb-24 px-6 lg:px-10 relative z-10 overflow-hidden ${
         "font-['Vazirmatn']"
       }`}
     >
@@ -136,7 +136,7 @@ export default function GreenScholarshipWidget({
 
                 <div className="min-w-0">
                   <h2
-                    className={`break-words text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl ${
+                    className={`break-words text-4xl leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl ${
                       isDark ? "text-white" : "text-[#0F172A]"
                     } ${isFa ? "font-black" : "font-extrabold"}`}
                   >
