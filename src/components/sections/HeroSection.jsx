@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { MessageCircle } from 'lucide-react';
+import { COMPANY_WHATSAPP_URL } from '../../constants/contact';
 
 const MOBILE_ASTRONAUT_SRC =
   '/assets/optimized/astronaut-640.webp';
@@ -10,8 +12,8 @@ const MOBILE_ASTRONAUT_SRC =
 export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_SRC, onConsultationClick }) {
   const modelViewerRef = useRef(null);
   const heroTrustItems = isFa
-    ? ['پذیرش دانشگاه', 'راهنمای ثبت‌نام', 'اقامت دانشجویی', 'مسکن و خوابگاه', 'بیمه سلامت', 'ورود و اسکان']
-    : ['University admission', 'Registration guidance', 'Student residence', 'Housing support', 'Insurance guidance', 'Arrival support'];
+    ? ['مشاوره رایگان ۲۴ ساعته', 'پذیرش دانشگاه', 'راهنمای ثبت‌نام', 'اقامت دانشجویی', 'مسکن و خوابگاه', 'بیمه سلامت', 'ورود و اسکان']
+    : ['Free 24-hour consultation', 'University admission', 'Registration guidance', 'Student residence', 'Housing support', 'Insurance guidance', 'Arrival support'];
 
   useEffect(() => {
     if (!isDesktopViewport) return undefined;
@@ -77,6 +79,16 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
                   <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
               </button>
+
+              <a
+                href={COMPANY_WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`${darkMode ? 'bg-emerald-500/15 text-emerald-100 ring-1 ring-emerald-300/20 hover:bg-emerald-500/22' : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-700/12 hover:bg-emerald-100'} inline-flex items-center gap-2 rounded-full px-5 py-3.5 text-sm font-black shadow-[0_10px_30px_rgba(5,150,105,0.10)] transition sm:px-6`}
+              >
+                <MessageCircle size={18} aria-hidden="true" />
+                {isFa ? 'ارتباط از طریق واتساپ' : 'Contact on WhatsApp'}
+              </a>
 
               <a
                 href="?page=blog&post=student-residence-e-ikamet-2026"

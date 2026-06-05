@@ -33,8 +33,39 @@ const BRAND_NAME = 'ACCA EDU';
 const BRAND_TAGLINE = 'Study in Turkey & International Student Placement';
 const BRAND_TITLE = `${BRAND_NAME} — ${BRAND_TAGLINE}`;
 const INDEXABLE_PAGES = new Set(['programs', 'universities', 'scholarships', 'blog', 'glossary']);
+const STATIC_ROUTE_ALIASES = {
+  '/programs': { page: 'programs', canonicalPath: '/programs/' },
+  '/study-in-turkey': { canonicalPath: '/study-in-turkey/' },
+  '/universities': { page: 'universities', canonicalPath: '/universities/' },
+  '/medical-universities-in-turkey': { page: 'programs', canonicalPath: '/medical-universities-in-turkey/' },
+  '/residence-permit': { page: 'blog', post: 'student-residence-e-ikamet-2026', canonicalPath: '/residence-permit/' },
+  '/accommodation': { page: 'blog', post: 'address-registration-nvi-turkey-student-warning', canonicalPath: '/accommodation/' },
+  '/partner-with-acca-edu': { section: 'partners', canonicalPath: '/partner-with-acca-edu/' },
+  '/contact': { section: 'contact', canonicalPath: '/contact/' },
+};
+const STATIC_ROUTE_META = {
+  '/medical-universities-in-turkey/': {
+    title: 'دانشگاه‌های پزشکی ترکیه | پزشکی، دندانپزشکی و علوم سلامت | ACCA EDU',
+    description: 'راهنمای دانشگاه‌های پزشکی ترکیه برای دانشجویان بین‌المللی؛ بررسی پزشکی، دندانپزشکی، داروسازی، علوم سلامت، شهریه‌ها، زبان تحصیل و مسیر پذیرش.',
+  },
+  '/partner-with-acca-edu/': {
+    title: 'همکاری با ACCA EDU | شبکه پذیرش و خدمات دانشجویی ترکیه',
+    description: 'صفحه همکاری با ACCA EDU برای دانشگاه‌ها، آژانس‌ها و نمایندگان آموزشی؛ زیرساخت پذیرش، خدمات دانشجویی، اقامت و جذب دانشجوی بین‌المللی.',
+  },
+  '/contact/': {
+    title: 'تماس با ACCA EDU | مشاوره تحصیل در ترکیه و ارتباط واتساپ',
+    description: 'تماس مستقیم با ACCA EDU برای مشاوره تحصیل در ترکیه، بررسی پذیرش، رشته‌ها، شهریه‌ها، اقامت دانشجویی و خدمات اسکان از طریق واتساپ و کانال‌های رسمی شرکت.',
+  },
+};
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px) and (pointer: fine)';
+
+function getStaticRouteAlias(pathname = '/') {
+  const normalized = `/${String(pathname || '/')
+    .replace(/^\/+/, '')
+    .replace(/\/+$/, '')}`;
+  return STATIC_ROUTE_ALIASES[normalized === '/' ? '/' : normalized] || null;
+}
 
 function getUniversityProfileHref(universityName) {
   const university = findUniversityByRouteValue(universityName);
@@ -509,14 +540,42 @@ export default function ACCALandingPage() {
 
   const isFa = language === 'fa';
   const search = typeof window !== 'undefined' ? window.location.search : '';
-  const params = useMemo(() => new URLSearchParams(search), [search]);
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+  const routeAlias = useMemo(() => getStaticRouteAlias(pathname), [pathname]);
+  const params = useMemo(() => {
+    const nextParams = new URLSearchParams(search);
+    if (routeAlias) {
+      Object.entries(routeAlias).forEach(([key, value]) => {
+        if (key === 'canonicalPath' || value == null || nextParams.has(key)) return;
+        nextParams.set(key, value);
+      });
+    }
+    return nextParams;
+  }, [search, routeAlias]);
   const page = params.get('page');
+  const staticCanonicalUrl = routeAlias?.canonicalPath
+    ? `${SITE_CANONICAL_ORIGIN}${routeAlias.canonicalPath}`
+    : null;
+  const staticRouteMeta = routeAlias?.canonicalPath
+    ? STATIC_ROUTE_META[routeAlias.canonicalPath]
+    : null;
 
   // ── SEO: keep <html lang/dir> in sync with the active language ────────────
   useEffect(() => {
     document.documentElement.lang = isFa ? 'fa' : 'en';
     document.documentElement.dir = isFa ? 'rtl' : 'ltr';
   }, [isFa]);
+
+  useEffect(() => {
+    const sectionId = params.get('section');
+    if (page || !sectionId) return undefined;
+
+    const timer = window.setTimeout(() => {
+      document.getElementById(sectionId)?.scrollIntoView({ block: 'start' });
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [page, params]);
 
   // ── SEO: update <title> and meta description per page ─────────────────────
   useEffect(() => {
@@ -545,15 +604,17 @@ export default function ACCALandingPage() {
         ? 'فرهنگ‌نامه آکا برای توضیح ساده اصطلاحات تحصیل در ترکیه، اقامت دانشجویی، ای‌کامِت، هارچ، ثبت آدرس، کارت اقامت و خدمات دولتی ترکیه.'
         : 'Glossary for study, residence and student life terms in Turkey.',
     };
-    document.title = PAGE_TITLES[page] || (isFa
+    document.title = staticRouteMeta?.title || PAGE_TITLES[page] || (isFa
       ? `تحصیل در ترکیه، از پذیرش دانشگاه تا اقامت دانشجویی | ${BRAND_NAME}`
       : BRAND_TITLE);
     const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc && PAGE_DESCS[page]) metaDesc.setAttribute('content', PAGE_DESCS[page]);
+    if (metaDesc && (staticRouteMeta?.description || PAGE_DESCS[page])) {
+      metaDesc.setAttribute('content', staticRouteMeta?.description || PAGE_DESCS[page]);
+    }
     const canonicalPage = INDEXABLE_PAGES.has(page) ? page : null;
-    const canonicalUrl = canonicalPage
+    const canonicalUrl = staticCanonicalUrl || (canonicalPage
       ? `${SITE_CANONICAL_ORIGIN}/?page=${canonicalPage}`
-      : `${SITE_CANONICAL_ORIGIN}/`;
+      : `${SITE_CANONICAL_ORIGIN}/`);
     const currentDescription = metaDesc?.getAttribute('content') || '';
     const shouldIndex = !page || INDEXABLE_PAGES.has(page);
     const setElementAttr = (selector, attr, value) => {
@@ -584,6 +645,14 @@ export default function ACCALandingPage() {
     // loaded module so the large datasets stay out of the main bundle.
     const applyRichSeo = (routeSeo) => {
       if (!routeSeo) return;
+      if (staticCanonicalUrl) routeSeo = { ...routeSeo, canonicalUrl: staticCanonicalUrl };
+      if (staticRouteMeta) {
+        routeSeo = {
+          ...routeSeo,
+          title: staticRouteMeta.title || routeSeo.title,
+          description: staticRouteMeta.description || routeSeo.description,
+        };
+      }
       document.title = routeSeo.title;
       if (metaDesc) metaDesc.setAttribute('content', routeSeo.description);
       setElementAttr('link[rel="canonical"]', 'href', routeSeo.canonicalUrl);
@@ -623,7 +692,7 @@ export default function ACCALandingPage() {
       applyRichSeo(getRouteSeo({ page, params, isFa }));
     }
     return () => { cancelled = true; };
-  }, [page, isFa, params]);
+  }, [page, isFa, params, staticCanonicalUrl, staticRouteMeta]);
 
 
   const handleInstallClick = async () => {

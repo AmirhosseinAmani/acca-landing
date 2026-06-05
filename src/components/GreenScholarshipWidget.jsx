@@ -77,7 +77,7 @@ export default function GreenScholarshipWidget({
       id="scholarship"
       dir={isFa ? "rtl" : "ltr"}
       className={`py-28 px-6 lg:px-10 relative z-10 overflow-hidden ${
-        isFa ? "font-['Vazirmatn']" : "font-['Rubik']"
+        "font-['Vazirmatn']"
       }`}
     >
       <div className="max-w-7xl mx-auto">

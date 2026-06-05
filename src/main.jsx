@@ -16,7 +16,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.error) {
       return (
         <div style={{
-          fontFamily: 'sans-serif', textAlign: 'center', padding: '60px 24px',
+          fontFamily: 'Vazirmatn, sans-serif', textAlign: 'center', padding: '60px 24px',
           background: '#071A3D', color: '#fffaf0', minHeight: '100vh',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         }}>

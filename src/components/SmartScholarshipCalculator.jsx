@@ -468,7 +468,7 @@ export default function SmartScholarshipCalculator({
                   </div>
 
                   <div
-                    className={`${!hasRealFee && isScholarshipPayment ? 'text-2xl leading-tight md:text-3xl' : 'text-5xl tracking-tight md:text-6xl'} min-h-[64px] font-black`}
+                    className={`${!hasRealFee && isScholarshipPayment ? 'text-2xl leading-tight md:text-3xl' : 'text-4xl leading-none tracking-tight sm:text-5xl md:text-6xl'} flex min-h-[88px] items-center justify-center font-black tabular-nums md:min-h-[104px]`}
                   >
                     {tuitionDisplay}
                   </div>

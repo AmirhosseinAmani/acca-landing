@@ -17,7 +17,7 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
   const mutedTextClass = darkMode ? 'text-neutral-300' : 'text-black/78';
 
   return (
-<section className="max-w-7xl mx-auto px-6 pb-40 relative z-10">
+<section id="contact" className="max-w-7xl mx-auto px-6 pb-40 relative z-10">
         <div className={`${darkMode ? 'darkGlass' : 'glass'} rounded-[52px] overflow-hidden relative`}>
           <div className="absolute inset-0 opacity-20 bg-gradient-to-br from-white/10 via-transparent to-emerald-400/10" />
 

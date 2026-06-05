@@ -220,18 +220,13 @@
     </script>
 
     <!-- Preconnect & DNS Prefetch -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://qysluhfrjpcguhneqsuz.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="//unpkg.com" />
     <link rel="dns-prefetch" href="//modelviewer.dev" />
 
     <!-- Preload LCP / above-fold resources -->
     <link rel="preload" as="image" href="/assets/optimized/astronaut-640.webp" media="(max-width: 1023px)" fetchpriority="high" />
-
-    <!-- Fonts -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800;900&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800;900&display=swap" />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/vazirmatn-arabic.woff2" crossorigin />
 
     <!-- Icons & Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -241,10 +236,10 @@
   </head>
   <body>
     <div id="root">
-      <main style="font-family: Vazirmatn, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; direction: rtl; min-height: 100vh; background: #f7f1e8; color: #071a3d;">
+      <main style="font-family: Vazirmatn, sans-serif; direction: rtl; min-height: 100vh; background: #f7f1e8; color: #071a3d;">
         <section style="max-width: 1120px; margin: 0 auto; padding: 72px 24px 48px;">
           <a href="/" aria-label="ACCA EDU" style="display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; font-weight: 900;">
-            <img src="/assets/optimized/acca-logo-320.webp" alt="ACCA EDU" width="132" height="57" style="height: 44px; width: auto; object-fit: contain;" />
+            <img src="/assets/optimized/acca-logo-320.webp" alt="ACCA EDU" width="132" height="57" style="width: 132px; height: 57px; object-fit: contain;" />
           </a>
           <p style="margin: 40px 0 12px; color: #008767; font-weight: 900;">پذیرش، ثبت‌نام، اقامت و ورود دانشجو به ترکیه</p>
           <h1 style="max-width: 820px; margin: 0; font-size: 2.35rem; line-height: 1.18; font-weight: 950;">
@@ -276,7 +271,7 @@
       </main>
     </div>
     <noscript>
-      <div style="font-family:sans-serif;text-align:center;padding:60px 24px;direction:rtl;">
+      <div style="font-family:Vazirmatn,sans-serif;text-align:center;padding:60px 24px;direction:rtl;">
         <h1 style="font-size:1.5rem;margin-bottom:12px;">ACCA EDU</h1>
         <p>برای استفاده از این وب‌سایت لطفاً JavaScript را در مرورگر خود فعال کنید.</p>
         <p style="margin-top:8px;direction:ltr;">Please enable JavaScript to use this website.</p>

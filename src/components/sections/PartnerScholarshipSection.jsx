@@ -1,6 +1,6 @@
 export default function PartnerScholarshipSection({ darkMode, isFa, scholarshipComparison }) {
   return (
-<section className="max-w-7xl mx-auto px-6 pb-32 relative z-10">
+<section id="partners" className="max-w-7xl mx-auto px-6 pb-32 relative z-10">
 
       <div className="pb-28 pt-10">
         <div className="mb-20 text-center">
