@@ -151,6 +151,8 @@ export default function SmartScholarshipCalculator({
   language = 'fa',
   programsHref = '?page=programs',
 }) {
+  const sectionRef = useRef(null);
+  const [shouldLoadData, setShouldLoadData] = useState(false);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [university, setUniversity] = useState('');
@@ -163,9 +165,34 @@ export default function SmartScholarshipCalculator({
   const t = labels[language];
 
   useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    const tryLoadData = () => {
+      const rect = section.getBoundingClientRect();
+      const userHasScrolled = window.scrollY > Math.min(240, window.innerHeight * 0.25);
+      if (userHasScrolled && rect.top < window.innerHeight * 1.15) {
+        setShouldLoadData(true);
+      }
+    };
+
+    const frame = window.requestAnimationFrame(tryLoadData);
+    window.addEventListener('scroll', tryLoadData, { passive: true });
+    window.addEventListener('resize', tryLoadData);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', tryLoadData);
+      window.removeEventListener('resize', tryLoadData);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLoadData) return undefined;
+
     let active = true;
 
-    fetch('/data/programs.json')
+    fetch('/data/calculator-programs.json')
       .then((response) => response.json())
       .then((data) => {
         if (!active) return;
@@ -195,7 +222,7 @@ export default function SmartScholarshipCalculator({
     return () => {
       active = false;
     };
-  }, []);
+  }, [shouldLoadData]);
 
   const universityOptions = useMemo(
     () => uniqueSorted(rows.map((row) => row.university)),
@@ -335,6 +362,8 @@ export default function SmartScholarshipCalculator({
 
   return (
     <section
+      ref={sectionRef}
+      onFocusCapture={() => setShouldLoadData(true)}
       dir={isFa ? 'rtl' : 'ltr'}
       className="relative overflow-visible px-4 py-20"
     >

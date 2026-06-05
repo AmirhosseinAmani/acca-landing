@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title">
+  <title>residence-fee-exemption glossary concept visual</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F1E8"/>
+      <stop offset="0.55" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EFE6D7"/>
+    </linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A2B5E"/>
+      <stop offset="1" stop-color="#071A3D"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#45C7A3"/>
+      <stop offset="1" stop-color="#008767"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#071A3D" flood-opacity="0.14"/>
+    </filter>
+    <filter id="smallShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#071A3D" flood-opacity="0.13"/>
+    </filter>
+    <style>
+      .line{stroke:#071A3D;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .thin{stroke:#071A3D;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .mutedLine{stroke:#99A0AE;stroke-width:8;stroke-linecap:round;fill:none}
+      .paper{fill:#FFFFFF;stroke:#E6E1D8;stroke-width:3;filter:url(#smallShadow)}
+      .chip{fill:#F7F1E8;stroke:#E8DDCA;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="1040" cy="120" r="210" fill="#008767" opacity="0.08"/>
+  <circle cx="190" cy="590" r="250" fill="#C6A768" opacity="0.10"/>
+  <path d="M85 210C215 110 365 90 525 148" class="thin" opacity="0.08"/>
+  <path d="M805 612C940 520 1060 508 1198 568" class="thin" opacity="0.08"/>
+  
+  
+  <rect x="318" y="150" width="340" height="430" rx="30" class="paper"/>
+  <rect x="360" y="192" width="115.60000000000001" height="18" rx="9" fill="#E35B4F" opacity="0.9"/>
+  <rect x="360" y="242" width="237.99999999999997" height="14" rx="7" fill="#071A3D" opacity="0.28"/><rect x="360" y="284" width="197.2" height="14" rx="7" fill="#99A0AE" opacity="0.34"/><rect x="360" y="326" width="224.4" height="14" rx="7" fill="#99A0AE" opacity="0.34"/><rect x="360" y="368" width="163.2" height="14" rx="7" fill="#99A0AE" opacity="0.34"/>
+  <rect x="360" y="494" width="256" height="40" rx="20" fill="#F7F1E8"/>
+
+  <circle cx="792" cy="380" r="132" fill="#008767" opacity="0.14"/>
+  <path d="M792 248l112 46v74c0 86-50 142-112 174-62-32-112-88-112-174v-74l112-46z" fill="url(#green)" filter="url(#softShadow)"/>
+  <path d="M735 389l36 36 84-94" stroke="#FFFFFF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M440 436h100M414 482h152" class="mutedLine"/>
+
+</svg>

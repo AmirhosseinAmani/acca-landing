@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { registerServiceWorker } from './registerServiceWorker'
+import { initScrollRestoration } from './lib/scrollRestoration'
+
+initScrollRestoration()
 
 /** Catches unexpected component errors so the whole page never goes blank. */
 class ErrorBoundary extends React.Component {

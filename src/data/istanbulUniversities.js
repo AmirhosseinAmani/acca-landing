@@ -14,10 +14,10 @@ const defaultInfo = {
 const S = 'https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/';
 const logoUrls = {
   acibadem:   S + 'acibadem.svg',
-  arel:       S + 'arel.png',
+  arel:       '/assets/optimized/uni-arel-240.webp',
   atlas:      S + 'atlas.svg',
-  aydin:      S + 'aydin.jpg',
-  bahcesehir: S + 'bahcesehir.png',
+  aydin:      '/assets/optimized/uni-aydin-240.webp',
+  bahcesehir: '/assets/optimized/uni-bahcesehir-240.webp',
   beykoz:     S + 'beykoz-universitesi-seeklogo.png',
   // beykent: logo was incorrect — omitted until a verified replacement is provided
   biruni:     S + 'biruni-universitesi-seeklogo.svg',

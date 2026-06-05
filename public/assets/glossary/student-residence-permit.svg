@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title">
+  <title>student-residence-permit glossary concept visual</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F1E8"/>
+      <stop offset="0.55" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EFE6D7"/>
+    </linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A2B5E"/>
+      <stop offset="1" stop-color="#071A3D"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#45C7A3"/>
+      <stop offset="1" stop-color="#008767"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#071A3D" flood-opacity="0.14"/>
+    </filter>
+    <filter id="smallShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#071A3D" flood-opacity="0.13"/>
+    </filter>
+    <style>
+      .line{stroke:#071A3D;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .thin{stroke:#071A3D;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .mutedLine{stroke:#99A0AE;stroke-width:8;stroke-linecap:round;fill:none}
+      .paper{fill:#FFFFFF;stroke:#E6E1D8;stroke-width:3;filter:url(#smallShadow)}
+      .chip{fill:#F7F1E8;stroke:#E8DDCA;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="1040" cy="120" r="210" fill="#008767" opacity="0.08"/>
+  <circle cx="190" cy="590" r="250" fill="#C6A768" opacity="0.10"/>
+  <path d="M85 210C215 110 365 90 525 148" class="thin" opacity="0.08"/>
+  <path d="M805 612C940 520 1060 508 1198 568" class="thin" opacity="0.08"/>
+  
+  <path d="M356 300c0-92 74-166 166-166s166 74 166 166-74 166-166 166-166-74-166-166z" fill="#008767" opacity="0.12"/>
+  <circle cx="520" cy="252" r="68" fill="#C6A768" opacity="0.95"/>
+  <path d="M384 490c26-94 88-138 136-138s110 44 136 138" fill="url(#navy)" filter="url(#smallShadow)"/>
+  <path d="M398 188l122-54 122 54-122 54-122-54z" fill="#071A3D"/>
+  <path d="M640 194v78" class="thin"/>
+  
+  <rect x="690" y="248" width="320" height="210" rx="34" fill="#FFFFFF" stroke="#DDE3E6" stroke-width="3" filter="url(#softShadow)"/>
+  <circle cx="768" cy="330" r="38" fill="url(#green)"/>
+  <rect x="830" y="302" width="115" height="16" rx="8" fill="#071A3D" opacity="0.25"/>
+  <rect x="830" y="340" width="60" height="13" rx="7" fill="#99A0AE" opacity="0.38"/>
+  <rect x="732" y="386" width="236" height="46" rx="23" fill="#C6A768" opacity="0.12"/>
+
+  <path d="M180 554h220l-28-134H208l-28 134z" fill="#FFFFFF" stroke="#E6E1D8" stroke-width="4" filter="url(#smallShadow)"/>
+  <path d="M205 420l85-70 85 70" class="thin"/>
+
+</svg>

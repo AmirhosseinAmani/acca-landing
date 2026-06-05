@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title">
+  <title>proof-of-residence glossary concept visual</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F1E8"/>
+      <stop offset="0.55" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EFE6D7"/>
+    </linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A2B5E"/>
+      <stop offset="1" stop-color="#071A3D"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#45C7A3"/>
+      <stop offset="1" stop-color="#008767"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#071A3D" flood-opacity="0.14"/>
+    </filter>
+    <filter id="smallShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#071A3D" flood-opacity="0.13"/>
+    </filter>
+    <style>
+      .line{stroke:#071A3D;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .thin{stroke:#071A3D;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .mutedLine{stroke:#99A0AE;stroke-width:8;stroke-linecap:round;fill:none}
+      .paper{fill:#FFFFFF;stroke:#E6E1D8;stroke-width:3;filter:url(#smallShadow)}
+      .chip{fill:#F7F1E8;stroke:#E8DDCA;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="1040" cy="120" r="210" fill="#008767" opacity="0.08"/>
+  <circle cx="190" cy="590" r="250" fill="#C6A768" opacity="0.10"/>
+  <path d="M85 210C215 110 365 90 525 148" class="thin" opacity="0.08"/>
+  <path d="M805 612C940 520 1060 508 1198 568" class="thin" opacity="0.08"/>
+  
+  <path d="M296 498V330l164-136 164 136v168z" fill="#FFFFFF" stroke="#E2DED7" stroke-width="5" filter="url(#softShadow)"/>
+  <path d="M258 346l202-168 202 168" class="line"/>
+  <rect x="418" y="404" width="84" height="94" rx="12" fill="#C6A768"/>
+  
+  <rect x="706" y="164" width="300" height="386" rx="30" class="paper"/>
+  <rect x="748" y="206" width="102.00000000000001" height="18" rx="9" fill="#008767" opacity="0.9"/>
+  <rect x="748" y="256" width="210" height="14" rx="7" fill="#071A3D" opacity="0.28"/><rect x="748" y="298" width="174" height="14" rx="7" fill="#99A0AE" opacity="0.34"/><rect x="748" y="340" width="198" height="14" rx="7" fill="#99A0AE" opacity="0.34"/><rect x="748" y="382" width="144" height="14" rx="7" fill="#99A0AE" opacity="0.34"/>
+  <rect x="748" y="464" width="216" height="40" rx="20" fill="#F7F1E8"/>
+
+  <path d="M760 466h194" class="mutedLine"/>
+
+</svg>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 const MOBILE_ASTRONAUT_SRC =
-  'https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/astronaut.png';
+  '/assets/optimized/astronaut-640.webp';
 
 /**
  * HeroSection owns its own scroll tracking so the parent App never re-renders
@@ -9,6 +9,9 @@ const MOBILE_ASTRONAUT_SRC =
  */
 export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_SRC, onConsultationClick }) {
   const modelViewerRef = useRef(null);
+  const heroTrustItems = isFa
+    ? ['پذیرش دانشگاه', 'راهنمای ثبت‌نام', 'اقامت دانشجویی', 'مسکن و خوابگاه', 'بیمه سلامت', 'ورود و اسکان']
+    : ['University admission', 'Registration guidance', 'Student residence', 'Housing support', 'Insurance guidance', 'Arrival support'];
 
   useEffect(() => {
     if (!isDesktopViewport) return undefined;
@@ -42,32 +45,62 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
             <div className={`${darkMode ? 'darkGlass text-white' : 'glass text-neutral-700'} inline-flex max-w-full items-center gap-3 px-4 py-2.5 rounded-full mb-5 text-xs font-bold sm:text-sm`}>
               <div className="w-3 h-3 shrink-0 rounded-full bg-emerald-500 animate-pulse" />
               <span className="min-w-0 leading-tight">
-                {isFa ? 'ACCA EDU — Study in Turkey & International Student Placement' : 'ACCA EDU — Study in Turkey & International Student Placement'}
+                {isFa ? 'پذیرش، اقامت و مسیر ورود دانشجو به ترکیه' : 'Admission, residence and student arrival in Turkey'}
               </span>
             </div>
 
-            <h1 className={`hero-title text-[clamp(2.55rem,11vw,3.7rem)] md:text-[5rem] font-black ${darkMode ? 'text-white' : 'text-neutral-900'}`}>
-              {isFa ? 'تحصیل.' : 'Study.'}
+            <h1
+              style={isFa ? { lineHeight: '1.2' } : undefined}
+              className={`hero-title text-4xl font-black leading-[1.12] sm:text-5xl md:text-6xl xl:text-7xl ${darkMode ? 'text-white' : 'text-neutral-900'}`}
+            >
+              {isFa ? 'تحصیل در ترکیه،' : 'Study in Turkey,'}
               <br />
-              {isFa ? 'انتقالی.' : 'Transfer.'}
+              {isFa ? 'از پذیرش دانشگاه' : 'from university admission'}
               <br />
-              {isFa ? 'آینده.' : 'Future.'}
+              {isFa ? 'تا اقامت دانشجویی' : 'to student residence'}
             </h1>
 
             <p className={`mt-4 lg:mt-5 text-sm lg:text-base leading-7 max-w-xl font-medium ${darkMode ? 'text-neutral-300' : 'text-neutral-700'}`}>
-              {isFa ? 'تجربه‌ای مدرن از مشاوره تحصیلی، انتقالی پزشکی و مسیر بین‌المللی دانشجویان در ترکیه و اروپا.' : 'A modern experience in educational consulting, medical transfer, and international student pathways in Turkey and Europe.'}
+              {isFa
+                ? 'آکا ادو مسیر دانشجو را از انتخاب دانشگاه و رشته تا ثبت‌نام، اقامت دانشجویی، بیمه، مسکن و ورود به ترکیه قدم‌به‌قدم منظم می‌کند.'
+                : 'ACCA EDU guides students from university and program selection to registration, student residence, insurance, housing and arrival in Turkey.'}
             </p>
 
-            <button
-              type="button"
-              onClick={onConsultationClick}
-              className="mt-6 lg:mt-7 inline-flex items-center gap-3 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3.5 rounded-full text-sm font-black transition-all duration-300 hover:scale-[1.04] shadow-[0_8px_32px_rgba(5,150,105,0.35)] sm:px-7 sm:text-base"
-            >
-              {isFa ? 'شروع مشاوره' : 'Start Consultation'}
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={isFa ? 'rotate-180' : ''}>
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
+            <div className="mt-6 flex flex-wrap items-center gap-3 lg:mt-7">
+              <button
+                type="button"
+                onClick={onConsultationClick}
+                className="inline-flex items-center gap-3 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3.5 rounded-full text-sm font-black transition-all duration-300 hover:scale-[1.04] shadow-[0_8px_32px_rgba(5,150,105,0.35)] sm:px-7 sm:text-base"
+              >
+                {isFa ? 'بررسی رایگان شرایط' : 'Free eligibility review'}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={isFa ? 'rotate-180' : ''}>
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+
+              <a
+                href="?page=blog&post=student-residence-e-ikamet-2026"
+                className={`${darkMode ? 'border-white/15 bg-white/8 text-white hover:bg-white/12' : 'border-black/10 bg-white/70 text-neutral-900 hover:bg-white'} inline-flex items-center gap-2 rounded-full border px-5 py-3.5 text-sm font-black shadow-[0_10px_30px_rgba(7,26,61,0.08)] transition sm:px-6`}
+              >
+                {isFa ? 'راهنمای اقامت دانشجویی' : 'Student residence guide'}
+              </a>
+            </div>
+
+            {/* Service highlights — a plain check-list, intentionally NOT styled
+                as buttons so visitors don't mistake them for clickable links. */}
+            <ul className="mt-5 flex max-w-xl flex-wrap items-center gap-x-3.5 gap-y-1.5" aria-label={isFa ? 'خدمات کلیدی آکا' : 'ACCA key services'}>
+              {heroTrustItems.map((item) => (
+                <li
+                  key={item}
+                  className={`${darkMode ? 'text-white/65' : 'text-neutral-600'} inline-flex select-none items-center gap-1.5 text-[12px] font-bold leading-5`}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-emerald-600" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="relative flex items-center justify-center min-h-[150px] sm:min-h-[190px] lg:min-h-[520px] xl:min-h-[580px] w-full">
@@ -125,7 +158,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
               <div className="hero-mobile-astronaut-wrap relative z-10 flex items-center justify-center">
                 <img
                   src={MOBILE_ASTRONAUT_SRC}
-                  alt="ACCA EDU astronaut"
+                  alt={isFa ? 'راهنمای هوشمند آکا برای تحصیل در ترکیه' : 'ACCA EDU study in Turkey guide'}
                   width="320"
                   height="320"
                   fetchPriority="high"

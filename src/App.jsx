@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Award, BookOpen, Building2, Menu, MessageCircle, UserRound, X } from 'lucide-react';
+import { Award, BookOpen, Building2, Menu, Newspaper, UserRound, X } from 'lucide-react';
 import SmartScholarshipCalculator from './components/SmartScholarshipCalculator';
 import GreenScholarshipWidget from "./components/GreenScholarshipWidget";
 import AccaShowcaseSection from "./components/AccaShowcaseSection";
@@ -17,21 +17,22 @@ import FaqSection from './components/sections/FaqSection';
 import FinalCtaSection from './components/sections/FinalCtaSection';
 import ContactSection from './components/sections/ContactSection';
 import FloatingActions from './components/FloatingActions';
-import { COMPANY_WHATSAPP_URL } from './constants/contact';
 import { buildUniversitySlug, istanbulUniversities } from './data/istanbulUniversities';
 import { getUniversityLogo } from './data/universityLogoMap';
 
 const ProgramsSearchPage = lazy(() => import('./components/pages/ProgramsSearchPageV2'));
 const UniversitiesPage = lazy(() => import('./components/pages/UniversitiesPage'));
 const ScholarshipsPage = lazy(() => import('./components/pages/ScholarshipsPage'));
+const BlogPage = lazy(() => import('./components/pages/BlogPage'));
+const GlossaryPage = lazy(() => import('./components/pages/GlossaryPage'));
 
 const ACCA_LOGO_SRC =
-  'https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/Asset%20171.png';
+  '/assets/optimized/acca-logo-320.webp';
 const SITE_CANONICAL_ORIGIN = 'https://www.accaco.com';
 const BRAND_NAME = 'ACCA EDU';
 const BRAND_TAGLINE = 'Study in Turkey & International Student Placement';
 const BRAND_TITLE = `${BRAND_NAME} — ${BRAND_TAGLINE}`;
-const INDEXABLE_PAGES = new Set(['programs', 'universities', 'scholarships']);
+const INDEXABLE_PAGES = new Set(['programs', 'universities', 'scholarships', 'blog', 'glossary']);
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px) and (pointer: fine)';
 
@@ -80,13 +81,13 @@ function getRouteSeo({ page, params, isFa }) {
     params.get('q'),
   ].filter(Boolean)[0] || '';
   const defaultTitle = isFa
-    ? `${BRAND_TITLE} | \u0645\u0634\u0627\u0648\u0631\u0647 \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062a\u0631\u06a9\u06cc\u0647`
+    ? `تحصیل در ترکیه، از پذیرش دانشگاه تا اقامت دانشجویی | ${BRAND_NAME}`
     : BRAND_TITLE;
   const fallback = {
     title: defaultTitle,
     description: isFa
-      ? `${BRAND_TITLE} — \u0645\u0634\u0627\u0648\u0631\u0647 \u062a\u062d\u0635\u06cc\u0644\u06cc\u060c \u067e\u0630\u06cc\u0631\u0634 \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062a\u0631\u06a9\u06cc\u0647\u060c \u0628\u0648\u0631\u0633\u06cc\u0647\u060c \u0627\u0646\u062a\u0642\u0627\u0644\u06cc \u0648 \u0645\u0633\u06cc\u0631 \u062f\u0627\u0646\u0634\u062c\u0648\u06cc\u0627\u0646 \u0628\u06cc\u0646\u200c\u0627\u0644\u0645\u0644\u0644\u06cc.`
-      : `${BRAND_TITLE}. Educational consulting for university admission, scholarships, transfer, and international student pathways in Turkey.`,
+      ? 'آکا ادو مسیر تحصیل در ترکیه را از پذیرش دانشگاه و انتخاب رشته تا ثبت‌نام، اقامت دانشجویی، بیمه، مسکن و ورود دانشجو به ترکیه همراهی می‌کند.'
+      : `${BRAND_TITLE}. Educational consulting for university admission, registration guidance, student residence, insurance, housing and arrival support in Turkey.`,
     canonicalUrl: `${SITE_CANONICAL_ORIGIN}/`,
     shouldIndex: true,
     structuredData: buildWebPageJsonLd(defaultTitle, `${SITE_CANONICAL_ORIGIN}/`),
@@ -386,6 +387,7 @@ export default function ACCALandingPage() {
 
   useEffect(() => {
     if (!isDesktopViewport) return undefined;
+    if (window.customElements?.get('model-viewer')) return undefined;
 
     const existing = document.querySelector(
       'script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]'
@@ -396,6 +398,7 @@ export default function ACCALandingPage() {
       script.type = 'module';
       script.src =
         'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
+      script.fetchPriority = 'low';
 
       script.onload = () => {};
 
@@ -517,12 +520,13 @@ export default function ACCALandingPage() {
 
   // ── SEO: update <title> and meta description per page ─────────────────────
   useEffect(() => {
-    const routeSeo = getRouteSeo({ page, params, isFa });
     const PAGE_TITLES = {
       programs:     isFa ? `رشته‌ها و شهریه‌ها | ${BRAND_TITLE}` : `Programs & Tuition | ${BRAND_TITLE}`,
       universities: isFa ? `دانشگاه‌ها | ${BRAND_TITLE}`          : `Universities | ${BRAND_TITLE}`,
       scholarships: isFa ? `بورسیه‌ها | ${BRAND_TITLE}`            : `Scholarships | ${BRAND_TITLE}`,
       portal:       isFa ? `پنل کاربری | ${BRAND_TITLE}`           : `Client Portal | ${BRAND_TITLE}`,
+      blog:         isFa ? `بلاگ تحصیل در ترکیه، اقامت دانشجویی و پذیرش | ${BRAND_TITLE}` : `Study in Turkey Blog: Admission, Residence & Student Guides | ${BRAND_TITLE}`,
+      glossary:     isFa ? `فرهنگ‌نامه تحصیل در ترکیه، اقامت و زندگی دانشجویی | ${BRAND_TITLE}` : `Study in Turkey Glossary | ${BRAND_TITLE}`,
     };
     const PAGE_DESCS = {
       programs:     isFa
@@ -534,9 +538,15 @@ export default function ACCALandingPage() {
       scholarships: isFa
         ? 'لیست کامل بورسیه‌های ACCA برای دانشگاه‌های ترکیه — صرفه‌جویی تا ۶۰٪.'
         : 'Full list of ACCA scholarships for Turkish universities — save up to 60%.',
+      blog:         isFa
+        ? 'بلاگ راهنمای آکا برای دانشجویان بین‌المللی: اقامت دانشجویی ترکیه، ای‌کامِت، هزینه اقامت، هارچ، دولت الکترونیک ترکیه، ثبت آدرس، پذیرش دانشگاه و مسیرهای تحصیل در ترکیه.'
+        : 'ACCA EDU data-led blog for international students: Turkey student residence, e-İkamet, residence fees, e-Devlet, address registration, university admission and study-in-Turkey guidance.',
+      glossary:     isFa
+        ? 'فرهنگ‌نامه آکا برای توضیح ساده اصطلاحات تحصیل در ترکیه، اقامت دانشجویی، ای‌کامِت، هارچ، ثبت آدرس، کارت اقامت و خدمات دولتی ترکیه.'
+        : 'Glossary for study, residence and student life terms in Turkey.',
     };
     document.title = PAGE_TITLES[page] || (isFa
-      ? `${BRAND_TITLE} | مشاوره پذیرش دانشگاه‌های ترکیه`
+      ? `تحصیل در ترکیه، از پذیرش دانشگاه تا اقامت دانشجویی | ${BRAND_NAME}`
       : BRAND_TITLE);
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc && PAGE_DESCS[page]) metaDesc.setAttribute('content', PAGE_DESCS[page]);
@@ -569,27 +579,50 @@ export default function ACCALandingPage() {
     setElementAttr('meta[property="og:description"]', 'content', currentDescription);
     setElementAttr('meta[name="twitter:title"]', 'content', document.title);
     setElementAttr('meta[name="twitter:description"]', 'content', currentDescription);
-    document.title = routeSeo.title;
-    if (metaDesc) metaDesc.setAttribute('content', routeSeo.description);
-    setElementAttr('link[rel="canonical"]', 'href', routeSeo.canonicalUrl);
-    setElementAttr('link[hreflang="fa"]', 'href', routeSeo.canonicalUrl);
-    setElementAttr('link[hreflang="en"]', 'href', routeSeo.canonicalUrl);
-    setElementAttr('link[hreflang="x-default"]', 'href', routeSeo.canonicalUrl);
-    setElementAttr('meta[property="og:url"]', 'content', routeSeo.canonicalUrl);
-    setElementAttr('meta[property="og:title"]', 'content', routeSeo.title);
-    setElementAttr('meta[property="og:description"]', 'content', routeSeo.description);
-    setElementAttr('meta[name="twitter:title"]', 'content', routeSeo.title);
-    setElementAttr('meta[name="twitter:description"]', 'content', routeSeo.description);
-    setElementAttr('meta[name="robots"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
-      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
-      : 'noindex, nofollow');
-    setElementAttr('meta[name="googlebot"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
-      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
-      : 'noindex, nofollow');
-    setElementAttr('meta[name="bingbot"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
-      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
-      : 'noindex, nofollow');
-    upsertJsonLd('acca-route-structured-data', routeSeo.structuredData);
+
+    // Rich per-route SEO override. For blog/glossary this comes from a lazily
+    // loaded module so the large datasets stay out of the main bundle.
+    const applyRichSeo = (routeSeo) => {
+      if (!routeSeo) return;
+      document.title = routeSeo.title;
+      if (metaDesc) metaDesc.setAttribute('content', routeSeo.description);
+      setElementAttr('link[rel="canonical"]', 'href', routeSeo.canonicalUrl);
+      setElementAttr('link[hreflang="fa"]', 'href', routeSeo.canonicalUrl);
+      setElementAttr('link[hreflang="en"]', 'href', routeSeo.canonicalUrl);
+      setElementAttr('link[hreflang="x-default"]', 'href', routeSeo.canonicalUrl);
+      setElementAttr('meta[property="og:url"]', 'content', routeSeo.canonicalUrl);
+      setElementAttr('meta[property="og:title"]', 'content', routeSeo.title);
+      setElementAttr('meta[property="og:description"]', 'content', routeSeo.description);
+      setElementAttr('meta[name="twitter:title"]', 'content', routeSeo.title);
+      setElementAttr('meta[name="twitter:description"]', 'content', routeSeo.description);
+      if (routeSeo.image) {
+        setElementAttr('meta[property="og:image"]', 'content', routeSeo.image);
+        setElementAttr('meta[name="twitter:image"]', 'content', routeSeo.image);
+      }
+      if (routeSeo.keywords) setElementAttr('meta[name="keywords"]', 'content', routeSeo.keywords);
+      setElementAttr('meta[name="robots"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
+        ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+        : 'noindex, nofollow');
+      setElementAttr('meta[name="googlebot"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
+        ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+        : 'noindex, nofollow');
+      setElementAttr('meta[name="bingbot"]', 'content', routeSeo.shouldIndex && (!page || INDEXABLE_PAGES.has(page))
+        ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+        : 'noindex, nofollow');
+      if (routeSeo.structuredData) upsertJsonLd('acca-route-structured-data', routeSeo.structuredData);
+    };
+
+    let cancelled = false;
+    if (page === 'blog' || page === 'glossary') {
+      import('./lib/knowledgeSeo')
+        .then(({ getKnowledgeRouteSeo }) => {
+          if (!cancelled) applyRichSeo(getKnowledgeRouteSeo({ page, params, isFa }));
+        })
+        .catch(() => { /* SEO enrichment is non-critical */ });
+    } else {
+      applyRichSeo(getRouteSeo({ page, params, isFa }));
+    }
+    return () => { cancelled = true; };
   }, [page, isFa, params]);
 
 
@@ -687,6 +720,52 @@ export default function ACCALandingPage() {
           darkMode={darkMode}
           isFa={isFa}
         />
+      </>
+    );
+  } else if (page === 'blog') {
+    pageContent = (
+      <>
+        <Suspense fallback={<PageLoadingScreen darkMode={darkMode} isFa={isFa} />}>
+          <BlogPage
+            darkMode={darkMode}
+            isFa={isFa}
+            ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+            postSlug={params.get('post')}
+            onConsultationClick={() => setConsultationOpen(true)}
+            onToggleDarkMode={() => setDarkMode(!darkMode)}
+            onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+          />
+        </Suspense>
+        <ConsultationModal
+          open={consultationOpen}
+          onClose={() => setConsultationOpen(false)}
+          darkMode={darkMode}
+          isFa={isFa}
+        />
+        {floatingActions}
+      </>
+    );
+  } else if (page === 'glossary') {
+    pageContent = (
+      <>
+        <Suspense fallback={<PageLoadingScreen darkMode={darkMode} isFa={isFa} />}>
+          <GlossaryPage
+            darkMode={darkMode}
+            isFa={isFa}
+            ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+            termSlug={params.get('term')}
+            onConsultationClick={() => setConsultationOpen(true)}
+            onToggleDarkMode={() => setDarkMode(!darkMode)}
+            onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+          />
+        </Suspense>
+        <ConsultationModal
+          open={consultationOpen}
+          onClose={() => setConsultationOpen(false)}
+          darkMode={darkMode}
+          isFa={isFa}
+        />
+        {floatingActions}
       </>
     );
   } else if (page === 'portal') {
@@ -1828,14 +1907,12 @@ export default function ACCALandingPage() {
 
           <div className="hidden lg:flex items-center gap-5">
             <a
-              href={COMPANY_WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="?page=blog"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
-                <MessageCircle size={17} strokeWidth={2.4} />
-                {isFa ? 'ارتباط مستقیم' : 'Direct Contact'}
+                <Newspaper size={17} strokeWidth={2.4} />
+                {isFa ? 'بلاگ' : 'Blog'}
               </span>
             </a>
 
@@ -1926,14 +2003,12 @@ export default function ACCALandingPage() {
           >
             <div className="grid gap-2">
               <a
-                href={COMPANY_WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="?page=blog"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
-                <span>{isFa ? 'ارتباط مستقیم' : 'Direct Contact'}</span>
-                <MessageCircle size={19} />
+                <span>{isFa ? 'بلاگ' : 'Blog'}</span>
+                <Newspaper size={19} />
               </a>
 
               <a

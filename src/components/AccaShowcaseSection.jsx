@@ -7,44 +7,33 @@ const persianFontStyle = {
   fontWeight: 900,
 };
 
-const showcaseImages = [
-  "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/1.jpg",
-  "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/2.jpg",
-  "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/3.jpg",
-  "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/4.jpg",
-  "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/5.jpg",
-];
-
+// Ordered so C3 is front/center (shown first); the closer to C3 by number,
+// the nearer it sits in the carousel ring (C2/C4 flank it, C1/C5 at the back).
 const showcaseSlides = [
   {
-    titleFa: "بورسیه صد درصد",
-    titleEn: "100% Scholarship",
-    image:
-      showcaseImages[0],
+    titleFa: "نمونه‌کار آکا ادو — مرکزی",
+    titleEn: "ACCA EDU showcase — featured",
+    image: "/assets/optimized/showcase-c3.webp",
   },
   {
-    titleFa: "ACCA EDU",
-    titleEn: "ACCA EDU",
-    image:
-      showcaseImages[1],
+    titleFa: "نمونه‌کار آکا ادو",
+    titleEn: "ACCA EDU showcase",
+    image: "/assets/optimized/showcase-c4.webp",
   },
   {
-    titleFa: "ACCA Showcase",
-    titleEn: "ACCA Showcase",
-    image:
-      showcaseImages[2],
+    titleFa: "نمونه‌کار آکا ادو",
+    titleEn: "ACCA EDU showcase",
+    image: "/assets/optimized/showcase-c5.webp",
   },
   {
-    titleFa: "ACCA Visual",
-    titleEn: "ACCA Visual",
-    image:
-      showcaseImages[3],
+    titleFa: "نمونه‌کار آکا ادو",
+    titleEn: "ACCA EDU showcase",
+    image: "/assets/optimized/showcase-c1.webp",
   },
   {
-    titleFa: "ACCA Slide",
-    titleEn: "ACCA Slide",
-    image:
-      showcaseImages[4],
+    titleFa: "نمونه‌کار آکا ادو",
+    titleEn: "ACCA EDU showcase",
+    image: "/assets/optimized/showcase-c2.webp",
   },
 ];
 
@@ -88,6 +77,7 @@ function SlideCard({ slide, isFa, darkMode, mobile = false, active = false }) {
         alt={title}
         className="absolute inset-0 h-full w-full object-cover"
         loading="lazy"
+        decoding="async"
       />
 
       <div className="absolute inset-0 bg-black/10" />

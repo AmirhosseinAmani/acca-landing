@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title">
+  <title>short-term-residence-permit glossary concept visual</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F1E8"/>
+      <stop offset="0.55" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EFE6D7"/>
+    </linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A2B5E"/>
+      <stop offset="1" stop-color="#071A3D"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#45C7A3"/>
+      <stop offset="1" stop-color="#008767"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#071A3D" flood-opacity="0.14"/>
+    </filter>
+    <filter id="smallShadow" x="-20%" y="-25%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#071A3D" flood-opacity="0.13"/>
+    </filter>
+    <style>
+      .line{stroke:#071A3D;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .thin{stroke:#071A3D;stroke-width:7;stroke-linecap:round;stroke-linejoin:round;fill:none}
+      .mutedLine{stroke:#99A0AE;stroke-width:8;stroke-linecap:round;fill:none}
+      .paper{fill:#FFFFFF;stroke:#E6E1D8;stroke-width:3;filter:url(#smallShadow)}
+      .chip{fill:#F7F1E8;stroke:#E8DDCA;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="1040" cy="120" r="210" fill="#008767" opacity="0.08"/>
+  <circle cx="190" cy="590" r="250" fill="#C6A768" opacity="0.10"/>
+  <path d="M85 210C215 110 365 90 525 148" class="thin" opacity="0.08"/>
+  <path d="M805 612C940 520 1060 508 1198 568" class="thin" opacity="0.08"/>
+  
+  <rect x="282" y="168" width="420" height="350" rx="34" fill="#FFFFFF" stroke="#E2DED7" stroke-width="4" filter="url(#softShadow)"/>
+  <rect x="282" y="168" width="420" height="92" rx="34" fill="url(#green)"/>
+  <circle cx="395" cy="345" r="34" fill="#C6A768"/>
+  <circle cx="492" cy="345" r="34" fill="#C6A768" opacity="0.65"/>
+  <circle cx="589" cy="345" r="34" fill="#C6A768" opacity="0.35"/>
+  <text x="492" y="455" text-anchor="middle" font-size="92" font-family="Arial, sans-serif" font-weight="800" fill="#071A3D">90</text>
+  <rect x="720" y="282" width="250" height="230" rx="38" fill="#071A3D" filter="url(#smallShadow)"/>
+  <path d="M785 282v-42c0-28 24-52 60-52s60 24 60 52v42" class="thin" stroke="#071A3D"/>
+  <rect x="758" y="340" width="176" height="26" rx="13" fill="#C6A768"/>
+
+</svg>

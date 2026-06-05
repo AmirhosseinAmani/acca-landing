@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowLeft,
   Award,
   Check,
   ChevronDown,
@@ -14,6 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import PriceRangeSlider from '../PriceRangeSlider';
+import { BackButton, MainNav } from '../SiteNav';
 import {
   formatScholarshipPrice,
   normalizeScholarshipText,
@@ -213,9 +213,14 @@ export default function ScholarshipsPage({
       className={`${darkMode ? 'bg-[#050816] text-white' : 'bg-[#F7F1E8] text-neutral-950'} min-h-screen overflow-hidden px-4 py-6 sm:px-6 sm:py-8`}
     >
       <div className={`${darkMode ? 'darkGlass' : 'glass'} mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full px-5 py-4 sm:px-7`}>
-        <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'} className="flex items-center gap-3">
-          <img src={ACCA_LOGO_SRC} alt="ACCA EDU Logo" className="h-10 w-auto object-contain sm:h-11" />
-        </a>
+        <div className="flex shrink-0 items-center gap-2">
+          <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'} className="flex items-center gap-3">
+            <img src={ACCA_LOGO_SRC} alt="ACCA EDU Logo" className="h-10 w-auto object-contain sm:h-11" />
+          </a>
+          <BackButton fallback="/" isFa={isFa} darkMode={darkMode} />
+        </div>
+
+        <MainNav active={undefined} isFa={isFa} darkMode={darkMode} />
 
         <div className="flex items-center gap-2 sm:gap-3">
           <button
@@ -234,14 +239,6 @@ export default function ScholarshipsPage({
           >
             {darkMode ? <Sun size={17} /> : <Moon size={17} />}
           </button>
-
-          <a
-            href="/"
-            className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-black/5 text-black hover:bg-black/10'} inline-flex items-center gap-2 rounded-full px-4 py-3 text-xs font-black transition sm:px-6 sm:text-sm`}
-          >
-            <ArrowLeft className={isFa ? 'rotate-180' : ''} size={16} />
-            {ui.back}
-          </a>
         </div>
       </div>
 

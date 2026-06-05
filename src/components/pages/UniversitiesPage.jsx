@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowLeft,
   Award,
   BookOpen,
   CalendarDays,
@@ -18,6 +17,7 @@ import {
   Sun,
   X,
 } from 'lucide-react';
+import { BackButton, MainNav } from '../SiteNav';
 import { istanbulUniversities } from '../../data/istanbulUniversities';
 
 const filterOptions = [
@@ -138,6 +138,26 @@ export default function UniversitiesPage({
   const [selectedUniversity, setSelectedUniversity] = useState(getInitialProfileUniversity);
   const ui = isFa ? copy.fa : copy.en;
 
+  // Open/close the details as a state-driven overlay (no page reload) so the
+  // visitor returns to the exact scroll position when they close it. The URL is
+  // still synced (via replaceState) so a profile link stays shareable.
+  const openDetails = (university) => {
+    setSelectedUniversity(university);
+    try {
+      window.history.replaceState(null, '', buildUniversityProfileUrl(university));
+    } catch {
+      /* history may be restricted; the modal still works */
+    }
+  };
+  const closeDetails = () => {
+    setSelectedUniversity(null);
+    try {
+      window.history.replaceState(null, '', '?page=universities');
+    } catch {
+      /* ignore */
+    }
+  };
+
   const filteredUniversities = useMemo(() => {
     const normalizedQuery = normalizeText(query);
 
@@ -173,13 +193,18 @@ export default function UniversitiesPage({
       <div
         className={`${darkMode ? 'darkGlass' : 'glass'} mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 rounded-[28px] px-4 py-3 sm:rounded-full sm:px-7 sm:py-4`}
       >
-        <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
-          <img
-            src={ACCA_LOGO_SRC}
-            alt="ACCA EDU Logo"
-            className="h-10 w-auto object-contain sm:h-11"
-          />
-        </a>
+        <div className="flex shrink-0 items-center gap-2">
+          <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
+            <img
+              src={ACCA_LOGO_SRC}
+              alt="ACCA EDU Logo"
+              className="h-10 w-auto object-contain sm:h-11"
+            />
+          </a>
+          <BackButton fallback="/" isFa={isFa} darkMode={darkMode} />
+        </div>
+
+        <MainNav active="universities" isFa={isFa} darkMode={darkMode} />
 
         <div className="flex flex-wrap items-center justify-end gap-2">
           <button
@@ -198,14 +223,6 @@ export default function UniversitiesPage({
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-
-          <a
-            href="/"
-            className={`${darkMode ? 'bg-white/10 text-white' : 'bg-black/5 text-black'} inline-flex items-center gap-2 rounded-full px-4 py-3 text-sm font-black sm:px-5`}
-          >
-            <ArrowLeft size={16} className={isFa ? 'rotate-180' : ''} />
-            {ui.back}
-          </a>
         </div>
       </div>
 
@@ -357,6 +374,7 @@ export default function UniversitiesPage({
                 isFa={isFa}
                 ui={ui}
                 onConsultationClick={onConsultationClick}
+                onOpenDetails={openDetails}
               />
             ))}
           </section>
@@ -375,7 +393,7 @@ export default function UniversitiesPage({
           darkMode={darkMode}
           isFa={isFa}
           ui={ui}
-          onClose={() => setSelectedUniversity(null)}
+          onClose={closeDetails}
         />
       ) : null}
     </div>
@@ -388,6 +406,7 @@ function UniversityCard({
   isFa,
   ui,
   onConsultationClick,
+  onOpenDetails,
 }) {
   const profile = university.decisionProfile;
   const websiteUrl = normalizeUrl(university.website);
@@ -492,6 +511,12 @@ function UniversityCard({
       <div className="mt-auto grid grid-cols-2 gap-2 pt-5 sm:flex sm:flex-wrap">
         <a
           href={buildUniversityProfileUrl(university)}
+          onClick={(event) => {
+            // Modified clicks (new tab / middle-click) keep their native behavior.
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1) return;
+            event.preventDefault();
+            onOpenDetails?.(university);
+          }}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[15px] bg-[#071A3D] px-3 py-3 text-center text-xs font-black text-white transition hover:scale-[1.02] sm:px-4"
         >
           <Sparkles size={15} />

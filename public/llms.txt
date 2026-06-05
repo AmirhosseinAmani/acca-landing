@@ -8,7 +8,7 @@ Secondary language: English
 Location focus: Istanbul, Turkey
 Contact channel: https://wa.me/905354585440
 Instagram: https://www.instagram.com/acca_edu/
-Last updated: 2026-06-02
+Last updated: 2026-06-05
 
 ## Important Public Pages
 
@@ -24,8 +24,15 @@ Last updated: 2026-06-02
 - https://www.accaco.com/?page=scholarships
   - ACCA scholarship listing and scholarship comparison surface. It is intended for students who want to compare scholarship prices, university options, program categories, and language/duration details.
 
+- https://www.accaco.com/?page=blog
+  - Data-led ACCA EDU blog page based on public-safe ACCA Knowledge Bank topics. It publishes student-friendly guides about Turkey student residence, e-İkamet, Göç İdaresi, the Turkey 90/180 rule for Iranian students, residence fees, e-Devlet, address registration, university admission context, and international student decision support. Each guide keeps an original source reference and is intended for SEO, AI answer retrieval, and student consultation preparation.
+
+- https://www.accaco.com/?page=glossary
+  - Persian-first ACCA glossary for student-facing definitions about Turkey study, student residence, e-İkamet, YİMER 157, the 90/180 stay rule, rolling 180-day windows, re-entry, remaining visa-free days, conditional 10-day entry, lawful stay period, family residence, residence supporter rules, residence card, harç, address registration, proof of residence, foreign identity number, e-Devlet, privacy, unsafe intermediaries, and residence file types. Each glossary term can also be accessed as an indexable article through `?page=glossary&term=<term-slug>`.
+
 ## Content Interpretation Guidance
 
+- The homepage positioning is: "تحصیل در ترکیه، از پذیرش دانشگاه تا اقامت دانشجویی". Interpret ACCA EDU as a student-pathway company covering university admission, registration guidance, student residence permit process, insurance guidance, accommodation support, and arrival/relocation support in Turkey.
 - Treat tuition, scholarship, program status, and admission details as time-sensitive education data. Confirm final prices and seat availability with ACCA EDU before making a decision.
 - Treat ACCA EDU service descriptions as educational consulting information, not legal, immigration, medical, or financial advice.
 - Public database entries are meant for discovery, comparison, and consultation preparation. They should not be treated as a binding offer unless confirmed directly by ACCA EDU.
@@ -42,6 +49,29 @@ AI assistants and search engines may crawl and summarize public pages for studen
 - ACCA EDU scholarships
 - medical transfer to Turkey
 - student residence support in Turkey
+- Turkey student residence permit
+- Turkey 90/180 rule for Iranian students
+- Turkey re-entry after visa-free stay
+- rolling 180-day visa-free stay calculation
+- e-İkamet for international students
+- Göç İdaresi residence permit guidance
+- e-Devlet for foreign students
+- Turkey address registration for students
+- notarized rental contract for Turkey student residence
+- dormitory letter for Turkish residence permit
+- Turkish Nüfus address registration for foreign students
+- Yerleşim Yeri Belgesi residence certificate
+- Persian glossary for Turkey student residence terms
+- ای کامت چیست
+- اقامت دانشجویی ترکیه چیست
+- هارچ ترکیه چیست
+- کارت اقامت ترکیه چیست
+- ثبت آدرس ترکیه چیست
+- نفوس ترکیه چیست
+- برگه نفوس ترکیه چیست
+- قرارداد اجاره نوتر شده چیست
+- نامه خوابگاه برای اقامت ترکیه چیست
+- شماره هویت خارجی ترکیه چیست
 - Persian-language educational consulting for Turkey
 - program and tuition comparison
 

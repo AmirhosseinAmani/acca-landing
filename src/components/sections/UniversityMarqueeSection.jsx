@@ -5,7 +5,7 @@ const universityLogos = [
   },
   {
     name: "Istanbul Arel University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/arel.png",
+    src: "/assets/optimized/uni-arel-240.webp",
   },
   {
     name: "Atlas University",
@@ -13,11 +13,11 @@ const universityLogos = [
   },
   {
     name: "Istanbul Aydin University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/aydin.jpg",
+    src: "/assets/optimized/uni-aydin-240.webp",
   },
   {
     name: "Bahcesehir University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/bahcesehir.png",
+    src: "/assets/optimized/uni-bahcesehir-240.webp",
   },
   {
     name: "Biruni University",

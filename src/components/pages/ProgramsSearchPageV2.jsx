@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import PriceRangeSlider from '../PriceRangeSlider';
+import { BackButton, MainNav } from '../SiteNav';
 
 const EXPORT_LIMIT = 100;
 const AVAILABLE_STATUS = 'Available';
@@ -475,13 +476,18 @@ function ProgramsSearchWorkspace({
       `}</style>
 
       <div className={`${darkMode ? 'darkGlass' : 'glass'} program-no-print mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 rounded-full px-5 py-3 sm:px-7 sm:py-4`}>
-        <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
-          <img
-            src={ACCA_LOGO_SRC}
-            alt="ACCA EDU Logo"
-            className="h-10 w-auto object-contain sm:h-11"
-          />
-        </a>
+        <div className="flex shrink-0 items-center gap-2">
+          <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
+            <img
+              src={ACCA_LOGO_SRC}
+              alt="ACCA EDU Logo"
+              className="h-10 w-auto object-contain sm:h-11"
+            />
+          </a>
+          <BackButton fallback="/" isFa={isFa} darkMode={darkMode} />
+        </div>
+
+        <MainNav active="programs" isFa={isFa} darkMode={darkMode} />
 
         <div className="flex items-center gap-2">
           <button
@@ -500,14 +506,6 @@ function ProgramsSearchWorkspace({
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-
-          <a
-            href="/"
-            className={`${darkMode ? 'bg-white/10 text-white' : 'bg-black/5 text-black'} inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-black`}
-          >
-            <ArrowLeft size={16} className={isFa ? 'rotate-180' : ''} />
-            {ui.back}
-          </a>
         </div>
       </div>
 
