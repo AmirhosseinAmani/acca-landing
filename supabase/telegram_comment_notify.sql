@@ -18,7 +18,7 @@
 -- down or blocks the comment insert.
 -- =============================================================================
 
-create extension if not exists pg_net with schema extensions;
+create extension if not exists pg_net;
 
 create or replace function public.notify_comment_to_telegram()
 returns trigger
