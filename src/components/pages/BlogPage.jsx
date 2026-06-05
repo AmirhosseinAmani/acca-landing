@@ -74,6 +74,17 @@ function formatCount(value, isFa) {
   return new Intl.NumberFormat(isFa ? 'fa-IR' : 'en-US').format(Number(value) || 0);
 }
 
+function formatAvg(value, isFa) {
+  try {
+    return new Intl.NumberFormat(isFa ? 'fa-IR' : 'en-US', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }).format(Number(value) || 0);
+  } catch {
+    return String(Number(value) || 0);
+  }
+}
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -176,26 +187,24 @@ function MetaRow({ post, isFa, darkMode }) {
   );
 }
 
-/** Compact popularity badge (rating vote count + comment count) shown in blog surfaces. */
+/** Compact popularity badge — average ★ (with vote count) + comment count. */
 function CardStats({ stat, isFa, showZero = false }) {
-  if (!stat || (!showZero && stat.ratingCount === 0 && stat.commentCount === 0)) return null;
-  const ratingCount = stat.ratingCount || 0;
-  const commentCount = stat.commentCount || 0;
+  const ratingCount = stat?.ratingCount || 0;
+  const commentCount = stat?.commentCount || 0;
+  const avg = stat?.avg || 0;
+  if (!showZero && ratingCount === 0 && commentCount === 0) return null;
 
   return (
     <span className="inline-flex items-center gap-3 whitespace-nowrap text-[11px] font-black text-[#C6A768]">
-      {(showZero || ratingCount > 0 || commentCount > 0) && (
-        <span className="inline-flex items-center gap-1" title={tt('تعداد امتیازها', 'Rating count', isFa)}>
-          <Star size={12} className="fill-[#C6A768] text-[#C6A768]" />
-          {formatCount(ratingCount, isFa)}
-          <span className="hidden sm:inline">{tt('امتیاز', 'ratings', isFa)}</span>
-        </span>
-      )}
+      <span className="inline-flex items-center gap-1" title={tt('میانگین امتیاز', 'Average rating', isFa)}>
+        <Star size={12} className="fill-[#C6A768] text-[#C6A768]" />
+        {ratingCount > 0 ? formatAvg(avg, isFa) : '—'}
+        {ratingCount > 0 && <span className="opacity-60">({formatCount(ratingCount, isFa)})</span>}
+      </span>
       {(showZero || commentCount > 0) && (
         <span className="inline-flex items-center gap-1" title={tt('تعداد نظرها', 'Comment count', isFa)}>
           <MessageCircle size={12} />
           {formatCount(commentCount, isFa)}
-          <span className="hidden sm:inline">{tt('نظر', 'comments', isFa)}</span>
         </span>
       )}
     </span>
