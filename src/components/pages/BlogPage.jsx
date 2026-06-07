@@ -21,11 +21,12 @@ import {
   MessageCircle,
   Newspaper,
   Quote,
+  Search,
   ShieldCheck,
   Sparkles,
   Star,
 } from 'lucide-react';
-import { getGlossaryTermForGlossaryItem } from '../../data/knowledgeGlossary';
+import { getGlossaryTermForGlossaryItem, glossaryTerms } from '../../data/knowledgeGlossary';
 import { getBlogPostBySlug, knowledgeBlogPosts } from '../../data/knowledgeBlogPosts';
 import {
   AuroraBackground,
@@ -213,6 +214,113 @@ function CardStats({ stat, isFa, showZero = false }) {
 
 /* ============================== INDEX VIEW ============================== */
 
+/** Normalize for forgiving Persian/English matching (Arabic↔Persian yeh/kaf,
+ *  ZWNJ → space, lower-case). */
+function normalizeSearch(value) {
+  return (value || '')
+    .toLowerCase()
+    .replace(/ي/g, 'ی') // Arabic yeh → Persian yeh
+    .replace(/ك/g, 'ک') // Arabic kaf → Persian kaf
+    .replace(/\p{M}/gu, '') // strip combining marks (harakat)
+    .replace(/\p{Cf}/gu, '') // strip format chars (ZWNJ / ZWJ / bidi)
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Minimal inline search over both guides and glossary terms. Shows a compact
+ *  results dropdown; each result links straight to the article / term page. */
+function KnowledgeSearch({ darkMode, isFa }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const results = useMemo(() => {
+    const q = normalizeSearch(query);
+    if (q.length < 2) return [];
+    const out = [];
+
+    for (const post of knowledgeBlogPosts) {
+      const hay = normalizeSearch(
+        [post.fa?.title, post.en?.title, post.fa?.excerpt, post.en?.excerpt, post.category, (post.tags || []).join(' ')]
+          .filter(Boolean)
+          .join(' ')
+      );
+      if (hay.includes(q)) {
+        out.push({ key: `a-${post.slug}`, type: 'article', title: textFor(post, isFa).title, href: postHref(post.slug) });
+      }
+    }
+
+    for (const term of glossaryTerms) {
+      const hay = normalizeSearch(
+        [...(term.labels || []), term.title?.fa, term.title?.en, term.question?.fa, term.question?.en]
+          .filter(Boolean)
+          .join(' ')
+      );
+      if (hay.includes(q)) {
+        out.push({ key: `t-${term.slug}`, type: 'term', title: isFa ? term.title?.fa : term.title?.en, href: term.href });
+      }
+    }
+
+    return out.slice(0, 7);
+  }, [query, isFa]);
+
+  const showPanel = open && normalizeSearch(query).length >= 2;
+
+  return (
+    <div
+      className="relative mt-6 w-full max-w-md"
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false); }}
+    >
+      <div className="relative">
+        <Search
+          size={17}
+          aria-hidden="true"
+          className={`${darkMode ? 'text-white/45' : 'text-neutral-400'} pointer-events-none absolute top-1/2 -translate-y-1/2 ltr:left-4 rtl:right-4`}
+        />
+        <input
+          type="search"
+          dir="auto"
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(e) => { if (e.key === 'Escape') { setOpen(false); e.currentTarget.blur(); } }}
+          placeholder={tt('جستجوی راهنما یا اصطلاح…', 'Search guides or glossary…', isFa)}
+          aria-label={tt('جستجو در نالج‌بانک آکا', 'Search the ACCA knowledge bank', isFa)}
+          className={`${darkMode ? 'border-white/12 bg-white/[0.06] text-white placeholder:text-white/40 focus:border-[#C6A768]/60' : 'border-black/10 bg-white/80 text-neutral-900 placeholder:text-neutral-400 focus:border-[#C6A768]/70'} w-full rounded-full border py-3 pe-4 ps-11 text-sm font-bold shadow-[0_10px_30px_rgba(7,26,61,0.06)] outline-none transition focus:ring-4 focus:ring-[#C6A768]/15`}
+        />
+      </div>
+
+      {showPanel && (
+        <div className={`${darkMode ? 'border-white/12 bg-[#0a1424]' : 'border-black/[0.08] bg-white'} absolute z-30 mt-2 w-full overflow-hidden rounded-2xl border shadow-[0_24px_60px_rgba(7,26,61,0.18)]`}>
+          {results.length === 0 ? (
+            <p className={`${darkMode ? 'text-white/55' : 'text-neutral-500'} px-4 py-4 text-sm font-bold`}>
+              {tt('چیزی پیدا نشد', 'No matches found', isFa)}
+            </p>
+          ) : (
+            <ul className="max-h-80 overflow-auto py-1.5">
+              {results.map((r) => (
+                <li key={r.key}>
+                  <a
+                    href={r.href}
+                    className={`${darkMode ? 'text-white/85 hover:bg-white/[0.07]' : 'text-neutral-800 hover:bg-black/[0.04]'} flex items-center gap-3 px-4 py-2.5 transition`}
+                  >
+                    {r.type === 'article'
+                      ? <FileText size={16} className="shrink-0 text-[#C6A768]" />
+                      : <LibraryBig size={16} className="shrink-0 text-[#C6A768]" />}
+                    <span className="line-clamp-1 flex-1 text-sm font-bold">{r.title}</span>
+                    <span className={`${darkMode ? 'bg-white/8 text-white/50' : 'bg-black/[0.05] text-neutral-500'} shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black`}>
+                      {r.type === 'article' ? tt('مقاله', 'Guide', isFa) : tt('اصطلاح', 'Term', isFa)}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BlogIndex({ darkMode, isFa, onConsultationClick }) {
   const [stats, setStats] = useState({});
 
@@ -297,6 +405,8 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
               </span>
             ))}
           </div>
+
+          <KnowledgeSearch darkMode={darkMode} isFa={isFa} />
         </Reveal>
 
         {/* Featured card with tilt */}
