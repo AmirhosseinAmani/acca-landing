@@ -660,19 +660,14 @@ export const scholarshipStats = {
   maxPrice: Math.max(...scholarshipRows.map((row) => row.priceAmount).filter(Boolean)),
 };
 
-export function findScholarshipPriceForSelection({ university, major, degree, language, programRows = [] }) {
+export function findScholarshipPriceForSelection({ university, major, degree, language }) {
   const universityKey = normalizeUniversityKey(university);
   const requestedCity = getUniversityCityToken(university);
-  const category = getProgramCategory(major || degree);
-  const canUseBachelorFallback = canUseGeneralBachelorFallback(category, degree, programRows);
-  const preferredLanguages = Array.from(
-    new Set(
-      [
-        inferLanguage(language),
-        ...programRows.map((row) => inferLanguage(row.language || row.program)),
-      ].filter(Boolean)
-    )
-  );
+  const category = getSelectionCategory(major, degree);
+  const preferredLanguage = inferLanguage(language);
+
+  if (!universityKey || !category || !preferredLanguage) return null;
+
   const universityMatches = scholarshipRows.filter((row) => {
     const rowCity = getUniversityCityToken(row.university) || normalizeScholarshipText(row.city);
     return (
@@ -683,31 +678,31 @@ export function findScholarshipPriceForSelection({ university, major, degree, la
 
   if (!universityMatches.length) return null;
 
-  const exactCategoryMatches = universityMatches.filter((row) => rowMatchesCategory(row, category));
-  const categoryMatches = exactCategoryMatches.length
-    ? exactCategoryMatches
-    : canUseBachelorFallback
-      ? universityMatches.filter(rowIsGeneralBachelor)
+  const explicitProgramMatches = universityMatches.filter((row) =>
+    rowExplicitlyNamesMajor(row, major)
+  );
+  const categoryMatches = explicitProgramMatches.length
+    ? explicitProgramMatches
+    : ['bachelor', 'master', 'associate'].includes(category)
+      ? universityMatches.filter((row) => rowMatchesCategory(row, category))
       : [];
 
   if (!categoryMatches.length) return null;
 
-  const languageCandidates = preferredLanguages.length
-    ? categoryMatches.filter((row) =>
-        preferredLanguages.some(
-          (preferredLanguage) =>
-            row.language === preferredLanguage || row.language === 'Turkish / English'
-        )
-      )
-    : categoryMatches;
+  const languageCandidates = categoryMatches.filter((row) =>
+    scholarshipLanguageMatches(row.language, preferredLanguage)
+  );
 
   if (!languageCandidates.length) return null;
 
-  const selected = languageCandidates
-    .filter((row) => row.priceAmount > 0)
-    .sort((a, b) => a.priceAmount - b.priceAmount)[0];
+  const pricedCandidates = languageCandidates.filter((row) => row.priceAmount > 0);
+  const distinctPrices = new Set(
+    pricedCandidates.map((row) => `${row.priceAmount}|${row.currency}`)
+  );
 
-  if (!selected) return null;
+  if (distinctPrices.size !== 1) return null;
+
+  const selected = pricedCandidates[0];
 
   return {
     amount: selected.priceAmount,
@@ -781,34 +776,26 @@ function normalizeUniversityKey(value) {
   const tokens = normalizeScholarshipText(value)
     .split(' ')
     .filter((token) => token && !['istanbul', 'ankara', 'university', 'universitesi', 'vakif', 'technical'].includes(token));
-  return tokens[0] || normalizeScholarshipText(value);
+  return tokens.join(' ') || normalizeScholarshipText(value);
 }
 
-function getProgramCategory(value) {
-  const text = normalizeScholarshipText(value);
+function getSelectionCategory(major, degree) {
+  const text = normalizeScholarshipText(major);
+
   if (text.includes('medicine')) return 'medicine';
   if (text.includes('dentistry') || text.includes('dental')) return 'dentistry';
   if (text.includes('pharmacy')) return 'pharmacy';
-  if (text.includes('physiotherapy')) return 'physiotherapy';
+  if (text.includes('physiotherapy') || text.includes('physical therapy')) return 'physiotherapy';
+  if (text.includes('artificial intelligence')) return 'ai';
   if (text.includes('software')) return 'software';
-  if (text.includes('computer')) return 'computer';
-  if (text.includes('artificial intelligence') || text.includes('data')) return 'ai';
-  if (text.includes('master')) return 'master';
-  if (text.includes('associate') || text.includes('diploma')) return 'associate';
-  return 'bachelor';
-}
-
-function canUseGeneralBachelorFallback(category, degree, programRows = []) {
-  if (['medicine', 'dentistry', 'pharmacy', 'master', 'associate'].includes(category)) {
-    return false;
-  }
+  if (text.includes('computer engineering')) return 'computer';
 
   const degreeText = normalizeScholarshipText(degree);
-  return (
-    category === 'bachelor' ||
-    degreeText.includes('bachelor') ||
-    programRows.some((row) => normalizeScholarshipText(row.degree).includes('bachelor'))
-  );
+  if (degreeText.includes('master')) return 'master';
+  if (degreeText.includes('associate') || degreeText.includes('diploma')) return 'associate';
+  if (degreeText.includes('bachelor')) return 'bachelor';
+
+  return '';
 }
 
 function rowIsGeneralBachelor(row) {
@@ -821,11 +808,39 @@ function rowMatchesCategory(row, category) {
   if (category === 'medicine') return text.includes('medicine');
   if (category === 'dentistry') return text.includes('dentistry');
   if (category === 'pharmacy') return text.includes('pharmacy');
-  if (category === 'physiotherapy') return text.includes('physiotherapy');
+  if (category === 'physiotherapy') {
+    return text.includes('physiotherapy') || text.includes('physical therapy');
+  }
   if (category === 'software') return text.includes('software');
   if (category === 'computer') return text.includes('computer');
-  if (category === 'ai') return text.includes('artificial intelligence') || text.includes('data');
+  if (category === 'ai') return text.includes('artificial intelligence');
   if (category === 'master') return text.includes('master');
   if (category === 'associate') return text.includes('associate') || text.includes('diploma');
   return rowIsGeneralBachelor(row);
+}
+
+function rowExplicitlyNamesMajor(row, major) {
+  const rowText = normalizeScholarshipText(row.program);
+  const majorText = normalizeScholarshipText(major);
+  if (!rowText || !majorText) return false;
+
+  const aliases = [];
+  if (majorText.includes('medicine')) aliases.push('medicine');
+  else if (majorText.includes('dentistry') || majorText.includes('dental')) aliases.push('dentistry');
+  else if (majorText.includes('pharmacy')) aliases.push('pharmacy');
+  else if (majorText.includes('physiotherapy') || majorText.includes('physical therapy')) aliases.push('physiotherapy');
+  else if (majorText.includes('artificial intelligence')) aliases.push('artificial intelligence');
+  else if (majorText.includes('computer engineering')) aliases.push('computer engineering');
+  else if (majorText.includes('software engineering')) aliases.push('software engineering');
+  else aliases.push(majorText);
+
+  return aliases.some((alias) => rowText.includes(alias));
+}
+
+function scholarshipLanguageMatches(rowLanguage, preferredLanguage) {
+  if (!rowLanguage || !preferredLanguage) return false;
+  if (rowLanguage === 'Turkish / English') {
+    return ['Turkish', 'English', 'Turkish / English'].includes(preferredLanguage);
+  }
+  return rowLanguage === preferredLanguage;
 }

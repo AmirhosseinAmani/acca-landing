@@ -66,10 +66,10 @@ const labels = {
     programLanguage: '\u0632\u0628\u0627\u0646 \u0631\u0634\u062a\u0647',
     paymentType: 'نوع پرداخت',
     finalTuition: 'شهریه نهایی',
-    dataSource: 'از دیتای شهریه دانشگاه',
+    dataSource: 'همگام با لیست رشته‌ها و شهریه‌ها',
     scholarshipFullPeriodNote: '\u0627\u06cc\u0646 \u0647\u0632\u06cc\u0646\u0647 \u0628\u0631\u0627\u06cc \u06a9\u0644 \u062f\u0648\u0631\u0647 \u062a\u062d\u0635\u06cc\u0644 \u0645\u06cc\u200c\u0628\u0627\u0634\u062f.',
-    scholarshipUnavailable: '\u0641\u0639\u0644\u0627\u064b \u0645\u0648\u062c\u0648\u062f \u0646\u06cc\u0633\u062a',
-    scholarshipUnavailableNote: '\u0628\u0631\u0627\u06cc \u0627\u06cc\u0646 \u0627\u0646\u062a\u062e\u0627\u0628 \u062f\u0631 \u0644\u06cc\u0633\u062a \u0628\u0648\u0631\u0633\u06cc\u0647 ACCA 100 \u0642\u06cc\u0645\u062a\u06cc \u062b\u0628\u062a \u0646\u0634\u062f\u0647 \u0627\u0633\u062a.',
+    scholarshipUnavailable: 'قیمت هنوز مشخص نشده',
+    scholarshipUnavailableNote: 'برای این دانشگاه، مقطع، رشته و زبان، قیمت مستقیمی در لیست بورسیه ثبت نشده است.',
     loading: 'در حال بارگذاری دیتا...',
     empty: 'دیتایی برای این انتخاب پیدا نشد',
     programsList: 'لیست تخصصی رشته‌ها و شهریه‌ها',
@@ -89,10 +89,10 @@ const labels = {
     programLanguage: 'Program Language',
     paymentType: 'Payment Type',
     finalTuition: 'Final Tuition',
-    dataSource: 'From university tuition data',
+    dataSource: 'Synced with the Programs & Tuition list',
     scholarshipFullPeriodNote: 'This fee is for the full study period.',
-    scholarshipUnavailable: 'Currently unavailable',
-    scholarshipUnavailableNote: 'No ACCA 100 scholarship price is registered for this selection yet.',
+    scholarshipUnavailable: 'Price not specified yet',
+    scholarshipUnavailableNote: 'No direct scholarship price is registered for this university, degree, program, and language.',
     loading: 'Loading data...',
     empty: 'No tuition data found for this selection',
     programsList: 'Specialized Programs & Tuition List',
@@ -160,6 +160,7 @@ export default function SmartScholarshipCalculator({
   const [major, setMajor] = useState('');
   const [programLanguage, setProgramLanguage] = useState('');
   const [paymentType, setPaymentType] = useState(PAYMENT_TYPES.semester);
+  const [translateProgramName, setTranslateProgramName] = useState(null);
 
   const isFa = language === 'fa';
   const t = labels[language];
@@ -192,9 +193,11 @@ export default function SmartScholarshipCalculator({
 
     let active = true;
 
-    fetch('/data/calculator-programs.json')
-      .then((response) => response.json())
-      .then((data) => {
+    Promise.all([
+      fetch('/data/programs.json').then((response) => response.json()),
+      import('../lib/academicTranslations'),
+    ])
+      .then(([data, translationModule]) => {
         if (!active) return;
 
         const nextRows = (data.rows || [])
@@ -203,12 +206,13 @@ export default function SmartScholarshipCalculator({
               row.university &&
               row.degree &&
               row.program &&
-              row.country === 'Turkey' &&
-              row.city === 'İstanbul'
+              normalizeLocation(row.country) === 'turkey' &&
+              normalizeLocation(row.city) === 'istanbul'
           )
           .map(normalizeProgramRow);
         const preferredRow = getPreferredDefaultRow(nextRows);
 
+        setTranslateProgramName(() => translationModule.translateAcademicText);
         setRows(nextRows);
         setUniversity(preferredRow?.university || '');
         setDegree(preferredRow?.degree || '');
@@ -271,9 +275,8 @@ export default function SmartScholarshipCalculator({
         major,
         degree,
         language: programLanguage,
-        programRows: selectedRows.length ? selectedRows : rowsForMajor,
       }),
-    [degree, major, programLanguage, rowsForMajor, selectedRows, university]
+    [degree, major, programLanguage, university]
   );
 
   const selectedFee = useMemo(
@@ -431,7 +434,7 @@ export default function SmartScholarshipCalculator({
                   >
                     {majorOptions.map((item) => (
                       <Option key={item} value={item}>
-                        {displayProgram(item, isFa)}
+                        {displayProgram(item, isFa, translateProgramName)}
                       </Option>
                     ))}
                   </Select>
@@ -672,12 +675,10 @@ function findBestFee(rows, paymentType) {
   if (paymentType === PAYMENT_TYPES.scholarship) return null;
 
   const feeKey = paymentType === PAYMENT_TYPES.cash ? 'cashFees' : 'tuitionFee';
-  const candidates = rows
-    .map((row) => parseFee(row[feeKey]))
-    .filter((fee) => fee && fee.amount > 0)
-    .sort((a, b) => a.amount - b.amount);
+  const primaryRow = rows[0];
+  const fee = primaryRow ? parseFee(primaryRow[feeKey]) : null;
 
-  return candidates[0] || null;
+  return fee && fee.amount > 0 ? fee : null;
 }
 
 function parseFee(value) {
@@ -722,250 +723,17 @@ function displayLanguage(value, isFa) {
   return isFa ? languageTranslations[value] || value : value;
 }
 
-function displayProgram(value, isFa) {
-  return isFa ? translateAcademicText(value) : value;
-}
-
-function translateAcademicText(value) {
-  if (!value) return '—';
-
-  const cleaned = String(value)
-    .replace(/[._]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  const exact = exactAcademicTranslations[cleaned.toLowerCase()];
-
-  if (exact) return exact;
-
-  return academicPhraseTranslations.reduce(
-    (text, [english, persian]) => replacePhrase(text, english, persian),
-    cleaned
-  );
-}
-
-function replacePhrase(text, english, persian) {
-  const escaped = english.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(new RegExp(`\\b${escaped}\\b`, 'gi'), persian);
+function displayProgram(value, isFa, translateProgramName) {
+  return isFa && translateProgramName ? translateProgramName(value) : value;
 }
 
 function normalize(value) {
   return String(value || '').trim().toLocaleLowerCase('en-US');
 }
 
-const exactAcademicTranslations = {
-  media: 'رسانه',
-  bachelor: 'کارشناسی',
-  agriculture: 'کشاورزی',
-  architecture: 'معماری',
-  business: 'کسب‌وکار',
-  communication: 'ارتباطات',
-  conservatory: 'کنسرواتوار',
-  dentistry: 'دندانپزشکی',
-  education: 'آموزش',
-  engineering: 'مهندسی',
-  humanities: 'علوم انسانی',
-  medicine: 'پزشکی',
-  pharmacy: 'داروسازی',
-};
-
-const academicPhraseTranslations = [
-  ['Turkish Language and Literature', 'زبان و ادبیات ترکی'],
-  ['Information Systems Engineering', 'مهندسی سیستم‌های اطلاعات'],
-  ['Educational Administration Supervision Economics and Planning', 'مدیریت آموزشی، نظارت، اقتصاد و برنامه‌ریزی'],
-  ['Radio, TV and Cinema', 'رادیو، تلویزیون و سینما'],
-  ['Radio-TV Cinema', 'رادیو، تلویزیون و سینما'],
-  ['Public Relations and Publicity', 'روابط عمومی و تبلیغات'],
-  ['Psycological Guidance and Counselling', 'راهنمایی و مشاوره روان‌شناختی'],
-  ['Psychological Guidance and Counselling', 'راهنمایی و مشاوره روان‌شناختی'],
-  ['Pre-School Education', 'آموزش پیش‌دبستانی'],
-  ['Interior Architecture and Environmental Design', 'معماری داخلی و طراحی محیطی'],
-  ['Interior Architecture & Environmental Design', 'معماری داخلی و طراحی محیطی'],
-  ['Interior Architecture', 'معماری داخلی'],
-  ['Tourism Management', 'مدیریت گردشگری'],
-  ['Special Education', 'آموزش ویژه'],
-  ['Public Health Nursing', 'پرستاری سلامت عمومی'],
-  ['Veterinary Internal Medicine', 'پزشکی داخلی دامپزشکی'],
-  ['Curriculum and Instruction', 'برنامه درسی و آموزش'],
-  ['Department of Surgery', 'گروه جراحی'],
-  ['Department of', 'گروه'],
-  ['Institute Of Graduate Pgrograms', 'موسسه برنامه‌های تحصیلات تکمیلی'],
-  ['Institute Of Graduate Programs', 'موسسه برنامه‌های تحصیلات تکمیلی'],
-  ['Graduate School of Health Science', 'دانشکده تحصیلات تکمیلی علوم سلامت'],
-  ['Graduate School of Natural and Applied Sciences', 'دانشکده تحصیلات تکمیلی علوم طبیعی و کاربردی'],
-  ['Graduate School of Natural Sciences', 'دانشکده تحصیلات تکمیلی علوم طبیعی'],
-  ['Graduate School of Science and Engineering', 'دانشکده تحصیلات تکمیلی علوم و مهندسی'],
-  ['Graduate School of Social Science', 'دانشکده تحصیلات تکمیلی علوم اجتماعی'],
-  ['Artificial Intelligence Engineering and Data Science', 'مهندسی هوش مصنوعی و علم داده'],
-  ['Artificial Intelligence and Data Engineering', 'هوش مصنوعی و مهندسی داده'],
-  ['Artificial Intelligence Engineering', 'مهندسی هوش مصنوعی'],
-  ['Artificial Intelligence', 'هوش مصنوعی'],
-  ['Computer Science and Software Engineering', 'علوم کامپیوتر و مهندسی نرم‌افزار'],
-  ['Computer Science', 'علوم کامپیوتر'],
-  ['Information Technology', 'فناوری اطلاعات'],
-  ['Information Science', 'علوم اطلاعات'],
-  ['Information Systems', 'سیستم‌های اطلاعات'],
-  ['Software Engineering', 'مهندسی نرم‌افزار'],
-  ['Electrical and Electronics Engineering', 'مهندسی برق و الکترونیک'],
-  ['Electronics Engineering', 'مهندسی الکترونیک'],
-  ['Electrical Engineering', 'مهندسی برق'],
-  ['Industrial Engineering', 'مهندسی صنایع'],
-  ['Civil Engineering', 'مهندسی عمران'],
-  ['Mechanical Engineering', 'مهندسی مکانیک'],
-  ['Biomedical Engineering', 'مهندسی پزشکی'],
-  ['Environmental Engineering', 'مهندسی محیط زیست'],
-  ['Chemical Engineering', 'مهندسی شیمی'],
-  ['Computer Engineering', 'مهندسی کامپیوتر'],
-  ['Architecture and Design', 'معماری و طراحی'],
-  ['Architecture Design', 'طراحی معماری'],
-  ['Architecture, Design and Fine Arts', 'معماری، طراحی و هنرهای زیبا'],
-  ['Fine Arts and Design', 'هنرهای زیبا و طراحی'],
-  ['Fine Arts', 'هنرهای زیبا'],
-  ['Art and Design', 'هنر و طراحی'],
-  ['Arts and Sciences', 'هنر و علوم'],
-  ['Arts and Science', 'هنر و علوم'],
-  ['Administrative and Social Sciences', 'علوم اداری و اجتماعی'],
-  ['Economics and Administrative Sciences', 'علوم اقتصادی و اداری'],
-  ['Economics, Administrative and Social Sciences', 'اقتصاد، علوم اداری و اجتماعی'],
-  ['Economics and Social Sciences', 'اقتصاد و علوم اجتماعی'],
-  ['Business Administration', 'مدیریت کسب‌وکار'],
-  ['Business and Management Science', 'علوم کسب‌وکار و مدیریت'],
-  ['Business and Social Science', 'کسب‌وکار و علوم اجتماعی'],
-  ['Business, Social & Decision Sciences', 'کسب‌وکار، علوم اجتماعی و تصمیم‌گیری'],
-  ['Health Sciences', 'علوم سلامت'],
-  ['Health Science', 'علوم سلامت'],
-  ['Health Programs', 'برنامه‌های سلامت'],
-  ['Educational Sciences', 'علوم تربیتی'],
-  ['Educational Programs', 'برنامه‌های آموزشی'],
-  ['Applied Science', 'علوم کاربردی'],
-  ['Natural Sciences', 'علوم طبیعی'],
-  ['Social Sciences', 'علوم اجتماعی'],
-  ['Theology', 'الهیات'],
-  ['Aviation and Space Sciences', 'علوم هوانوردی و فضایی'],
-  ['Civil Aviation', 'هوانوردی غیرنظامی'],
-  ['Maritime Management', 'مدیریت دریایی'],
-  ['Maritime Studies', 'مطالعات دریایی'],
-  ['Nursing', 'پرستاری'],
-  ['Physiotherapy and Rehabilitation', 'فیزیوتراپی و توانبخشی'],
-  ['Nutrition and Dietetics', 'تغذیه و رژیم‌درمانی'],
-  ['Molecular Biology and Genetics', 'زیست‌شناسی مولکولی و ژنتیک'],
-  ['Psychology', 'روان‌شناسی'],
-  ['Pharmacy Services', 'خدمات داروسازی'],
-  ['Clinical Pharmacy', 'داروسازی بالینی'],
-  ['Pharmacy', 'داروسازی'],
-  ['Medicine', 'پزشکی'],
-  ['Dentistry', 'دندانپزشکی'],
-  ['Veterinary', 'دامپزشکی'],
-  ['Toxicology', 'سم‌شناسی'],
-  ['Pedodontics', 'دندانپزشکی کودکان'],
-  ['Electrical and Electronic Engineering', 'مهندسی برق و الکترونیک'],
-  ['Electrical and Electronic', 'برق و الکترونیک'],
-  ['English Language Teaching', 'آموزش زبان انگلیسی'],
-  ['Child Development', 'رشد کودک'],
-  ['Human Resources Management', 'مدیریت منابع انسانی'],
-  ['Human Resource Management', 'مدیریت منابع انسانی'],
-  ['Health Management', 'مدیریت سلامت'],
-  ['Aviation Management', 'مدیریت هوانوردی'],
-  ['Sports Science', 'علوم ورزشی'],
-  ['Gastronomy and Culinary Arts', 'گاسترونومی و هنرهای آشپزی'],
-  ['Human Resources', 'منابع انسانی'],
-  ['Human Resource', 'منابع انسانی'],
-  ['Industrial Design', 'طراحی صنعتی'],
-  ['Industrial Engineering', 'مهندسی صنایع'],
-  ['Industrial', 'صنعتی'],
-  ['History of Art', 'تاریخ هنر'],
-  ['History', 'تاریخ'],
-  ['Sociology', 'جامعه‌شناسی'],
-  ['Philosophy', 'فلسفه'],
-  ['Mathematics', 'ریاضیات'],
-  ['Mathematical', 'ریاضی'],
-  ['Physics', 'فیزیک'],
-  ['Chemistry', 'شیمی'],
-  ['Biology', 'زیست‌شناسی'],
-  ['Genetics', 'ژنتیک'],
-  ['Biochemistry', 'بیوشیمی'],
-  ['Biotechnology', 'بیوتکنولوژی'],
-  ['Statistics', 'آمار'],
-  ['Accounting', 'حسابداری'],
-  ['Finance', 'امور مالی'],
-  ['Marketing', 'بازاریابی'],
-  ['Banking', 'بانکداری'],
-  ['Insurance', 'بیمه'],
-  ['International Relations', 'روابط بین‌الملل'],
-  ['International Trade', 'تجارت بین‌الملل'],
-  ['International', 'بین‌الملل'],
-  ['Political Science', 'علوم سیاسی'],
-  ['Public Administration', 'مدیریت دولتی'],
-  ['Journalism', 'روزنامه‌نگاری'],
-  ['Visual Arts', 'هنرهای تجسمی'],
-  ['Visual Communication', 'ارتباطات تجسمی'],
-  ['Graphic Design', 'طراحی گرافیک'],
-  ['Fashion Design', 'طراحی مد'],
-  ['Game Design', 'طراحی بازی'],
-  ['Animation', 'انیمیشن'],
-  ['Photography', 'عکاسی'],
-  ['Theater', 'تئاتر'],
-  ['Music', 'موسیقی'],
-  ['Sports Management', 'مدیریت ورزشی'],
-  ['Physical Education', 'تربیت بدنی'],
-  ['Sports', 'ورزش'],
-  ['Gastronomy', 'گاسترونومی'],
-  ['Culinary', 'آشپزی'],
-  ['Logistics', 'لجستیک'],
-  ['Supply Chain', 'زنجیره تأمین'],
-  ['Real Estate', 'املاک و مستغلات'],
-  ['Urban Planning', 'شهرسازی'],
-  ['Landscape', 'منظر'],
-  ['Main Campus', 'پردیس اصلی'],
-  ['Campus', 'پردیس'],
-  ['Health', 'سلامت'],
-  ['Audiology', 'شنوایی‌شناسی'],
-  ['Ergotherapy', 'کاردرمانی'],
-  ['Optometry', 'بینایی‌سنجی'],
-  ['Perfusion', 'پرفیوژن'],
-  ['Physiotherapy', 'فیزیوتراپی'],
-  ['Radiotherapy', 'پرتودرمانی'],
-  ['Orthopedics', 'ارتوپدی'],
-  ['Aviation', 'هوانوردی'],
-  ['Language Teaching', 'آموزش زبان'],
-  ['Teaching', 'آموزش'],
-  ['Tourism', 'گردشگری'],
-  ['Management', 'مدیریت'],
-  ['Economics', 'اقتصاد'],
-  ['Administration', 'مدیریت'],
-  ['Communication', 'ارتباطات'],
-  ['Administrative', 'اداری'],
-  ['Commercial', 'بازرگانی'],
-  ['Environmental', 'محیط زیست'],
-  ['Performing', 'اجرایی'],
-  ['Applied', 'کاربردی'],
-  ['Natural', 'طبیعی'],
-  ['Decision', 'تصمیم‌گیری'],
-  ['Studies', 'مطالعات'],
-  ['Programs', 'برنامه‌ها'],
-  ['Program', 'برنامه'],
-  ['School', 'مدرسه'],
-  ['College', 'کالج'],
-  ['Faculty', 'دانشکده'],
-  ['Media', 'رسانه'],
-  ['Education', 'آموزش'],
-  ['Counselling', 'مشاوره'],
-  ['Counseling', 'مشاوره'],
-  ['Architecture', 'معماری'],
-  ['Engineering', 'مهندسی'],
-  ['Informatics', 'انفورماتیک'],
-  ['Science', 'علوم'],
-  ['Sciences', 'علوم'],
-  ['Design', 'طراحی'],
-  ['Arts', 'هنرها'],
-  ['Art', 'هنر'],
-  ['Law', 'حقوق'],
-  ['Language', 'زبان'],
-  ['Literature', 'ادبیات'],
-  ['Turkish', 'ترکی'],
-  ['English', 'انگلیسی'],
-  ['Faculty of', 'دانشکده'],
-  ['College of', 'کالج'],
-  ['School of', 'مدرسه'],
-  ['and', 'و'],
-  ['of', ''],
-].sort((a, b) => b[0].length - a[0].length);
+function normalizeLocation(value) {
+  return String(value || '')
+    .trim()
+    .toLocaleLowerCase('tr-TR')
+    .replace(/\u0131/g, 'i');
+}

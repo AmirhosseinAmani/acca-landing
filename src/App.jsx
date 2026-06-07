@@ -33,6 +33,8 @@ const BRAND_NAME = 'ACCA EDU';
 const BRAND_TAGLINE = 'Study in Turkey & International Student Placement';
 const BRAND_TITLE = `${BRAND_NAME} — ${BRAND_TAGLINE}`;
 const INDEXABLE_PAGES = new Set(['programs', 'universities', 'scholarships', 'blog', 'glossary']);
+const LANGUAGE_STORAGE_KEY = 'acca:language';
+const SUPPORTED_LANGUAGES = new Set(['fa', 'en']);
 const STATIC_ROUTE_ALIASES = {
   '/programs': { page: 'programs', canonicalPath: '/programs/' },
   '/study-in-turkey': { canonicalPath: '/study-in-turkey/' },
@@ -59,6 +61,17 @@ const STATIC_ROUTE_META = {
 };
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px) and (pointer: fine)';
+
+function getStoredLanguage() {
+  if (typeof window === 'undefined') return 'fa';
+
+  try {
+    const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return SUPPORTED_LANGUAGES.has(storedLanguage) ? storedLanguage : 'fa';
+  } catch {
+    return 'fa';
+  }
+}
 
 function getStaticRouteAlias(pathname = '/') {
   const normalized = `/${String(pathname || '/')
@@ -339,7 +352,7 @@ const FloatingOrbs = memo(function FloatingOrbs({ floatingObjects, darkMode }) {
 
 export default function ACCALandingPage() {
   const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState('fa');
+  const [language, setLanguage] = useState(getStoredLanguage);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [consultationOpen, setConsultationOpen] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
@@ -367,6 +380,29 @@ export default function ACCALandingPage() {
   const cursorRingRef = useRef(null);
   const cursorTargetRef = useRef({ x: 0, y: 0 });
   const cursorRingPositionRef = useRef({ x: 0, y: 0 });
+
+  const toggleLanguage = () => {
+    setLanguage((currentLanguage) => currentLanguage === 'fa' ? 'en' : 'fa');
+  };
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    } catch {
+      // Keep the selected language for this page when storage is unavailable.
+    }
+  }, [language]);
+
+  useEffect(() => {
+    const syncLanguageAcrossTabs = (event) => {
+      if (event.key !== LANGUAGE_STORAGE_KEY || !SUPPORTED_LANGUAGES.has(event.newValue)) return;
+      setLanguage(event.newValue);
+    };
+
+    window.addEventListener('storage', syncLanguageAcrossTabs);
+    return () => window.removeEventListener('storage', syncLanguageAcrossTabs);
+  }, []);
+
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
 
@@ -738,7 +774,7 @@ export default function ACCALandingPage() {
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
           onConsultationClick={() => setConsultationOpen(true)}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
-          onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+          onToggleLanguage={toggleLanguage}
         />
         </Suspense>
         <ConsultationModal
@@ -759,7 +795,7 @@ export default function ACCALandingPage() {
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
           onConsultationClick={() => setConsultationOpen(true)}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
-          onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+          onToggleLanguage={toggleLanguage}
         />
         </Suspense>
         <ConsultationModal
@@ -780,7 +816,7 @@ export default function ACCALandingPage() {
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
           onConsultationClick={() => setConsultationOpen(true)}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
-          onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+          onToggleLanguage={toggleLanguage}
         />
         </Suspense>
         <ConsultationModal
@@ -802,7 +838,7 @@ export default function ACCALandingPage() {
             postSlug={params.get('post')}
             onConsultationClick={() => setConsultationOpen(true)}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
-            onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+            onToggleLanguage={toggleLanguage}
           />
         </Suspense>
         <ConsultationModal
@@ -825,7 +861,7 @@ export default function ACCALandingPage() {
             termSlug={params.get('term')}
             onConsultationClick={() => setConsultationOpen(true)}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
-            onToggleLanguage={() => setLanguage(isFa ? 'en' : 'fa')}
+            onToggleLanguage={toggleLanguage}
           />
         </Suspense>
         <ConsultationModal
@@ -857,7 +893,7 @@ export default function ACCALandingPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
-              onClick={() => setLanguage(isFa ? 'en' : 'fa')}
+              onClick={toggleLanguage}
               className={`${darkMode ? 'bg-white text-black' : 'bg-black text-white'} h-11 rounded-full px-4 text-xs font-black sm:px-5 sm:text-sm`}
             >
               {isFa ? 'EN' : 'FA'}
@@ -2038,7 +2074,7 @@ export default function ACCALandingPage() {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setLanguage(isFa ? 'en' : 'fa')}
+              onClick={toggleLanguage}
               aria-label={isFa ? 'Switch to English' : 'تغییر به فارسی'}
               className={`${darkMode ? 'bg-white text-black' : 'bg-black text-white'} px-5 h-12 rounded-full text-sm font-black transition-all duration-300`}
             >

@@ -10,9 +10,14 @@ import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../constants/supabase';
  * ========================================================================== */
 
 const REST = `${SUPABASE_URL}/rest/v1`;
+const FUNCTIONS = `${SUPABASE_URL}/functions/v1`;
 const HEADERS = {
   apikey: SUPABASE_PUBLISHABLE_KEY,
   Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+  'Content-Type': 'application/json',
+};
+const FUNCTION_HEADERS = {
+  apikey: SUPABASE_PUBLISHABLE_KEY,
   'Content-Type': 'application/json',
 };
 
@@ -250,46 +255,40 @@ export function detectLang(text) {
   return 'en';
 }
 
-/**
- * Smart, reliable comment translation (TR / FA / EN).
- *  1. Primary — Google's free endpoint with automatic source detection
- *     (`sl=auto`). High quality for Persian/Turkish/English, no API key.
- *  2. Fallback — MyMemory, with client-side source detection.
- * Resolves to the translated string, or throws so the UI can show a graceful
- * "translation failed" state. Callers only depend on (text, target) → string.
- */
 export async function translateText(text, target) {
   const clean = (text || '').trim();
   if (!clean) return '';
 
-  // 1) Google Translate (gtx) — detects the source server-side, so a Persian,
-  //    Turkish or English comment is translated correctly without us guessing.
-  try {
-    const url =
-      'https://translate.googleapis.com/translate_a/single?client=gtx' +
-      `&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(clean)}`;
-    const res = await fetch(url);
-    if (res.ok) {
-      const data = await res.json();
-      const out = Array.isArray(data?.[0])
-        ? data[0].map((seg) => (Array.isArray(seg) ? seg[0] : '')).join('')
-        : '';
-      if (out && out.trim()) return out;
-    }
-  } catch {
-    /* network / CORS hiccup — fall through to the secondary provider */
+  if (!TRANSLATE_LANGS.some((language) => language.code === target)) {
+    throw new Error('unsupported translation language');
   }
 
-  // 2) MyMemory fallback.
   const source = detectLang(clean);
   if (source === target) return clean;
-  const mmUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=${source}|${target}`;
-  const mmRes = await fetch(mmUrl);
-  if (!mmRes.ok) throw new Error('translate request failed');
-  const mmData = await mmRes.json();
-  const translated = mmData?.responseData?.translatedText;
-  if (!translated || /MYMEMORY WARNING|INVALID|QUERY LENGTH LIMIT/i.test(translated)) {
-    throw new Error('translation unavailable');
+
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch(`${FUNCTIONS}/translate-comment`, {
+      method: 'POST',
+      headers: FUNCTION_HEADERS,
+      body: JSON.stringify({ text: clean, target, source }),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || !data?.translatedText?.trim()) {
+      throw new Error(data?.error || 'translation unavailable');
+    }
+
+    return data.translatedText.trim();
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      throw new Error('translation timed out', { cause: error });
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
-  return translated;
 }
