@@ -4,8 +4,10 @@ import './index.css'
 import App from './App'
 import { registerServiceWorker } from './registerServiceWorker'
 import { initScrollRestoration } from './lib/scrollRestoration'
+import { initAnalytics } from './lib/analytics'
 
 initScrollRestoration()
+initAnalytics()
 
 /** Catches unexpected component errors so the whole page never goes blank. */
 class ErrorBoundary extends React.Component {

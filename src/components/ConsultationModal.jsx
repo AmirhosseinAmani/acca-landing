@@ -3,6 +3,7 @@ import {
   SUPABASE_PUBLISHABLE_KEY,
   SUPABASE_URL,
 } from '../constants/supabase';
+import { trackLead } from '../lib/analytics';
 
 const initialForm = {
   firstName: '',
@@ -102,6 +103,8 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa }) {
 
       setForm(initialForm);
       setSubmitted(true);
+      // Lead captured — fire the conversion (GTM dataLayer + Google Ads gtag).
+      trackLead({ method: 'consultation_form' });
     } catch (requestError) {
       console.error(requestError);
       setError(copy.error);
