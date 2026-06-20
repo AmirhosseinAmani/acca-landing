@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Internal knowledge-base exports must not be published to the repo.
+acca-knowledge-bank/
+acca-knowledge-bank.zip
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

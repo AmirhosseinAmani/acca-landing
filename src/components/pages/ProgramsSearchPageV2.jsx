@@ -142,6 +142,8 @@ const copy = {
     loading: 'در حال بارگذاری...',
     noResults: 'نتیجه‌ای برای این فیلترها پیدا نشد.',
     consult: 'مشاوره',
+    apply: 'اپلای',
+    universityDetails: 'اطلاعات دانشگاه',
     loadResults: '\u0646\u0645\u0627\u06cc\u0634 \u0631\u0634\u062a\u0647\u200c\u0647\u0627',
     pendingChanges: (count) => `${formatNumber(count, true)} \u0641\u06cc\u0644\u062a\u0631 \u0622\u0645\u0627\u062f\u0647 \u0627\u0639\u0645\u0627\u0644`,
     filtersSynced: '\u0641\u06cc\u0644\u062a\u0631\u0647\u0627 \u0627\u0639\u0645\u0627\u0644 \u0634\u062f\u0647\u200c\u0627\u0646\u062f',
@@ -196,6 +198,8 @@ const copy = {
     loading: 'Loading...',
     noResults: 'No matching programs found.',
     consult: 'Consult',
+    apply: 'Apply',
+    universityDetails: 'University details',
     loadResults: 'Load programs',
     pendingChanges: (count) => `${count} filters ready to apply`,
     filtersSynced: 'Filters applied',
@@ -1581,13 +1585,27 @@ function ProgramCard({ row, darkMode, isFa, ui, onConsultationClick }) {
         {/* Status + consult (desktop: inline; mobile: wraps below) */}
         <div className="flex shrink-0 flex-col items-end gap-2">
           <StatusBadge status={row.status} isFa={isFa} />
-          <button
-            type="button"
-            onClick={onConsultationClick}
-            className={`${darkMode ? 'bg-emerald-500 text-white' : 'bg-emerald-600 text-white'} whitespace-nowrap rounded-[12px] px-4 py-2 text-xs font-black transition hover:scale-[1.03] hover:bg-emerald-700`}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onConsultationClick}
+              className={`${darkMode ? 'border-white/15 text-white/75 hover:bg-white/10' : 'border-black/10 text-black/65 hover:bg-black/[0.04]'} whitespace-nowrap rounded-[12px] border px-3 py-2 text-[11px] font-black transition`}
+            >
+              {ui.consult}
+            </button>
+            <a
+              href={buildSmartApplyProgramUrl(row)}
+              className={`${darkMode ? 'bg-emerald-500 text-white' : 'bg-emerald-600 text-white'} whitespace-nowrap rounded-[12px] px-4 py-2 text-xs font-black transition hover:scale-[1.03] hover:bg-emerald-700`}
+            >
+              {ui.apply}
+            </a>
+          </div>
+          <a
+            href={buildUniversityCatalogUrl(row.university)}
+            className={`${darkMode ? 'text-white/60 hover:text-white' : 'text-black/55 hover:text-black'} whitespace-nowrap text-[10px] font-black underline-offset-4 hover:underline`}
           >
-            {ui.consult}
-          </button>
+            {ui.universityDetails}
+          </a>
         </div>
       </div>
 
@@ -1730,6 +1748,26 @@ function normalizeProgramRow(row) {
       ? getUniversityWebsite(row.university)
       : (row.universityUrl || getUniversityWebsite(row.university)),
   };
+}
+
+function getSmartServicesOrigin() {
+  if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+    return 'http://localhost:5173';
+  }
+  return 'https://accatransfer.com';
+}
+
+function buildSmartApplyProgramUrl(row) {
+  const url = new URL('/account', getSmartServicesOrigin());
+  url.searchParams.set('select', 'smart_apply');
+  url.searchParams.set('programId', row.id);
+  url.searchParams.set('university', row.university);
+  url.searchParams.set('source', 'accaco-programs');
+  return url.toString();
+}
+
+function buildUniversityCatalogUrl(universityName) {
+  return `?page=universities&university=${encodeURIComponent(universityName)}`;
 }
 
 const normalizedFilterValueCache = new WeakMap();

@@ -57,7 +57,8 @@ const copy = {
       'یک نمای تصمیم‌ساز از دانشگاه‌های خصوصی استانبول؛ خلاصه، سریع‌خوان و متکی بر داده‌هایی که در بانک داخلی ثبت شده‌اند.',
     back: 'بازگشت',
     search: 'جستجو در نام دانشگاه، آدرس، امکانات یا توضیحات...',
-    consult: 'بررسی پذیرش',
+    consult: 'مشاوره',
+    apply: 'اپلای',
     programs: 'رشته‌ها',
     website: 'وب‌سایت',
     calendar: 'تقویم',
@@ -91,7 +92,8 @@ const copy = {
       'A decision-ready view of Istanbul private universities, with compact summaries and source-aware data from the internal archive.',
     back: 'Back',
     search: 'Search university name, address, facilities, or notes...',
-    consult: 'Admission Review',
+    consult: 'Consult',
+    apply: 'Apply',
     programs: 'Programs',
     website: 'Website',
     calendar: 'Calendar',
@@ -555,13 +557,21 @@ function UniversityCard({
           </a>
         ) : null}
 
-        <button
-          type="button"
-          onClick={onConsultationClick}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[15px] bg-emerald-600 px-3 py-3 text-center text-xs font-black text-white transition hover:scale-[1.02] sm:px-4"
-        >
-          {ui.consult}
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={onConsultationClick}
+            className={`${darkMode ? 'border-white/15 text-white/75 hover:bg-white/10' : 'border-black/10 text-black/65 hover:bg-black/[0.04]'} inline-flex min-h-11 items-center justify-center rounded-[15px] border px-3 py-3 text-center text-xs font-black transition`}
+          >
+            {ui.consult}
+          </button>
+          <a
+            href={buildSmartApplyUniversityUrl(university.name)}
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[15px] bg-emerald-600 px-3 py-3 text-center text-xs font-black text-white transition hover:scale-[1.02] sm:px-4"
+          >
+            {ui.apply}
+          </a>
+        </div>
       </div>
     </article>
   );
@@ -751,7 +761,7 @@ function getInitialProfileUniversity() {
   if (typeof window === 'undefined') return null;
 
   const params = new URLSearchParams(window.location.search);
-  const profileParam = params.get('profile');
+  const profileParam = params.get('profile') || params.get('university');
   if (!profileParam) return null;
 
   const normalizedProfile = normalizeText(profileParam);
@@ -770,6 +780,21 @@ function buildProgramsUrl(universityName) {
 function buildUniversityProfileUrl(university) {
   const profile = university?.slug || university?.name || '';
   return `?page=universities&profile=${encodeURIComponent(profile)}`;
+}
+
+function getSmartServicesOrigin() {
+  if (typeof window !== 'undefined' && ['localhost', '127.0.0.1'].includes(window.location.hostname)) {
+    return 'http://localhost:5173';
+  }
+  return 'https://accatransfer.com';
+}
+
+function buildSmartApplyUniversityUrl(universityName) {
+  const url = new URL('/account', getSmartServicesOrigin());
+  url.searchParams.set('select', 'smart_apply');
+  url.searchParams.set('university', universityName);
+  url.searchParams.set('source', 'accaco-universities');
+  return url.toString();
 }
 
 function TimesHigherEducationSection({ profile, darkMode, isFa, ui }) {
