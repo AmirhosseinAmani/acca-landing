@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-labelledby="title">
+  <title>SGK work insurance glossary concept visual</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7F1E8"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#071A3D" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <circle cx="185" cy="590" r="250" fill="#008767" opacity="0.08"/>
+  <path d="M640 120l280 94v160c0 152-104 230-280 304-176-74-280-152-280-304V214l280-94z" fill="#FFFFFF" stroke="#E8DDCA" stroke-width="5" filter="url(#shadow)"/>
+  <path d="M640 178l206 70v122c0 112-76 171-206 226-130-55-206-114-206-226V248l206-70z" fill="#071A3D"/>
+  <path d="M640 270v208M536 374h208" stroke="#C6A768" stroke-width="34" stroke-linecap="round"/>
+  <rect x="792" y="486" width="230" height="60" rx="30" fill="#C6A768" filter="url(#shadow)"/>
+  <path d="M842 516h130" stroke="#071A3D" stroke-width="14" stroke-linecap="round"/>
+</svg>

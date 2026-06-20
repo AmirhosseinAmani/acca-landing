@@ -53,6 +53,7 @@ function postHref(slug) {
 }
 
 const BLOG_CATEGORY_EN = {
+  'کار دانشجویی': 'Student work',
   'اقامت دانشجویی': 'Student residence',
   'قوانین اقامت': 'Residence law',
   'هزینه اقامت': 'Residence costs',
@@ -62,6 +63,17 @@ const BLOG_CATEGORY_EN = {
 
 function catLabel(category, isFa) {
   return isFa ? category : (BLOG_CATEGORY_EN[category] || category);
+}
+
+function localizedValue(value, isFa) {
+  if (!value || typeof value === 'string') return value || '';
+  return tt(value.fa || '', value.en || value.fa || '', isFa);
+}
+
+function handleBlogImageError(event) {
+  if (event.currentTarget.dataset.fallbackApplied) return;
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = '/assets/og-cover.jpg';
 }
 
 /** Reading time is stored in Persian; render an English equivalent in EN mode. */
@@ -422,6 +434,7 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
                   alt={featured.image.alt}
                   width="1440"
                   height="900"
+                  onError={handleBlogImageError}
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#071A3D]/85 via-[#071A3D]/10 to-transparent" />
@@ -477,6 +490,7 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
                       width="1440"
                       height="900"
                       loading="lazy"
+                      onError={handleBlogImageError}
                       className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]"
                     />
                   </div>
@@ -518,12 +532,15 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
 
   const toc = useMemo(() => [
     { id: 'quick-answer', label: tt('پاسخ کوتاه', 'Quick answer', isFa) },
+    ...(post.metricCards?.length ? [{ id: 'work-snapshot', label: tt('نقشه سریع', 'Snapshot', isFa) }] : []),
+    ...(post.comparisonRows?.length ? [{ id: 'degree-rules', label: tt('مقایسه مقطع‌ها', 'Degree comparison', isFa) }] : []),
+    ...(post.salaryBars?.length ? [{ id: 'income-model', label: tt('مدل درآمد', 'Income model', isFa) }] : []),
     ...copy.sections.map((section, index) => ({ id: `sec-${index}`, label: section.heading })),
     { id: 'key-takeaways', label: tt('نکات کلیدی', 'Key takeaways', isFa) },
     { id: 'faq', label: tt('پرسش‌های پرتکرار', 'FAQ', isFa) },
     { id: 'sources', label: tt('منابع و اعتبار', 'Sources', isFa) },
     { id: 'community', label: tt('نظرها و امتیاز', 'Ratings & comments', isFa) },
-  ], [copy.sections, isFa]);
+  ], [copy.sections, isFa, post.comparisonRows?.length, post.metricCards?.length, post.salaryBars?.length]);
 
   const activeId = useActiveId(toc.map((item) => item.id));
 
@@ -630,6 +647,7 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
             alt={post.image.alt}
             width="1440"
             height="810"
+            onError={handleBlogImageError}
             className="aspect-[16/9] w-full rounded-[28px] object-cover shadow-[0_28px_70px_rgba(7,26,61,0.18)]"
           />
         </Reveal>
@@ -673,6 +691,104 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
                 <InlineGlossaryText text={copy.lead} glossary={post.glossary} darkMode={darkMode} />
               </p>
             </Reveal>
+
+            {post.metricCards?.length > 0 && (
+              <Reveal id="work-snapshot" as="section" className="mt-8 scroll-mt-28">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                  {post.metricCards.map((card) => (
+                    <div
+                      key={localizedValue(card.label, isFa)}
+                      className={`${darkMode ? 'border-white/10 bg-white/[0.04]' : 'border-black/5 bg-white'} rounded-[22px] border p-4 shadow-[0_14px_44px_rgba(7,26,61,0.06)]`}
+                    >
+                      <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.14em] text-[#C6A768]">
+                        <Compass size={14} />
+                        {localizedValue(card.label, isFa)}
+                      </div>
+                      <p className="mt-3 text-xl font-black leading-8">{localizedValue(card.value, isFa)}</p>
+                      <p className={`${darkMode ? 'text-white/58' : 'text-neutral-600'} mt-2 text-xs font-semibold leading-6`}>
+                        {localizedValue(card.note, isFa)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+            )}
+
+            {post.comparisonRows?.length > 0 && (
+              <Reveal
+                id="degree-rules"
+                as="section"
+                className={`${darkMode ? 'border-white/10 bg-white/[0.04]' : 'border-black/5 bg-white'} mt-8 scroll-mt-28 overflow-hidden rounded-[24px] border shadow-[0_14px_44px_rgba(7,26,61,0.07)]`}
+              >
+                <div className={`${darkMode ? 'border-white/10' : 'border-black/5'} flex flex-wrap items-center justify-between gap-3 border-b p-5`}>
+                  <div>
+                    <h2 className="flex items-center gap-2 text-lg font-black">
+                      <FileText size={18} className="text-[#C6A768]" />
+                      {tt('مقایسه سریع قوانین کار بر اساس مقطع', 'Work rules by degree level', isFa)}
+                    </h2>
+                    <p className={`${darkMode ? 'text-white/55' : 'text-neutral-500'} mt-1 text-xs font-semibold leading-6`}>
+                      {tt('خلاصه تصمیم‌ساز؛ جزئیات هر پرونده باید با کارفرما و مسیر رسمی بررسی شود.', 'Decision summary; each case still needs employer and official-route review.', isFa)}
+                    </p>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[760px] border-collapse text-right text-sm">
+                    <thead className={darkMode ? 'bg-white/[0.04] text-white/65' : 'bg-[#F7F1E8] text-neutral-600'}>
+                      <tr>
+                        {['مقطع', 'زمان شروع', 'نوع کار', 'درآمد منطقی', 'ریسک اصلی'].map((label, index) => (
+                          <th key={label} className={`px-4 py-3 text-xs font-black ${!isFa && index === 0 ? 'text-left' : ''}`}>
+                            {tt(label, ['Degree', 'Start point', 'Work type', 'Income lens', 'Main risk'][index], isFa)}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {post.comparisonRows.map((row) => (
+                        <tr key={localizedValue(row.degree, isFa)} className={`${darkMode ? 'border-white/10' : 'border-black/5'} border-t align-top`}>
+                          <td className="px-4 py-4 font-black">{localizedValue(row.degree, isFa)}</td>
+                          <td className={`${darkMode ? 'text-white/70' : 'text-neutral-700'} px-4 py-4 font-semibold leading-7`}>{localizedValue(row.start, isFa)}</td>
+                          <td className={`${darkMode ? 'text-white/70' : 'text-neutral-700'} px-4 py-4 font-semibold leading-7`}>{localizedValue(row.workType, isFa)}</td>
+                          <td className={`${darkMode ? 'text-white/70' : 'text-neutral-700'} px-4 py-4 font-semibold leading-7`}>{localizedValue(row.income, isFa)}</td>
+                          <td className={`${darkMode ? 'text-white/70' : 'text-neutral-700'} px-4 py-4 font-semibold leading-7`}>{localizedValue(row.risk, isFa)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Reveal>
+            )}
+
+            {post.salaryBars?.length > 0 && (
+              <Reveal
+                id="income-model"
+                as="section"
+                className={`${darkMode ? 'border-[#C6A768]/20 bg-[#C6A768]/[0.07]' : 'border-[#C6A768]/25 bg-[#FFF8E9]'} mt-8 scroll-mt-28 rounded-[24px] border p-5 sm:p-6`}
+              >
+                <h2 className="flex items-center gap-2 text-lg font-black">
+                  <Sparkles size={18} className="text-[#C6A768]" />
+                  {tt('مدل برنامه‌ریزی درآمد دانشجویی', 'Student income planning model', isFa)}
+                </h2>
+                <p className={`${darkMode ? 'text-white/62' : 'text-neutral-600'} mt-2 text-sm font-semibold leading-8`}>
+                  {localizedValue(post.salaryNote, isFa)}
+                </p>
+                <div className="mt-5 grid gap-4">
+                  {post.salaryBars.map((bar) => (
+                    <div key={localizedValue(bar.label, isFa)} className="grid gap-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-black">
+                        <span>{localizedValue(bar.label, isFa)}</span>
+                        <span className="text-[#C6A768]">{localizedValue(bar.amount, isFa)}</span>
+                      </div>
+                      <div className={`${darkMode ? 'bg-white/10' : 'bg-white'} h-3 overflow-hidden rounded-full`}>
+                        <div className="h-full rounded-full bg-[#C6A768]" style={{ width: `${Math.max(0, Math.min(100, Number(bar.value) || 0))}%` }} />
+                      </div>
+                      <p className={`${darkMode ? 'text-white/52' : 'text-neutral-500'} text-xs font-semibold leading-6`}>
+                        {localizedValue(bar.note, isFa)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Reveal>
+            )}
 
             {/* Sections */}
             <div className="mt-8 grid gap-8">
@@ -777,6 +893,22 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
                 {tt('منبع رسمی', 'Official source', isFa)}: {post.sourceName}
                 <ExternalLink size={14} />
               </a>
+              {post.sourceLinks?.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {post.sourceLinks.map((source) => (
+                    <a
+                      key={`${localizedValue(source.label, isFa)}-${source.url}`}
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${darkMode ? 'border-white/10 hover:border-emerald-400/40' : 'border-black/5 hover:border-emerald-500/40'} inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-black text-emerald-600 transition`}
+                    >
+                      {tt('منبع تکمیلی', 'Supporting source', isFa)}: {localizedValue(source.label, isFa)}
+                      <ExternalLink size={14} />
+                    </a>
+                  ))}
+                </div>
+              )}
             </Reveal>
           </div>
         </div>
@@ -809,7 +941,7 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
                   className={`${darkMode ? 'border-white/10 bg-[#07111f] hover:border-[#C6A768]/40' : 'border-black/5 bg-white hover:border-[#C6A768]/50'} group flex flex-col overflow-hidden rounded-[24px] border shadow-[0_12px_40px_rgba(7,26,61,0.07)] transition hover:-translate-y-1`}
                 >
                   <div className="relative aspect-[16/10] overflow-hidden">
-                    <img src={item.image.src} alt={item.image.alt} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]" />
+                    <img src={item.image.src} alt={item.image.alt} loading="lazy" onError={handleBlogImageError} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]" />
                   </div>
                   <div className="p-4">
                     <p className={`${darkMode ? 'text-white/45' : 'text-neutral-400'} text-[11px] font-black`}>{catLabel(item.category, isFa)}</p>

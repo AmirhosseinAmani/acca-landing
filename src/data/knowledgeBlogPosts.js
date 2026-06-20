@@ -1,4 +1,10 @@
 export const BLOG_SEO_KEYWORDS = [
+  'کار دانشجویی در ترکیه',
+  'اجازه کار دانشجویی ترکیه',
+  'حقوق دانشجویی در ترکیه',
+  'حداقل دستمزد ترکیه ۲۰۲۶',
+  'work permit for students in Turkey',
+  'student jobs in Turkey',
   'تحصیل در ترکیه',
   'اقامت دانشجویی ترکیه',
   'پذیرش دانشگاه ترکیه',
@@ -514,6 +520,259 @@ const turkey90180IranianStudentsPost = {
 };
 
 export const knowledgeBlogPosts = [
+  {
+    slug: 'student-work-permit-turkey-2026',
+    priority: 108,
+    readTime: '۱۶ دقیقه',
+    date: '2026-06-20',
+    sourceName: 'اداره مهاجرت ترکیه؛ پرسش‌های پرتکرار اجازه کار',
+    sourceUrl: 'https://www.goc.gov.tr/calisma-izni-sss',
+    sourceLinks: [
+      { label: { fa: 'UİGM؛ نوع درخواست اجازه کار', en: 'UIGM work permit application types' }, url: 'https://www.csgb.gov.tr/uigm/calisma-izni/basvuru-turleri/' },
+      { label: { fa: 'وزارت کار؛ حداقل دستمزد ۲۰۲۶', en: 'Ministry of Labour 2026 minimum wage' }, url: 'https://www.csgb.gov.tr/poco-pages/asgari-ucret/' },
+      { label: { fa: 'UİGM؛ هزینه اجازه کار ۲۰۲۶', en: 'UIGM 2026 work permit fees' }, url: 'https://www.csgb.gov.tr/uigm/genel-bilgi/harc-ve-degerli-k%C3%A2git-bedelinin-odenmesi/' },
+      { label: { fa: 'Study in Türkiye؛ فرصت‌های کار و کارآموزی', en: 'Study in Turkiye work opportunities' }, url: 'https://www.studyinturkiye.gov.tr/StudyinTurkey/ShowDetail?cId=PE4Nr0mMoY4%3D&rID=rlsyTUzKZzY%3D' },
+      { label: { fa: 'İŞKUR؛ برنامه جوانان دانشگاهی', en: 'ISKUR youth programme' }, url: 'https://www.iskur.gov.tr/is-arayan/aktif-isgucu-programlari/iskur-genclik-programi/' },
+    ],
+    knowledgeSource: 'نالج‌بانک داخلی آکا / دسته کار و اجازه کار، بازبینی‌شده با منابع رسمی ترکیه در ژوئن ۲۰۲۶',
+    category: 'کار دانشجویی',
+    image: {
+      src: '/assets/blog/student-residence-e-ikamet.jpg',
+      alt: 'دانشجو در ترکیه در حال آماده‌سازی مدارک اقامت، اجازه کار و برنامه‌ریزی شغلی',
+    },
+    tags: [
+      'کار دانشجویی در ترکیه',
+      'اجازه کار دانشجویی ترکیه',
+      'حقوق دانشجویی در ترکیه',
+      'حداقل دستمزد ترکیه ۲۰۲۶',
+      'کاردانی ترکیه',
+      'کارشناسی ترکیه',
+      'کارشناسی ارشد ترکیه',
+      'work permit Turkey students',
+    ],
+    metricCards: [
+      {
+        label: { fa: 'اصل طلایی', en: 'Golden rule' },
+        value: { fa: 'اقامت دانشجویی اجازه کار نیست', en: 'Student residence is not a work permit' },
+        note: { fa: 'برای شروع کار باید اجازه کار معتبر و مسیر کارفرما مشخص باشد.', en: 'Work must start only after a valid permit and employer route.' },
+      },
+      {
+        label: { fa: 'کاردانی و کارشناسی', en: 'Associate and bachelor' },
+        value: { fa: 'بعد از سال اول', en: 'After the first year' },
+        note: { fa: 'قانون برای این دو مقطع شروع درخواست را به پایان سال اول تحصیل وصل می‌کند.', en: 'The law ties the application right to completion of the first study year.' },
+      },
+      {
+        label: { fa: 'ارشد و دکتری', en: 'Graduate study' },
+        value: { fa: 'بدون شرط سال اول', en: 'No first-year wait' },
+        note: { fa: 'دانشجوی تحصیلات تکمیلی همچنان به اجازه کار نیاز دارد، اما محدودیت کاردانی و کارشناسی روی او اعمال نمی‌شود.', en: 'Graduate students still need a permit, but the undergraduate timing limits do not apply.' },
+      },
+      {
+        label: { fa: 'حداقل دستمزد ۲۰۲۶', en: '2026 minimum wage' },
+        value: { fa: 'خالص ۲۸٬۰۷۵٫۵۰ لیر', en: 'TRY 28,075.50 net' },
+        note: { fa: 'برای تخمین درآمد دانشجویی، این عدد کف برنامه‌ریزی است نه وعده حقوق.', en: 'Use it as a planning floor, not a guaranteed student salary.' },
+      },
+    ],
+    comparisonRows: [
+      {
+        degree: { fa: 'کاردانی', en: 'Associate degree' },
+        start: { fa: 'پس از اتمام سال اول و فقط با اجازه کار.', en: 'After completing the first year and only with a work permit.' },
+        workType: { fa: 'پاره‌وقت، هماهنگ با کلاس و معمولاً مناسب کارهای ساده‌تر یا مهارت‌محور.', en: 'Part-time, class-friendly roles, usually simple or skill-based work.' },
+        income: { fa: 'واقع‌بینانه‌تر است روی درآمد مکمل حساب شود، نه پوشش کامل شهریه و زندگی.', en: 'Plan for supplemental income, not full tuition and living coverage.' },
+        risk: { fa: 'شروع کار قبل از مجوز یا قبول کار نقدی بدون ثبت رسمی.', en: 'Starting before permit approval or accepting unregistered cash work.' },
+      },
+      {
+        degree: { fa: 'کارشناسی', en: 'Bachelor degree' },
+        start: { fa: 'پس از سال اول؛ مسیر رسمی باید توسط کارفرما/سامانه اجازه کار پیگیری شود.', en: 'After the first year; the official employer permit route must be followed.' },
+        workType: { fa: 'پاره‌وقت در فروش، گردشگری، خدمات، زبان، تولید محتوا، پشتیبانی یا کارهای دانشگاهی مجاز.', en: 'Part-time roles in retail, tourism, services, language, content, support or eligible campus work.' },
+        income: { fa: 'زبان ترکی، شهر، ساعت کاری و قرارداد، درآمد را شدیدا تغییر می‌دهد.', en: 'Turkish level, city, hours and contract type materially change income.' },
+        risk: { fa: 'به هم خوردن برنامه کلاس، تمدید اقامت یا وضعیت دانشجویی به خاطر کار غیرقانونی.', en: 'Damaging class schedule, residence renewal or student status through illegal work.' },
+      },
+      {
+        degree: { fa: 'کارشناسی ارشد', en: 'Master degree' },
+        start: { fa: 'با گرفتن اجازه کار؛ محدودیت سال اول و محدودیت‌های کاردانی/کارشناسی اعمال نمی‌شود.', en: 'With a work permit; first-year and undergraduate restrictions do not apply.' },
+        workType: { fa: 'برای دستیار پژوهشی، شرکت‌های بین‌المللی، فناوری، ترجمه، فروش تخصصی یا کار مرتبط با رشته مناسب‌تر است.', en: 'Better fit for research assistant, international company, tech, translation, specialist sales or field-related roles.' },
+        income: { fa: 'اگر مهارت واقعی و زبان مناسب داشته باشد، شانس درآمد بالاتر از کار پاره‌وقت ساده بیشتر است.', en: 'With real skills and language, the upside can be higher than simple part-time work.' },
+        risk: { fa: 'تصور اشتباه که ارشد بدون مجوز می‌تواند آزادانه کار کند.', en: 'Assuming graduate status allows work without a permit.' },
+      },
+    ],
+    salaryNote: {
+      fa: 'این مدل بر اساس حداقل دستمزد خالص ۲۰۲۶ ترکیه یعنی ۲۸٬۰۷۵٫۵۰ لیر در ماه و نسبت ساعت کاری به ۴۵ ساعت هفتگی ساخته شده است. عددها برای بودجه‌بندی هستند؛ قرارداد، مالیات، SGK، شهر، زبان و مجوز واقعی می‌تواند نتیجه را تغییر دهد.',
+      en: 'This model uses the 2026 net monthly minimum wage in Turkey, TRY 28,075.50, and a simple hours-to-45-hours ratio. It is for budgeting; contract, tax, SGK, city, language and permit details can change the outcome.',
+    },
+    salaryBars: [
+      {
+        label: { fa: '۱۲ ساعت در هفته', en: '12 hours per week' },
+        value: 27,
+        amount: { fa: 'حدود ۷٬۵۰۰ لیر', en: 'About TRY 7,500' },
+        note: { fa: 'برای شروع آرام، تقویت زبان و حفظ تمرکز روی درس.', en: 'A light start that protects study time and language learning.' },
+      },
+      {
+        label: { fa: '۲۰ ساعت در هفته', en: '20 hours per week' },
+        value: 44,
+        amount: { fa: 'حدود ۱۲٬۵۰۰ لیر', en: 'About TRY 12,500' },
+        note: { fa: 'برای خیلی از دانشجویان خارجی برنامه‌ریزی واقع‌بینانه‌تری از کار سنگین است.', en: 'Often more realistic for international students than a heavy schedule.' },
+      },
+      {
+        label: { fa: '۲۴ ساعت در هفته', en: '24 hours per week' },
+        value: 53,
+        amount: { fa: 'حدود ۱۵٬۰۰۰ لیر', en: 'About TRY 15,000' },
+        note: { fa: 'سقف محافظه‌کارانه رایج در برنامه‌ریزی دانشجویی؛ باید با مجوز و قرارداد همخوان باشد.', en: 'A conservative student-planning ceiling; it must match the permit and contract.' },
+      },
+      {
+        label: { fa: '۳۰ ساعت در هفته', en: '30 hours per week' },
+        value: 67,
+        amount: { fa: 'حدود ۱۸٬۷۰۰ لیر', en: 'About TRY 18,700' },
+        note: { fa: 'فقط اگر قانون، مقطع، مجوز و برنامه دانشگاه اجازه بدهد؛ برای کاردانی/کارشناسی با احتیاط بررسی شود.', en: 'Only if law, degree status, permit and university schedule allow it; review carefully for undergraduate students.' },
+      },
+    ],
+    glossary: [
+      {
+        labels: ['اجازه کار دانشجویی ترکیه', 'اجازه کار', 'Çalışma izni', 'calisma izni', 'work permit'],
+        title: 'اجازه کار دانشجویی ترکیه چیست؟',
+        definition: 'اجازه کار دانشجویی ترکیه یعنی مجوز رسمی کار برای دانشجوی خارجی که از مسیر وزارت کار و کارفرما پیگیری می‌شود. اقامت دانشجویی به تنهایی حق کار ایجاد نمی‌کند.',
+      },
+      {
+        labels: ['کار پاره‌وقت', 'پاره‌وقت', 'kısmi süreli çalışma', 'part-time work'],
+        title: 'کار پاره‌وقت دانشجویی چیست؟',
+        definition: 'کار پاره‌وقت یعنی کار با ساعت محدود که نباید مسیر درس، حضور در کلاس، اقامت و مجوز دانشجو را به خطر بیندازد.',
+      },
+      {
+        labels: ['قانون نیروی کار بین‌المللی', 'قانون ۶۷۳۵', 'Uluslararası İşgücü Kanunu', 'Law 6735'],
+        title: 'قانون نیروی کار بین‌المللی ترکیه چیست؟',
+        definition: 'قانون ۶۷۳۵ چارچوب اصلی اجازه کار خارجی‌ها در ترکیه است و ماده مربوط به دانشجویان، تفاوت کاردانی/کارشناسی با تحصیلات تکمیلی را روشن می‌کند.',
+      },
+      {
+        labels: ['حداقل دستمزد ترکیه', 'حداقل حقوق ترکیه', 'Asgari Ücret', 'minimum wage'],
+        title: 'حداقل دستمزد ترکیه چیست؟',
+        definition: 'حداقل دستمزد ترکیه کف قانونی حقوق برای کار تمام‌وقت است و برای دانشجو بیشتر نقش عدد پایه برای بودجه‌بندی و مقایسه درآمد دارد.',
+      },
+      {
+        labels: ['SGK', 'بیمه اجتماعی', 'سوشال سکوریتی', 'social security'],
+        title: 'SGK و بیمه کار در ترکیه چیست؟',
+        definition: 'SGK سیستم بیمه و تامین اجتماعی ترکیه است. در کار رسمی، وضعیت بیمه، قرارداد و ثبت کارفرما باید با مجوز و قانون هماهنگ باشد.',
+      },
+    ],
+    fa: {
+      title: 'کار دانشجویی در ترکیه و اجازه کار ۲۰۲۶؛ راهنمای کامل کاردانی، کارشناسی و کارشناسی ارشد',
+      excerpt: 'اگر می‌خواهی برای تحصیل به ترکیه بیایی و از روز اول بدانی کار دانشجویی، اجازه کار، حقوق، ساعت کاری و ریسک‌های قانونی چطور عمل می‌کند، این راهنما مسیر را از صفر تا تصمیم‌گیری حرفه‌ای توضیح می‌دهد.',
+      thesis: 'اقامت دانشجویی در ترکیه به‌تنهایی اجازه کار نیست. دانشجوی کاردانی و کارشناسی پس از اتمام سال اول می‌تواند برای اجازه کار اقدام کند و باید پاره‌وقت و قانونی فکر کند؛ دانشجوی کارشناسی ارشد با اجازه کار وارد مسیر منعطف‌تری می‌شود، اما بدون مجوز رسمی هیچ مقطعی نباید کار را شروع کند.',
+      lead: 'خیلی از دانشجویان قبل از آمدن به ترکیه یک سؤال ساده دارند: آیا می‌شود کنار درس کار کرد و بخشی از هزینه‌ها را پوشش داد؟ جواب کوتاه این است: بله، اما نه با تصور بازار غیررسمی، نه با وعده درآمد قطعی، و نه بدون اجازه کار دانشجویی ترکیه. باید مقطع، سال تحصیل، اقامت، کارفرما، ساعت کاری، حداقل دستمزد ترکیه، SGK و برنامه کلاس کنار هم دیده شوند.',
+      sections: [
+        {
+          heading: 'از صفر شروع کنیم: اقامت دانشجویی با اجازه کار فرق دارد',
+          body: 'اولین اشتباه این است که دانشجو فکر کند کارت اقامت دانشجویی یعنی حق کار خودکار. منابع رسمی ترکیه روشن می‌گویند اقامت دانشجویی به‌تنهایی اجازه کار نیست و برای کار در دوران تحصیل باید اجازه کار گرفته شود. این یعنی حتی اگر دانشگاه ثبت‌نام کرده‌ای، خوابگاه داری و کیملیک دانشجویی گرفته‌ای، باز هم برای شروع کار رسمی باید مسیر کارفرما و سامانه اجازه کار طی شود. کار کردن قبل از مجوز می‌تواند برای دانشجو، کارفرما، تمدید اقامت و پرونده آینده ریسک بسازد.',
+        },
+        {
+          heading: 'کاردانی در ترکیه: بعد از سال اول، با برنامه پاره‌وقت',
+          body: 'برای دانشجوی کاردانی، قانون شروع حق اقدام برای اجازه کار را به اتمام سال اول تحصیل وصل می‌کند. یعنی دانشجویی که تازه وارد برنامه کاردانی شده، نباید روی کار رسمی از همان ترم اول حساب قطعی باز کند. برنامه درست این است که سال اول را برای زبان ترکی، شناخت شهر، ساخت رزومه، ارتباط با دانشگاه و پیدا کردن کارفرمای قانونی بگذارد. پس از سال اول، کار پاره‌وقت در حوزه‌هایی مثل خدمات دانشجویی، فروش، کافه، گردشگری، پشتیبانی، ترجمه ساده یا کارهای مهارت‌محور می‌تواند بررسی شود، اما فقط وقتی کارفرما حاضر باشد مسیر مجوز را رسمی جلو ببرد.',
+        },
+        {
+          heading: 'کارشناسی در ترکیه: فرصت بیشتر، اما همان قانون سال اول',
+          body: 'دانشجوی کارشناسی معمولا چهار سال فرصت دارد و از نظر بازار کار شانس بیشتری برای رشد تدریجی دارد؛ اما قانون پایه برای شروع کار مشابه کاردانی است: پس از اتمام سال اول و با اجازه کار. بهترین استراتژی برای دانشجوی کارشناسی این است که سال اول را برای زبان، شبکه‌سازی، مهارت دیجیتال، رزومه ترکی و شناخت صنعت بگذارد و از سال دوم سراغ کار پاره‌وقت قانونی برود. اگر رشته سنگین مثل پزشکی، دندانپزشکی، داروسازی یا مهندسی است، فشار کار باید بسیار کنترل‌شده باشد؛ چون افت تحصیلی یا غیبت می‌تواند از درآمد کوتاه‌مدت پرهزینه‌تر شود.',
+        },
+        {
+          heading: 'کارشناسی ارشد: مسیر منعطف‌تر، اما نه بدون مجوز',
+          body: 'برای دانشجوی کارشناسی ارشد و به طور کلی تحصیلات تکمیلی، محدودیت سال اول و محدودیت‌های کاردانی/کارشناسی اعمال نمی‌شود. این مزیت مهمی است، چون دانشجوی ارشد معمولا مهارت تخصصی‌تر، سابقه کاری یا زبان قوی‌تری دارد و می‌تواند برای دستیار پژوهشی، کار شرکتی، فناوری، ترجمه تخصصی، فروش بین‌الملل، تولید محتوا یا کار مرتبط با رشته شانس بهتری داشته باشد. اما این مزیت به معنی کار آزاد و بدون قانون نیست. ارشد هم باید اجازه کار بگیرد، کارفرما باید مسیر را درست ثبت کند و قرارداد، SGK و شهر محل کار باید با مجوز بخواند.',
+        },
+        {
+          heading: 'حقوق و درآمد در ۲۰۲۶: با عدد واقعی برنامه‌ریزی کن، نه با شنیده‌ها',
+          body: 'برای محاسبه درآمد دانشجویی باید از یک عدد رسمی شروع کرد. حداقل دستمزد خالص ترکیه برای بازه ۱ ژانویه تا ۳۱ دسامبر ۲۰۲۶ برابر ۲۸٬۰۷۵٫۵۰ لیر در ماه و مبلغ ناخالص ۳۳٬۰۳۰ لیر است. دانشجو معمولا تمام‌وقت کار نمی‌کند، پس باید درآمد را نسبت به ساعت کاری تخمین زد. مثلا ۲۰ تا ۲۴ ساعت کار هفتگی می‌تواند تقریبا معادل ۱۲٬۵۰۰ تا ۱۵٬۰۰۰ لیر در مدل ساده حداقل دستمزد باشد؛ اما این فقط مدل بودجه‌بندی است. شهر، زبان ترکی، نوع کار، تجربه، قرارداد، پرداخت بیمه و قانونی بودن مجوز می‌تواند عدد نهایی را کم یا زیاد کند.',
+        },
+        {
+          heading: 'چه شغل‌هایی برای دانشجوی خارجی منطقی‌تر است؟',
+          body: 'برای دانشجوی تازه‌وارد، بهترین کار همیشه کاری نیست که بیشترین پول را بدهد؛ کاری است که با کلاس، زبان، اقامت و هدف آینده تضاد نداشته باشد. کارهای رایج شامل فروش و retail، کافه و رستوران، پذیرش و گردشگری، پشتیبانی فارسی/انگلیسی، تولید محتوا، ترجمه، کارهای دانشگاهی، کارآموزی و کارهای دیجیتال است. اگر ترکی ضعیف باشد، کارهای فارسی‌زبان یا انگلیسی‌زبان ممکن است راحت‌تر شروع شوند، اما تعدادشان محدودتر است. اگر ترکی قوی شود، دامنه کارها، اعتماد کارفرما و شانس قرارداد رسمی بهتر می‌شود.',
+        },
+        {
+          heading: 'کارآموزی و برنامه‌های دانشگاهی را با کار عادی قاطی نکن',
+          body: 'بعضی برنامه‌های دانشگاهی، مخصوصا کارآموزی اجباری یا انتخابی که از مسیر دانشگاه تعریف شده، می‌تواند با کار عادی فرق داشته باشد. Study in Türkiye توضیح می‌دهد برخی کارآموزی‌های مرتبط با برنامه تحصیلی، مخصوصا در تابستان، ممکن است نیاز به اجازه کار عادی نداشته باشند. اما این به معنی آن نیست که هر کاری را می‌توان اسمش را کارآموزی گذاشت. از طرف دیگر، برنامه İŞKUR Gençlik Programı برای دانشجویان دانشگاه‌های دولتی ترکیه عدد جذابی مثل ۱٬۳۷۵ لیر روزانه و سقف ۲۲٫۵ ساعت هفتگی دارد، اما شرط شهروندی ترکیه در آن آمده است؛ پس دانشجوی خارجی نباید روی آن به‌عنوان گزینه قطعی حساب کند مگر شرایط رسمی همان سال را بررسی کرده باشد.',
+        },
+        {
+          heading: 'هزینه اجازه کار و نقش کارفرما',
+          body: 'در مسیر رسمی، اجازه کار هزینه و پرداخت‌های اداری دارد. برای ۲۰۲۶، UİGM هزینه اجازه کار مدت‌دار تا یک سال را ۱۲٬۵۷۴٫۹۰ لیر و هزینه کاغذ ارزشمند کارت را ۹۶۴ لیر اعلام کرده است. در عمل، دانشجو باید از ابتدا با کارفرما شفاف کند چه کسی هزینه‌ها، قرارداد، مدارک، ثبت سامانه، شروع کار و تمدید احتمالی را مدیریت می‌کند. پیشنهاد شغلی که از پرداخت رسمی، قرارداد یا ثبت مجوز فرار می‌کند، حتی اگر حقوق خوبی وعده بدهد، برای دانشجوی خارجی ریسک جدی است.',
+        },
+        {
+          heading: 'چک‌لیست قبل از قبول کار',
+          body: 'قبل از اینکه دانشجو کار را قبول کند، باید این موارد را بررسی کند: آیا سال اول برای کاردانی یا کارشناسی تمام شده است؟ آیا اقامت دانشجویی معتبر است؟ آیا کارفرما حاضر است درخواست اجازه کار را رسمی ثبت کند؟ آیا قرارداد، شهر، عنوان شغلی و ساعت کاری روشن است؟ آیا کار با برنامه کلاس و امتحان‌ها می‌خواند؟ آیا پرداخت حقوق از مسیر قابل پیگیری انجام می‌شود؟ آیا بیمه و SGK در صورت نیاز درست دیده شده است؟ اگر پاسخ یکی از این سؤال‌ها مبهم باشد، عجله برای شروع کار می‌تواند بعدا گران تمام شود.',
+        },
+        {
+          heading: 'استراتژی پیشنهادی برای دانشجوی تازه‌وارد',
+          body: 'اگر تازه می‌خواهی وارد ترکیه شوی، از ماه اول دنبال کار سنگین نرو. اول اقامت، آدرس، بیمه، دانشگاه و زبان را تثبیت کن. هم‌زمان رزومه ترکی و انگلیسی بساز، مهارت‌های قابل فروش مثل Excel، فروش، زبان، تولید محتوا، طراحی، برنامه‌نویسی یا پشتیبانی مشتری را تقویت کن و بازار شهر خودت را بشناس. بعد از اینکه از نظر مقطع و سال تحصیل مجاز شدی، کارفرمایی را انتخاب کن که مسیر اجازه کار دانشجویی ترکیه را رسمی جلو ببرد. درآمد خوب وقتی ارزش دارد که اقامت، تحصیل و آینده‌ات را به خطر نیندازد.',
+        },
+      ],
+      keyTakeaways: [
+        'اقامت دانشجویی به‌تنهایی اجازه کار ایجاد نمی‌کند.',
+        'کاردانی و کارشناسی بعد از اتمام سال اول وارد مسیر اجازه کار می‌شوند.',
+        'کارشناسی ارشد محدودیت سال اول کاردانی/کارشناسی را ندارد، اما همچنان مجوز لازم دارد.',
+        'حداقل دستمزد خالص ۲۰۲۶ ترکیه ۲۸٬۰۷۵٫۵۰ لیر است و برای تخمین درآمد دانشجویی باید نسبت ساعت کاری را حساب کرد.',
+        'کار پاره‌وقت قانونی بهتر از درآمد نقدی و غیررسمی پرریسک است.',
+        'قبل از شروع کار، قرارداد، کارفرما، SGK، ساعت کاری و اثر روی اقامت باید بررسی شود.',
+      ],
+      faq: [
+        {
+          q: 'آیا دانشجوی خارجی در ترکیه می‌تواند کار کند؟',
+          a: 'بله، اما فقط با رعایت شرایط رسمی و گرفتن اجازه کار. اقامت دانشجویی به‌تنهایی حق کار ایجاد نمی‌کند.',
+        },
+        {
+          q: 'دانشجوی کاردانی از چه زمانی می‌تواند کار کند؟',
+          a: 'پس از اتمام سال اول تحصیل می‌تواند برای اجازه کار اقدام کند و باید مسیر قانونی و پاره‌وقت را جدی بگیرد.',
+        },
+        {
+          q: 'دانشجوی کارشناسی هم باید سال اول را تمام کند؟',
+          a: 'بله. برای کارشناسی نیز شروع مسیر اجازه کار پس از سال اول است.',
+        },
+        {
+          q: 'دانشجوی کارشناسی ارشد از همان ابتدا می‌تواند کار کند؟',
+          a: 'محدودیت سال اول کاردانی و کارشناسی برای تحصیلات تکمیلی اعمال نمی‌شود، اما اجازه کار همچنان لازم است.',
+        },
+        {
+          q: 'آیا کار پاره‌وقت بدون مجوز ایرادی ندارد؟',
+          a: 'خیر. حتی کار پاره‌وقت اگر برای دانشجوی خارجی بدون مسیر مجوز انجام شود می‌تواند ریسک اقامت و جریمه ایجاد کند.',
+        },
+        {
+          q: 'درآمد دانشجویی در ترکیه چقدر است؟',
+          a: 'برای بودجه‌بندی ۲۰۲۶ می‌توان از حداقل دستمزد خالص ۲۸٬۰۷۵٫۵۰ لیر شروع کرد و آن را نسبت به ساعت کاری محاسبه کرد. درآمد واقعی به شهر، زبان، شغل، تجربه و مجوز بستگی دارد.',
+        },
+        {
+          q: 'آیا کارآموزی هم اجازه کار می‌خواهد؟',
+          a: 'کارآموزی رسمی مرتبط با برنامه دانشگاهی ممکن است مسیر متفاوت داشته باشد، اما هر کار عادی را نمی‌توان کارآموزی حساب کرد. باید دانشگاه و منبع رسمی بررسی شود.',
+        },
+        {
+          q: 'هزینه اجازه کار را دانشجو می‌دهد یا کارفرما؟',
+          a: 'باید در توافق با کارفرما شفاف شود. مهم این است که پرداخت‌ها و درخواست در مسیر رسمی انجام شود و هیچ‌چیز مبهم یا نقدی و غیرقابل پیگیری نباشد.',
+        },
+      ],
+    },
+    en: {
+      title: 'Student Work and Work Permits in Turkey 2026',
+      excerpt: 'A practical guide for international students who want to understand legal student work, work permits, income planning and degree-level differences in Turkey.',
+      thesis: 'A student residence permit does not itself grant the right to work in Turkey. Associate and bachelor students generally enter the work-permit path after completing the first year, while graduate students have a more flexible route, but every student still needs the proper permit before starting work.',
+      lead: 'Student work in Turkey should be planned around degree level, residence status, employer route, legal hours, minimum wage, SGK and class schedule. The goal is income without risking the student file.',
+      sections: [
+        { heading: 'Residence is not work permission', body: 'Official sources make the first point clear: student residence alone does not cover work permission. A separate work permit route is needed before starting employment.' },
+        { heading: 'Associate students', body: 'Associate students should plan for legal work only after the first academic year and should treat part-time work as supplemental income.' },
+        { heading: 'Bachelor students', body: 'Bachelor students follow the same first-year rule, but have more time to build Turkish, a CV, campus links and marketable skills before applying.' },
+        { heading: 'Master students', body: 'Graduate students are not subject to the undergraduate first-year limitation, but they still need a valid work permit and a compliant employer route.' },
+        { heading: 'Income planning', body: 'Turkey 2026 net monthly minimum wage is TRY 28,075.50. Student income should be estimated by hours worked, but real pay depends on city, language, contract, SGK and permit details.' },
+        { heading: 'Safer job choices', body: 'Retail, tourism, support, content, translation, campus roles, internships and digital skills can fit students when the schedule and permit route are clean.' },
+        { heading: 'Internship and public programmes', body: 'University-defined internships can differ from ordinary work. ISKUR youth programme figures are useful context, but eligibility rules such as Turkish citizenship must be checked carefully.' },
+        { heading: 'Before accepting a job', body: 'Check degree year, valid residence, employer willingness to apply, contract, city, job title, hours, payment path and SGK before starting.' },
+      ],
+      keyTakeaways: [
+        'Student residence is not a work permit.',
+        'Associate and bachelor students usually need to finish the first year first.',
+        'Graduate students are more flexible but still need a permit.',
+        'Use the 2026 minimum wage as a planning floor.',
+        'Legal part-time work is safer than informal cash work.',
+        'Contract, employer route and SGK matter.',
+      ],
+      faq: [
+        { q: 'Can international students work in Turkey?', a: 'Yes, with the proper work permit and official route.' },
+        { q: 'When can associate or bachelor students apply?', a: 'After completing the first year of study.' },
+        { q: 'Can master students work from the start?', a: 'They are not subject to the undergraduate first-year limitation, but a permit is still required.' },
+        { q: 'How much can a student earn?', a: 'Use the 2026 net minimum wage as a benchmark and adjust by hours, city, language and contract.' },
+      ],
+    },
+  },
   {
     slug: 'student-residence-e-ikamet-2026',
     priority: 100,
