@@ -59,6 +59,14 @@ Object.assign(EXTRA_TERM_SLUG_BY_TITLE, {
   'برگه نفوس یا Yerleşim Yeri Belgesi چیست؟': 'yerlesim-yeri-belgesi',
 });
 
+Object.assign(EXTRA_TERM_SLUG_BY_TITLE, {
+  'اجازه کار دانشجویی ترکیه چیست؟': 'student-work-permit',
+  'کار پاره‌وقت دانشجویی چیست؟': 'part-time-student-work',
+  'قانون نیروی کار بین‌المللی ترکیه چیست؟': 'international-workforce-law',
+  'حداقل دستمزد ترکیه چیست؟': 'minimum-wage-turkey',
+  'SGK و بیمه کار در ترکیه چیست؟': 'sgk-work-insurance',
+});
+
 const ALL_TERM_SLUG_BY_TITLE = {
   ...TERM_SLUG_BY_TITLE,
   ...EXTRA_TERM_SLUG_BY_TITLE,
@@ -1437,6 +1445,154 @@ Object.assign(EXTRA_TERM_DETAILS, {
       faq: [
         { q: 'Is it the same as a lease?', a: 'No.' },
         { q: 'Can a bank ask for it?', a: 'Yes, it may.' },
+      ],
+    },
+  },
+});
+
+Object.assign(EXTRA_TERM_DETAILS, {
+  'student-work-permit': {
+    title: { fa: 'اجازه کار دانشجویی ترکیه', en: 'Student work permit in Turkey' },
+    question: { fa: 'اجازه کار دانشجویی ترکیه چیست و چه زمانی لازم می‌شود؟', en: 'What is a student work permit in Turkey?' },
+    category: 'کار دانشجویی',
+    summary: 'اجازه کار دانشجویی ترکیه مجوز رسمی کار برای دانشجوی خارجی است. اقامت دانشجویی، ثبت‌نام دانشگاه یا کیملیک دانشجویی به‌تنهایی اجازه شروع کار نمی‌دهد.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'دانشجوی خارجی برای کار در ترکیه باید قبل از شروع کار، مسیر اجازه کار را از کانال رسمی و معمولا با نقش کارفرما طی کند.' },
+      { heading: 'چه زمانی مهم است؟', body: 'وقتی دانشجو می‌خواهد کنار درس درآمد داشته باشد، کارآموزی غیر دانشگاهی انجام دهد یا قرارداد کاری بگیرد، باید وضعیت مجوز بررسی شود.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه اقامت دانشجویی یا پذیرش دانشگاه خودبه‌خود حق کار ایجاد می‌کند.' },
+    ],
+    checklist: ['اقامت معتبر', 'مقطع و سال تحصیل', 'کارفرمای رسمی', 'قرارداد و عنوان شغلی', 'ثبت سامانه اجازه کار'],
+    faq: [
+      { q: 'آیا بدون اجازه کار می‌شود پاره‌وقت کار کرد؟', a: 'خیر. پاره‌وقت بودن جایگزین مجوز رسمی نیست.' },
+      { q: 'آیا دانشجو خودش درخواست می‌دهد؟', a: 'در کار وابسته، نقش کارفرما در ثبت درخواست کلیدی است.' },
+    ],
+    en: {
+      summary: 'A student work permit is the official permission that allows an international student to work in Turkey.',
+      sections: [
+        { heading: 'Simple definition', body: 'A separate official route is needed before work starts.' },
+        { heading: 'When it matters', body: 'It matters for paid jobs, non-university internships and employment contracts.' },
+        { heading: 'Common mistake', body: 'Assuming student residence automatically gives work rights.' },
+      ],
+      checklist: ['Valid residence', 'Degree and year', 'Official employer', 'Contract and job title', 'Permit system application'],
+      faq: [
+        { q: 'Can part-time work be done without a permit?', a: 'No.' },
+        { q: 'Does the student apply alone?', a: 'For dependent work, the employer route is central.' },
+      ],
+    },
+  },
+  'part-time-student-work': {
+    title: { fa: 'کار پاره‌وقت دانشجویی', en: 'Part-time student work' },
+    question: { fa: 'کار پاره‌وقت دانشجویی در ترکیه یعنی چه؟', en: 'What is part-time student work in Turkey?' },
+    category: 'کار دانشجویی',
+    summary: 'کار پاره‌وقت یعنی کار با ساعت محدود و قابل جمع شدن با کلاس، اقامت و مجوز دانشجو. پاره‌وقت بودن به معنی بی‌نیازی از اجازه کار نیست.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'کار پاره‌وقت درآمد مکمل می‌دهد، اما نباید مسیر درس و اقامت را مختل کند.' },
+      { heading: 'برای چه کسی مناسب است؟', body: 'برای دانشجوی سال‌های بالاتر، کسی که زبان و برنامه کلاسش پایدارتر شده و کارفرمای قانونی پیدا کرده است.' },
+      { heading: 'اشتباه رایج', body: 'قبول کار نقدی، بدون قرارداد یا بدون ثبت مجوز با این تصور که چون ساعت کم است مشکلی ندارد.' },
+    ],
+    checklist: ['ساعت کاری روشن', 'قرارداد قابل پیگیری', 'هماهنگی با کلاس', 'اجازه کار', 'پرداخت شفاف'],
+    faq: [
+      { q: 'آیا درآمد پاره‌وقت شهریه را کامل پوشش می‌دهد؟', a: 'معمولا باید آن را درآمد مکمل دید، نه تضمین پوشش کامل هزینه‌ها.' },
+      { q: 'آیا ۲۴ ساعت در هفته همیشه مجاز است؟', a: 'باید با مقطع، مجوز، قرارداد و قانون همان پرونده بررسی شود.' },
+    ],
+    en: {
+      summary: 'Part-time student work is limited-hour work that must fit study, residence and permit conditions.',
+      sections: [
+        { heading: 'Simple definition', body: 'Supplemental work that should not disrupt the student file.' },
+        { heading: 'Best fit', body: 'Students with stable schedule, language and a compliant employer.' },
+        { heading: 'Common mistake', body: 'Assuming low hours make informal work safe.' },
+      ],
+      checklist: ['Clear hours', 'Traceable contract', 'Class fit', 'Work permit', 'Transparent payment'],
+      faq: [
+        { q: 'Will it cover all costs?', a: 'Usually it is supplemental income.' },
+        { q: 'Is 24 hours always allowed?', a: 'The case must be checked.' },
+      ],
+    },
+  },
+  'international-workforce-law': {
+    title: { fa: 'قانون نیروی کار بین‌المللی', en: 'International Workforce Law' },
+    question: { fa: 'قانون نیروی کار بین‌المللی ترکیه برای دانشجو چه می‌گوید؟', en: 'What does Turkey International Workforce Law mean for students?' },
+    category: 'قوانین کار',
+    summary: 'قانون ۶۷۳۵ چارچوب اصلی اجازه کار خارجی‌ها در ترکیه است و برای دانشجوی خارجی تفاوت کاردانی/کارشناسی با تحصیلات تکمیلی را مشخص می‌کند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'این قانون می‌گوید خارجی‌ها برای کار در ترکیه باید در چارچوب اجازه کار یا معافیت قانونی عمل کنند.' },
+      { heading: 'برای دانشجو', body: 'کاردانی و کارشناسی پس از سال اول وارد مسیر درخواست می‌شوند؛ تحصیلات تکمیلی از این محدودیت معاف است اما همچنان اجازه کار لازم دارد.' },
+      { heading: 'اشتباه رایج', body: 'تبدیل یک جمله قانونی به وعده قطعی بدون بررسی پرونده، کارفرما و اقامت.' },
+    ],
+    checklist: ['مقطع تحصیلی', 'سال تحصیل', 'وضعیت اقامت', 'نوع کار', 'منبع رسمی'],
+    faq: [
+      { q: 'آیا قانون برای همه مقاطع یکسان است؟', a: 'خیر. کاردانی/کارشناسی با تحصیلات تکمیلی فرق دارد.' },
+      { q: 'آیا ارشد بدون مجوز کار می‌کند؟', a: 'خیر. تفاوت در محدودیت‌هاست، نه حذف مجوز.' },
+    ],
+    en: {
+      summary: 'Law 6735 is the main framework for foreign work permits in Turkey and defines student-related differences.',
+      sections: [
+        { heading: 'Simple definition', body: 'Foreign work must fit the permit or exemption framework.' },
+        { heading: 'For students', body: 'Undergraduate levels differ from graduate levels.' },
+        { heading: 'Common mistake', body: 'Turning a legal rule into a guarantee without case review.' },
+      ],
+      checklist: ['Degree', 'Study year', 'Residence status', 'Work type', 'Official source'],
+      faq: [
+        { q: 'Is it the same for all levels?', a: 'No.' },
+        { q: 'Can master students work without permit?', a: 'No.' },
+      ],
+    },
+  },
+  'minimum-wage-turkey': {
+    title: { fa: 'حداقل دستمزد ترکیه', en: 'Turkey minimum wage' },
+    question: { fa: 'حداقل دستمزد ترکیه برای برنامه‌ریزی درآمد دانشجو چه کاربردی دارد؟', en: 'How does Turkey minimum wage help student income planning?' },
+    category: 'هزینه و درآمد',
+    summary: 'حداقل دستمزد ترکیه کف قانونی حقوق کار تمام‌وقت است. برای دانشجو، این عدد بیشتر ابزار بودجه‌بندی و مقایسه درآمد پاره‌وقت است.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'حداقل مبلغ قانونی برای کار تمام‌وقت که هر سال توسط مرجع رسمی اعلام می‌شود.' },
+      { heading: 'برای دانشجو', body: 'برای تخمین درآمد پاره‌وقت باید نسبت ساعت کار دانشجو به ساعت کار تمام‌وقت حساب شود.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه هر دانشجوی خارجی حتما به اندازه حداقل حقوق کامل درآمد دارد.' },
+    ],
+    checklist: ['عدد سال جاری', 'خالص یا ناخالص', 'ساعت هفتگی', 'قرارداد', 'کسورات و بیمه'],
+    faq: [
+      { q: 'آیا حداقل دستمزد یعنی درآمد قطعی دانشجو؟', a: 'خیر. فقط مبنای برنامه‌ریزی و مقایسه است.' },
+      { q: 'خالص و ناخالص فرق دارد؟', a: 'بله. مبلغ خالص دریافتی با ناخالص و هزینه کارفرما متفاوت است.' },
+    ],
+    en: {
+      summary: 'Turkey minimum wage is the legal floor for full-time work and a useful benchmark for student budgeting.',
+      sections: [
+        { heading: 'Simple definition', body: 'The official minimum amount for full-time work.' },
+        { heading: 'For students', body: 'Estimate part-time income by hour ratio.' },
+        { heading: 'Common mistake', body: 'Assuming every student earns a full minimum wage.' },
+      ],
+      checklist: ['Current year amount', 'Net or gross', 'Weekly hours', 'Contract', 'Deductions and insurance'],
+      faq: [
+        { q: 'Is it guaranteed student income?', a: 'No.' },
+        { q: 'Do net and gross differ?', a: 'Yes.' },
+      ],
+    },
+  },
+  'sgk-work-insurance': {
+    title: { fa: 'SGK و بیمه کار', en: 'SGK and work insurance' },
+    question: { fa: 'SGK در کار دانشجویی ترکیه چه نقشی دارد؟', en: 'What role does SGK play in student work in Turkey?' },
+    category: 'بیمه و قانون کار',
+    summary: 'SGK سیستم تامین اجتماعی ترکیه است. در کار رسمی، ثبت بیمه و وضعیت کارفرما باید با قرارداد و اجازه کار هماهنگ باشد.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'SGK نهاد و سیستم مربوط به بیمه اجتماعی، حق بیمه و ثبت‌های کار در ترکیه است.' },
+      { heading: 'برای دانشجو', body: 'اگر کار رسمی باشد، وضعیت بیمه و قرارداد باید با اجازه کار و عنوان شغلی همخوان باشد.' },
+      { heading: 'اشتباه رایج', body: 'قبول کار بدون هیچ رد پرداخت یا ثبت رسمی و بعد انتظار حمایت قانونی.' },
+    ],
+    checklist: ['قرارداد', 'عنوان شغلی', 'پرداخت قابل پیگیری', 'وضعیت بیمه', 'هماهنگی با مجوز'],
+    faq: [
+      { q: 'آیا SGK جای اجازه کار را می‌گیرد؟', a: 'خیر. هر کدام نقش جدا دارد و باید با هم هماهنگ باشند.' },
+      { q: 'آیا کار نقدی امن است؟', a: 'برای دانشجوی خارجی معمولا پرریسک است چون قابل پیگیری و قانونی نیست.' },
+    ],
+    en: {
+      summary: 'SGK is Turkey social security system. Formal work should align insurance, contract and work permit status.',
+      sections: [
+        { heading: 'Simple definition', body: 'The social security and work registration system.' },
+        { heading: 'For students', body: 'Formal work should align contract, permit and insurance status.' },
+        { heading: 'Common mistake', body: 'Accepting untraceable cash work and expecting legal protection.' },
+      ],
+      checklist: ['Contract', 'Job title', 'Traceable payment', 'Insurance status', 'Permit alignment'],
+      faq: [
+        { q: 'Does SGK replace a permit?', a: 'No.' },
+        { q: 'Is cash work safe?', a: 'Usually risky for international students.' },
       ],
     },
   },
