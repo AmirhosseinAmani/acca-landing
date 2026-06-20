@@ -16,9 +16,13 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/framer-motion')) return 'vendor-framer';
-          if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) return 'vendor-react';
-          if (id.includes('node_modules/lucide-react')) return 'vendor-lucide';
+          const normalizedId = id.replace(/\\/g, '/');
+          if (
+            normalizedId.includes('/node_modules/react/') ||
+            normalizedId.includes('/node_modules/react-dom/') ||
+            normalizedId.includes('/node_modules/scheduler/')
+          ) return 'vendor-react';
+          if (normalizedId.includes('/node_modules/lucide-react/')) return 'vendor-lucide';
         },
       },
     },

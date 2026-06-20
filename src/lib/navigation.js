@@ -10,9 +10,9 @@
 
 /** The three main content pages that cross-link to each other everywhere. */
 export const MAIN_NAV = [
-  { key: 'blog', href: '?page=blog', fa: 'بلاگ', en: 'Blog' },
-  { key: 'universities', href: '?page=universities', fa: 'دانشگاه‌ها', en: 'Universities' },
-  { key: 'programs', href: '?page=programs', fa: 'رشته‌ها و شهریه‌ها', en: 'Programs & Tuition' },
+  { key: 'blog', href: '/blog/', fa: 'بلاگ', en: 'Blog' },
+  { key: 'universities', href: '/universities/', fa: 'دانشگاه‌ها', en: 'Universities' },
+  { key: 'programs', href: '/programs/', fa: 'رشته‌ها و شهریه‌ها', en: 'Programs & Tuition' },
 ];
 
 /** Go back to the exact previous in-site page, or `fallback` on a cold entry. */

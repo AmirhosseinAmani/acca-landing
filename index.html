@@ -219,19 +219,47 @@
     </script>
 
     <!-- Preconnect -->
-    <link rel="preconnect" href="https://qysluhfrjpcguhneqsuz.supabase.co" crossorigin />
+    <link rel="preconnect" href="https://qysluhfrjpcguhneqsuz.supabase.co" />
+
+    <script>
+      (() => {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const addImagePreload = (href, options = {}) => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'image';
+            link.href = href;
+            if (options.srcset) link.setAttribute('imagesrcset', options.srcset);
+            if (options.sizes) link.setAttribute('imagesizes', options.sizes);
+            link.fetchPriority = 'high';
+            document.head.appendChild(link);
+          };
+          if (params.get('page') === 'blog' && !params.get('post')) {
+            addImagePreload('https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/a/b1.jpg');
+            return;
+          }
+          if (
+            window.location.pathname === '/' &&
+            !params.get('page') &&
+            !params.get('section') &&
+            window.matchMedia('(max-width: 1023px)').matches
+          ) {
+            addImagePreload('/assets/optimized/astronaut-384.webp', {
+              srcset: '/assets/optimized/astronaut-384.webp 384w, /assets/optimized/astronaut-640.webp 640w',
+              sizes: '(max-width: 480px) 78vw, 300px',
+            });
+          }
+        } catch {
+          /* Route image preloads are performance hints only. */
+        }
+      })();
+    </script>
 
     <!-- Preload LCP / above-fold resources -->
-    <link
-      rel="preload"
-      as="image"
-      href="/assets/optimized/astronaut-384.webp"
-      imagesrcset="/assets/optimized/astronaut-384.webp 384w, /assets/optimized/astronaut-640.webp 640w"
-      imagesizes="(max-width: 480px) 78vw, 300px"
-      media="(max-width: 1023px)"
-      fetchpriority="high"
-    />
+    <link rel="preload" as="image" href="/assets/optimized/acca-logo-320.webp" fetchpriority="high" />
     <link rel="preload" as="font" type="font/woff2" href="/fonts/vazirmatn-arabic.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/vazirmatn-latin-ext.woff2" crossorigin />
 
     <!-- Icons & Manifest -->
     <link rel="manifest" href="/manifest.webmanifest" />
