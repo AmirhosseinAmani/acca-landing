@@ -3,7 +3,7 @@ import { MessageCircle } from 'lucide-react';
 import { COMPANY_WHATSAPP_URL } from '../../constants/contact';
 
 const MOBILE_ASTRONAUT_SRC =
-  '/assets/optimized/astronaut-640.webp';
+  '/assets/optimized/astronaut-384.webp';
 
 /**
  * HeroSection owns its own scroll tracking so the parent App never re-renders
@@ -170,9 +170,11 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
               <div className="hero-mobile-astronaut-wrap relative z-10 flex items-center justify-center">
                 <img
                   src={MOBILE_ASTRONAUT_SRC}
+                  srcSet="/assets/optimized/astronaut-384.webp 384w, /assets/optimized/astronaut-640.webp 640w"
+                  sizes="(max-width: 480px) 78vw, 300px"
                   alt={isFa ? 'راهنمای هوشمند آکا برای تحصیل در ترکیه' : 'ACCA EDU study in Turkey guide'}
-                  width="320"
-                  height="320"
+                  width="384"
+                  height="384"
                   fetchPriority="high"
                   loading="eager"
                   decoding="async"

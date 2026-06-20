@@ -316,15 +316,20 @@ export default function AccaShowcaseSection({ darkMode = false, isFa = true }) {
                 key={index}
                 type="button"
                 onClick={() => goToSlide(index)}
-                className={`h-2 rounded-full transition-all ${
-                  activeSlide === index
-                    ? "w-10 bg-[#E7C77D]"
-                    : darkMode
-                      ? "w-2 bg-white/25"
-                      : "w-2 bg-black/20"
-                }`}
+                className="grid h-7 min-w-7 place-items-center rounded-full transition hover:bg-black/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E7C77D]/70"
                 aria-label={`Go to slide ${index + 1}`}
-              />
+                aria-current={activeSlide === index ? 'true' : undefined}
+              >
+                <span
+                  className={`h-2 rounded-full transition-all ${
+                    activeSlide === index
+                      ? "w-10 bg-[#E7C77D]"
+                      : darkMode
+                        ? "w-2 bg-white/25"
+                        : "w-2 bg-black/20"
+                  }`}
+                />
+              </button>
             ))}
           </div>
 

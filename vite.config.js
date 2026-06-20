@@ -5,6 +5,13 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
+    modulePreload: {
+      resolveDependencies(filename, deps, { hostType }) {
+        if (hostType !== 'html') return deps;
+
+        return deps.filter((dep) => !dep.includes('vendor-framer'));
+      },
+    },
     // Split vendor libraries into separate cacheable chunks
     rollupOptions: {
       output: {

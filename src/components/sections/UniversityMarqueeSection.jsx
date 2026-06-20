@@ -5,7 +5,7 @@ const universityLogos = [
   },
   {
     name: "Istanbul Arel University",
-    src: "/assets/optimized/uni-arel-240.webp",
+    src: "/assets/optimized/uni-arel-96.webp",
   },
   {
     name: "Atlas University",
@@ -13,11 +13,11 @@ const universityLogos = [
   },
   {
     name: "Istanbul Aydin University",
-    src: "/assets/optimized/uni-aydin-240.webp",
+    src: "/assets/optimized/uni-aydin-96.webp",
   },
   {
     name: "Bahcesehir University",
-    src: "/assets/optimized/uni-bahcesehir-240.webp",
+    src: "/assets/optimized/uni-bahcesehir-96.webp",
   },
   {
     name: "Biruni University",
@@ -68,8 +68,11 @@ export default function UniversityMarqueeSection({ darkMode, isFa }) {
                     <img
                       src={uni.src}
                       alt={uni.name}
+                      width="96"
+                      height="96"
                       className="university-logo"
-                      loading="lazy"
+                      loading={row === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
                       draggable={false}
                     />
                   </div>
