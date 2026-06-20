@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { registerServiceWorker } from './registerServiceWorker'
+import { initDeferredAnalytics } from './lib/analytics'
 import { initScrollRestoration } from './lib/scrollRestoration'
 
 initScrollRestoration()
@@ -45,3 +46,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 )
 registerServiceWorker()
+initDeferredAnalytics()

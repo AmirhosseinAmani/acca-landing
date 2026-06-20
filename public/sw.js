@@ -1,4 +1,4 @@
-const APP_VERSION = 'acca-edu-pwa-v1.0.0';
+const APP_VERSION = 'acca-edu-pwa-v1.0.1';
 const SHELL_CACHE = `${APP_VERSION}-shell`;
 const RUNTIME_CACHE = `${APP_VERSION}-runtime`;
 

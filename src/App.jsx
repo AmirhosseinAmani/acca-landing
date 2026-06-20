@@ -1,21 +1,8 @@
 import { lazy, memo, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Award, BookOpen, Building2, Menu, Newspaper, UserRound, X } from 'lucide-react';
-import SmartScholarshipCalculator from './components/SmartScholarshipCalculator';
-import GreenScholarshipWidget from "./components/GreenScholarshipWidget";
-import AccaShowcaseSection from "./components/AccaShowcaseSection";
 import ConsultationModal from './components/ConsultationModal';
 import HeroSection from './components/sections/HeroSection';
 import UniversityMarqueeSection from './components/sections/UniversityMarqueeSection';
-import RegistrationProcessSection from './components/sections/RegistrationProcessSection';
-import FeaturedUniversitiesSection from './components/sections/FeaturedUniversitiesSection';
-import PopularMajorsSection from './components/sections/PopularMajorsSection';
-import PartnerScholarshipSection from './components/sections/PartnerScholarshipSection';
-import TestimonialsSection from './components/sections/TestimonialsSection';
-import StatsSection from './components/sections/StatsSection';
-import MigrationBlueprintSection from './components/sections/MigrationBlueprintSection';
-import FaqSection from './components/sections/FaqSection';
-import FinalCtaSection from './components/sections/FinalCtaSection';
-import ContactSection from './components/sections/ContactSection';
 import FloatingActions from './components/FloatingActions';
 import { buildUniversitySlug, istanbulUniversities } from './data/istanbulUniversities';
 import { getUniversityLogo } from './data/universityLogoMap';
@@ -25,6 +12,19 @@ const UniversitiesPage = lazy(() => import('./components/pages/UniversitiesPage'
 const ScholarshipsPage = lazy(() => import('./components/pages/ScholarshipsPage'));
 const BlogPage = lazy(() => import('./components/pages/BlogPage'));
 const GlossaryPage = lazy(() => import('./components/pages/GlossaryPage'));
+const AccaShowcaseSection = lazy(() => import('./components/AccaShowcaseSection'));
+const SmartScholarshipCalculator = lazy(() => import('./components/SmartScholarshipCalculator'));
+const StatsSection = lazy(() => import('./components/sections/StatsSection'));
+const RegistrationProcessSection = lazy(() => import('./components/sections/RegistrationProcessSection'));
+const GreenScholarshipWidget = lazy(() => import('./components/GreenScholarshipWidget'));
+const FeaturedUniversitiesSection = lazy(() => import('./components/sections/FeaturedUniversitiesSection'));
+const PopularMajorsSection = lazy(() => import('./components/sections/PopularMajorsSection'));
+const PartnerScholarshipSection = lazy(() => import('./components/sections/PartnerScholarshipSection'));
+const TestimonialsSection = lazy(() => import('./components/sections/TestimonialsSection'));
+const MigrationBlueprintSection = lazy(() => import('./components/sections/MigrationBlueprintSection'));
+const FaqSection = lazy(() => import('./components/sections/FaqSection'));
+const FinalCtaSection = lazy(() => import('./components/sections/FinalCtaSection'));
+const ContactSection = lazy(() => import('./components/sections/ContactSection'));
 
 const ACCA_LOGO_SRC =
   '/assets/optimized/acca-logo-320.webp';
@@ -350,6 +350,65 @@ const FloatingOrbs = memo(function FloatingOrbs({ floatingObjects, darkMode }) {
   );
 });
 
+function DeferredSectionFallback({ minHeight }) {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        minHeight,
+        contentVisibility: 'auto',
+        containIntrinsicSize: `auto ${minHeight}px`,
+      }}
+    />
+  );
+}
+
+function DeferredHomeSection({ children, eager = false, minHeight = 560, rootMargin = '1400px 0px' }) {
+  const containerRef = useRef(null);
+  const [shouldRender, setShouldRender] = useState(eager);
+  const renderNow = eager || shouldRender;
+
+  useEffect(() => {
+    if (renderNow) return undefined;
+
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === 'undefined') {
+      setShouldRender(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldRender(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [renderNow, rootMargin]);
+
+  return (
+    <div
+      ref={containerRef}
+      style={renderNow ? undefined : {
+        minHeight,
+        contentVisibility: 'auto',
+        containIntrinsicSize: `auto ${minHeight}px`,
+      }}
+    >
+      {renderNow ? (
+        <Suspense fallback={<DeferredSectionFallback minHeight={minHeight} />}>
+          {children}
+        </Suspense>
+      ) : null}
+    </div>
+  );
+}
+
 export default function ACCALandingPage() {
   const [darkMode, setDarkMode] = useState(false);
   const [language, setLanguage] = useState(getStoredLanguage);
@@ -455,6 +514,15 @@ export default function ACCALandingPage() {
   useEffect(() => {
     if (!isDesktopViewport) return undefined;
     if (window.customElements?.get('model-viewer')) return undefined;
+
+    ['https://unpkg.com', 'https://modelviewer.dev'].forEach((href) => {
+      if (document.querySelector(`link[rel="preconnect"][href="${href}"]`)) return;
+      const link = document.createElement('link');
+      link.rel = 'preconnect';
+      link.href = href;
+      link.crossOrigin = 'anonymous';
+      document.head.appendChild(link);
+    });
 
     const existing = document.querySelector(
       'script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]'
@@ -595,6 +663,7 @@ export default function ACCALandingPage() {
   const staticRouteMeta = routeAlias?.canonicalPath
     ? STATIC_ROUTE_META[routeAlias.canonicalPath]
     : null;
+  const eagerHomeSections = !page && Boolean(params.get('section'));
 
   // ── SEO: keep <html lang/dir> in sync with the active language ────────────
   useEffect(() => {
@@ -1181,7 +1250,7 @@ export default function ACCALandingPage() {
 
       <div
         dir={isFa ? 'rtl' : 'ltr'}
-        className={`min-h-screen overflow-hidden relative ${
+        className={`min-h-screen overflow-hidden relative ${!darkMode ? 'light-contrast-scope' : ''} ${
           darkMode
             ? 'bg-[#050816] text-white'
             : 'bg-[#f5efe4] text-[#1f1f1f]'
@@ -1196,6 +1265,18 @@ export default function ACCALandingPage() {
         body {
           margin: 0;
           overflow-x: hidden;
+        }
+
+        .light-contrast-scope .text-neutral-500 {
+          color: rgb(82 82 82);
+        }
+
+        .light-contrast-scope .text-emerald-400 {
+          color: rgb(4 120 87);
+        }
+
+        .light-contrast-scope .text-\\[\\#C6A77D\\] {
+          color: #7c5f34;
         }
 
         @media (min-width: 1024px) and (pointer: fine) {
@@ -2157,92 +2238,120 @@ export default function ACCALandingPage() {
         </div>
       </nav>
 
-      <HeroSection
-        darkMode={darkMode}
-        isFa={isFa}
-        ACCA_LOGO_SRC={ACCA_LOGO_SRC}
-        isDesktopViewport={isDesktopViewport}
-        MODEL_SRC={MODEL_SRC}
-        mouseOffset={mouseOffset}
-        onConsultationClick={() => setConsultationOpen(true)}
-      />
+      <main id="main-content">
+        <HeroSection
+          darkMode={darkMode}
+          isFa={isFa}
+          ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+          isDesktopViewport={isDesktopViewport}
+          MODEL_SRC={MODEL_SRC}
+          mouseOffset={mouseOffset}
+          onConsultationClick={() => setConsultationOpen(true)}
+        />
 
-      <UniversityMarqueeSection
-        darkMode={darkMode}
-        isFa={isFa}
-      />
+        <UniversityMarqueeSection
+          darkMode={darkMode}
+          isFa={isFa}
+        />
 
-      <AccaShowcaseSection
-       darkMode={darkMode}
-       isFa={isFa}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={720}>
+          <AccaShowcaseSection
+            darkMode={darkMode}
+            isFa={isFa}
+          />
+        </DeferredHomeSection>
 
-      <SmartScholarshipCalculator
-        darkMode={darkMode}
-        language={language}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={880}>
+          <SmartScholarshipCalculator
+            darkMode={darkMode}
+            language={language}
+          />
+        </DeferredHomeSection>
 
-      <StatsSection
-        darkMode={darkMode}
-        isFa={isFa}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={520}>
+          <StatsSection
+            darkMode={darkMode}
+            isFa={isFa}
+          />
+        </DeferredHomeSection>
 
-      <RegistrationProcessSection
-        darkMode={darkMode}
-        isFa={isFa}
-        registrationSteps={registrationSteps}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={760}>
+          <RegistrationProcessSection
+            darkMode={darkMode}
+            isFa={isFa}
+            registrationSteps={registrationSteps}
+          />
+        </DeferredHomeSection>
 
-      <GreenScholarshipWidget
-        isFa={isFa}
-        darkMode={darkMode}
-        onConsultationClick={() => setConsultationOpen(true)}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={760}>
+          <GreenScholarshipWidget
+            isFa={isFa}
+            darkMode={darkMode}
+            onConsultationClick={() => setConsultationOpen(true)}
+          />
+        </DeferredHomeSection>
 
-      <FeaturedUniversitiesSection
-        darkMode={darkMode}
-        isFa={isFa}
-        universityCards={universityCards}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={720}>
+          <FeaturedUniversitiesSection
+            darkMode={darkMode}
+            isFa={isFa}
+            universityCards={universityCards}
+          />
+        </DeferredHomeSection>
 
-      <PopularMajorsSection
-        darkMode={darkMode}
-        isFa={isFa}
-        majors={majors}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={920}>
+          <PopularMajorsSection
+            darkMode={darkMode}
+            isFa={isFa}
+            majors={majors}
+          />
+        </DeferredHomeSection>
 
-      <PartnerScholarshipSection
-        darkMode={darkMode}
-        isFa={isFa}
-        scholarshipComparison={scholarshipComparison}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={1120}>
+          <PartnerScholarshipSection
+            darkMode={darkMode}
+            isFa={isFa}
+            scholarshipComparison={scholarshipComparison}
+          />
+        </DeferredHomeSection>
 
-      <TestimonialsSection
-        darkMode={darkMode}
-        isFa={isFa}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={760}>
+          <TestimonialsSection
+            darkMode={darkMode}
+            isFa={isFa}
+          />
+        </DeferredHomeSection>
 
-      <MigrationBlueprintSection
-        darkMode={darkMode}
-        isFa={isFa}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={1020}>
+          <MigrationBlueprintSection
+            darkMode={darkMode}
+            isFa={isFa}
+          />
+        </DeferredHomeSection>
 
-      <FaqSection
-        darkMode={darkMode}
-        isFa={isFa}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={840}>
+          <FaqSection
+            darkMode={darkMode}
+            isFa={isFa}
+          />
+        </DeferredHomeSection>
 
-      <FinalCtaSection
-        darkMode={darkMode}
-        isFa={isFa}
-        onConsultationClick={() => setConsultationOpen(true)}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={540}>
+          <FinalCtaSection
+            darkMode={darkMode}
+            isFa={isFa}
+            onConsultationClick={() => setConsultationOpen(true)}
+          />
+        </DeferredHomeSection>
 
-      <ContactSection
-        darkMode={darkMode}
-        isFa={isFa}
-        onConsultationClick={() => setConsultationOpen(true)}
-      />
+        <DeferredHomeSection eager={eagerHomeSections} minHeight={860}>
+          <ContactSection
+            darkMode={darkMode}
+            isFa={isFa}
+            onConsultationClick={() => setConsultationOpen(true)}
+          />
+        </DeferredHomeSection>
+      </main>
       {floatingActions}
       <ConsultationModal
         open={consultationOpen}
