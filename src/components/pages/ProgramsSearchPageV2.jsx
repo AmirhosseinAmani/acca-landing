@@ -20,6 +20,7 @@ import { BackButton, MainNav } from '../SiteNav';
 
 const EXPORT_LIMIT = 100;
 const AVAILABLE_STATUS = 'Available';
+const SELECTED_CHIP_PREVIEW_LIMIT = 24;
 
 const filterFields = [
   { key: 'country', rowKey: 'country', labelFa: 'کشور', labelEn: 'Country' },
@@ -141,8 +142,15 @@ const copy = {
     loading: 'در حال بارگذاری...',
     noResults: 'نتیجه‌ای برای این فیلترها پیدا نشد.',
     consult: 'مشاوره',
+    loadResults: '\u0646\u0645\u0627\u06cc\u0634 \u0631\u0634\u062a\u0647\u200c\u0647\u0627',
+    pendingChanges: (count) => `${formatNumber(count, true)} \u0641\u06cc\u0644\u062a\u0631 \u0622\u0645\u0627\u062f\u0647 \u0627\u0639\u0645\u0627\u0644`,
+    filtersSynced: '\u0641\u06cc\u0644\u062a\u0631\u0647\u0627 \u0627\u0639\u0645\u0627\u0644 \u0634\u062f\u0647\u200c\u0627\u0646\u062f',
+    loadedResults: (count) => `${formatNumber(count, true)} \u0631\u0634\u062a\u0647 \u0646\u0645\u0627\u06cc\u0634 \u062f\u0627\u062f\u0647 \u0645\u06cc\u200c\u0634\u0648\u062f`,
     website: 'وب‌سایت',
     all: (label) => `همه ${label}`,
+    allSelected: (label) => `\u0647\u0645\u0647 ${label} \u0627\u0646\u062a\u062e\u0627\u0628 \u0634\u062f`,
+    selectAll: '\u0627\u0646\u062a\u062e\u0627\u0628 \u0647\u0645\u0647',
+    clearAll: '\u067e\u0627\u06a9 \u06a9\u0631\u062f\u0646 \u0647\u0645\u0647',
     search: 'جستجو...',
     moreOptions: 'برای دیدن گزینه‌های بیشتر جستجو کنید.',
     noOptions: 'گزینه‌ای پیدا نشد.',
@@ -188,8 +196,15 @@ const copy = {
     loading: 'Loading...',
     noResults: 'No matching programs found.',
     consult: 'Consult',
+    loadResults: 'Load programs',
+    pendingChanges: (count) => `${count} filters ready to apply`,
+    filtersSynced: 'Filters applied',
+    loadedResults: (count) => `${count} programs shown`,
     website: 'Website',
     all: (label) => `All ${label}`,
+    allSelected: (label) => `All ${label} selected`,
+    selectAll: 'Select all',
+    clearAll: 'Clear all',
     search: 'Search...',
     moreOptions: 'Search to reveal more options.',
     noOptions: 'No options found.',
@@ -257,8 +272,11 @@ function ProgramsSearchWorkspace({
 }) {
   const [rows, setRows] = useState([]);
   const [filters, setFilters] = useState(() => createInitialFiltersFromUrl());
+  const [draftFilters, setDraftFilters] = useState(() => createInitialFiltersFromUrl());
   const [query, setQuery] = useState(() => getInitialSearchQueryFromUrl());
+  const [draftQuery, setDraftQuery] = useState(() => getInitialSearchQueryFromUrl());
   const [priceRange, setPriceRange] = useState(() => createInitialPriceRangeFromUrl());
+  const [draftPriceRange, setDraftPriceRange] = useState(() => createInitialPriceRangeFromUrl());
   const [pageSize, setPageSize] = useState(25);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -288,6 +306,12 @@ function ProgramsSearchWorkspace({
     );
     return getPriceBounds(fieldFilteredRows.map((row) => getProgramPriceAmount(row)));
   }, [filters, rows]);
+  const draftPriceBounds = useMemo(() => {
+    const fieldFilteredRows = rows.filter((row) =>
+      filterFields.every((field) => rowMatchesFilter(row, field, draftFilters[field.key]))
+    );
+    return getPriceBounds(fieldFilteredRows.map((row) => getProgramPriceAmount(row)));
+  }, [draftFilters, rows]);
   const effectivePriceRange = useMemo(
     () => normalizePriceRange(priceRange, priceBounds),
     [priceBounds, priceRange]
@@ -295,6 +319,14 @@ function ProgramsSearchWorkspace({
   const priceRangeActive = useMemo(
     () => isPriceRangeActive(priceRange, priceBounds),
     [priceBounds, priceRange]
+  );
+  const draftEffectivePriceRange = useMemo(
+    () => normalizePriceRange(draftPriceRange, draftPriceBounds),
+    [draftPriceBounds, draftPriceRange]
+  );
+  const draftPriceRangeActive = useMemo(
+    () => isPriceRangeActive(draftPriceRange, draftPriceBounds),
+    [draftPriceBounds, draftPriceRange]
   );
 
   const cascadedOptions = useMemo(() => {
@@ -304,15 +336,15 @@ function ProgramsSearchWorkspace({
       const otherFields = filterFields.filter((f) => f.key !== field.key);
       const availableRows = rows.filter((row) => {
         const matchesFilters = otherFields.every((f) =>
-          rowMatchesFilter(row, f, filters[f.key])
+          rowMatchesFilter(row, f, draftFilters[f.key])
         );
         if (!matchesFilters) return false;
-        if (priceRangeActive) {
+        if (draftPriceRangeActive) {
           const rowPrice = getProgramPriceAmount(row);
           if (
             !Number.isFinite(rowPrice) ||
-            rowPrice < effectivePriceRange.min ||
-            rowPrice > effectivePriceRange.max
+            rowPrice < draftEffectivePriceRange.min ||
+            rowPrice > draftEffectivePriceRange.max
           ) {
             return false;
           }
@@ -324,7 +356,7 @@ function ProgramsSearchWorkspace({
     });
 
     return nextOptions;
-  }, [effectivePriceRange, filters, priceRangeActive, rows]);
+  }, [draftEffectivePriceRange, draftFilters, draftPriceRangeActive, rows]);
 
   const filteredRows = useMemo(() => {
     const normalizedQuery = normalize(query);
@@ -358,24 +390,43 @@ function ProgramsSearchWorkspace({
   const startIndex = (safePage - 1) * pageSize;
   const visibleRows = filteredRows.slice(startIndex, startIndex + pageSize);
   const exportRows = filteredRows.slice(0, EXPORT_LIMIT);
-  const activeFilterCount =
-    Object.values(filters).reduce(
-      (count, value) => count + (Array.isArray(value) ? dedupeFilterValues(value).length : value ? 1 : 0),
-      0
-    ) + (query ? 1 : 0) + (priceRangeActive ? 1 : 0);
+  const activeFilterCount = getFilterActivityCount(filters, query, priceRangeActive);
+  const pendingFilterCount = getFilterActivityCount(
+    draftFilters,
+    draftQuery,
+    draftPriceRangeActive
+  );
+  const hasPendingFilters = useMemo(
+    () =>
+      !areFilterStatesEqual(filters, draftFilters) ||
+      query !== draftQuery ||
+      !arePriceRangesEqual(priceRange, draftPriceRange),
+    [draftFilters, draftPriceRange, draftQuery, filters, priceRange, query]
+  );
 
   const updateFilter = (key, value) => {
-    setPage(1);
-    setFilters((current) => ({
+    setDraftFilters((current) => ({
       ...current,
       [key]: Array.isArray(value) ? dedupeFilterValues(value) : value,
     }));
   };
 
+  const applyFilters = () => {
+    setFilters(draftFilters);
+    setPriceRange(draftPriceRange);
+    setQuery(draftQuery);
+    setPage(1);
+  };
+
   const resetFilters = () => {
-    setFilters(createInitialFilters());
-    setPriceRange(createEmptyPriceRange());
+    const nextFilters = createInitialFilters();
+    const nextPriceRange = createEmptyPriceRange();
+    setFilters(nextFilters);
+    setDraftFilters(nextFilters);
+    setPriceRange(nextPriceRange);
+    setDraftPriceRange(nextPriceRange);
     setQuery('');
+    setDraftQuery('');
     setPage(1);
   };
 
@@ -567,7 +618,7 @@ function ProgramsSearchWorkspace({
               <MultiFilterSelect
                 key={field.key}
                 field={field}
-                value={filters[field.key]}
+                value={draftFilters[field.key]}
                 options={cascadedOptions[field.key] || []}
                 darkMode={darkMode}
                 isFa={isFa}
@@ -580,11 +631,10 @@ function ProgramsSearchWorkspace({
 
           <PriceRangeSlider
             className="mt-4"
-            value={priceRange}
-            bounds={priceBounds}
+            value={draftPriceRange}
+            bounds={draftPriceBounds}
             onChange={(nextRange) => {
-              setPriceRange(nextRange);
-              setPage(1);
+              setDraftPriceRange(nextRange);
             }}
             darkMode={darkMode}
             isFa={isFa}
@@ -600,15 +650,44 @@ function ProgramsSearchWorkspace({
             <input
               id="search"
               type="search"
-              value={query}
+              value={draftQuery}
               onChange={(event) => {
-                setQuery(event.target.value);
-                setPage(1);
+                setDraftQuery(event.target.value);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  applyFilters();
+                }
               }}
               placeholder={ui.searchPlaceholder}
               className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:opacity-45"
             />
           </label>
+
+          <div
+            data-filter-apply-panel
+            className={`${darkMode ? 'border-white/10 bg-white/[0.045]' : 'border-black/10 bg-black/[0.025]'} mt-4 flex flex-col gap-3 rounded-[20px] border px-4 py-3 sm:flex-row sm:items-center sm:justify-between`}
+          >
+            <div className="min-w-0">
+              <p className={`${hasPendingFilters ? (darkMode ? 'text-emerald-300' : 'text-emerald-700') : darkMode ? 'text-white/52' : 'text-black/52'} text-sm font-black`}>
+                {hasPendingFilters ? ui.pendingChanges(pendingFilterCount) : ui.filtersSynced}
+              </p>
+              <p className={`${darkMode ? 'text-white/40' : 'text-black/40'} mt-1 text-xs font-bold`}>
+                {ui.loadedResults(filteredRows.length)}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              data-apply-filters-button
+              onClick={applyFilters}
+              disabled={!hasPendingFilters}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[16px] bg-emerald-600 px-5 py-3 text-sm font-black text-white transition hover:scale-[1.02] hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
+            >
+              <Check size={16} />
+              {ui.loadResults}
+            </button>
+          </div>
         </section>
 
         <section className={`${darkMode ? 'darkGlass' : 'glass'} program-table-card mt-7 overflow-hidden rounded-[30px]`}>
@@ -1226,6 +1305,10 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
     () => new Set(selectedValues.map((item) => normalize(item))),
     [selectedValues]
   );
+  const allOptionsSelected =
+    options.length > 0 && options.every((option) => selectedSet.has(normalize(option)));
+  const visibleSelectedValues = selectedValues.slice(0, SELECTED_CHIP_PREVIEW_LIMIT);
+  const hiddenSelectedCount = Math.max(0, selectedValues.length - visibleSelectedValues.length);
   const filteredOptions = useMemo(() => {
     const normalizedSearch = normalize(search);
     const matched = normalizedSearch
@@ -1292,7 +1375,9 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
     onChange(selectedValues.filter((item) => normalize(item) !== normalizedOption));
   };
   const selectedSummary = selectedValues.length
-    ? selectedValues.length <= 2
+    ? allOptionsSelected
+      ? ui.allSelected(label)
+      : selectedValues.length <= 2
       ? selectedValues.map((option) => displayValue(field.key, option, isFa)).join(isFa ? '، ' : ', ')
       : isFa
         ? `${formatNumber(selectedValues.length, isFa)} مورد انتخاب شده`
@@ -1337,7 +1422,7 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
 
         {selectedValues.length > 2 && (
           <div className="mt-2 flex flex-wrap gap-2">
-            {selectedValues.map((option) => (
+            {visibleSelectedValues.map((option) => (
               <button
                 key={normalize(option)}
                 type="button"
@@ -1348,6 +1433,11 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
                 <X size={13} />
               </button>
             ))}
+            {hiddenSelectedCount > 0 && (
+              <span className={`${darkMode ? 'bg-white/8 text-white/55' : 'bg-black/5 text-black/55'} inline-flex items-center rounded-full px-3 py-1.5 text-xs font-black`}>
+                +{formatNumber(hiddenSelectedCount, isFa)}
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -1365,6 +1455,26 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
                 className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:opacity-45"
               />
             </label>
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                data-filter-select-all={field.key}
+                onClick={() => onChange(dedupeFilterValues(options))}
+                disabled={!options.length || allOptionsSelected}
+                className={`${darkMode ? 'bg-white/8 hover:bg-white/12' : 'bg-black/[0.04] hover:bg-black/[0.07]'} rounded-[12px] px-3 py-2 text-xs font-black transition disabled:pointer-events-none disabled:opacity-35`}
+              >
+                {ui.selectAll}
+              </button>
+              <button
+                type="button"
+                data-filter-clear-all={field.key}
+                onClick={() => onChange([])}
+                disabled={!selectedValues.length}
+                className={`${darkMode ? 'bg-white/8 hover:bg-white/12' : 'bg-black/[0.04] hover:bg-black/[0.07]'} rounded-[12px] px-3 py-2 text-xs font-black transition disabled:pointer-events-none disabled:opacity-35`}
+              >
+                {ui.clearAll}
+              </button>
+            </div>
           </div>
 
           <div className="max-h-80 overflow-y-auto p-2">
@@ -1622,6 +1732,8 @@ function normalizeProgramRow(row) {
   };
 }
 
+const normalizedFilterValueCache = new WeakMap();
+
 function getFieldValues(row, field) {
   return [row[field.rowKey]].filter(Boolean);
 }
@@ -1645,17 +1757,77 @@ function getUniqueFieldValues(rows, field) {
 
 function rowMatchesFilter(row, field, selectedValue) {
   if (Array.isArray(selectedValue)) {
-    const normalizedSelectedValue = dedupeFilterValues(selectedValue);
-    if (!normalizedSelectedValue.length) return true;
-    const selectedValues = new Set(normalizedSelectedValue.map((value) => normalize(value)));
+    const { values, selectedSet } = getCachedNormalizedFilterValues(selectedValue);
+    if (!values.length) return true;
 
-    return getFieldValues(row, field).some((value) => selectedValues.has(normalize(value)));
+    return getFieldValues(row, field).some((value) => selectedSet.has(normalize(value)));
   }
 
   if (!selectedValue) return true;
   const selected = normalize(selectedValue);
 
   return getFieldValues(row, field).some((value) => normalize(value) === selected);
+}
+
+function getCachedNormalizedFilterValues(selectedValue) {
+  const cached = normalizedFilterValueCache.get(selectedValue);
+  if (cached) return cached;
+
+  const values = dedupeFilterValues(selectedValue);
+  const normalizedValues = {
+    values,
+    selectedSet: new Set(values.map((value) => normalize(value))),
+  };
+
+  normalizedFilterValueCache.set(selectedValue, normalizedValues);
+  return normalizedValues;
+}
+
+function getFilterActivityCount(filters, query, priceRangeActive) {
+  return (
+    Object.values(filters).reduce(
+      (count, value) => count + (Array.isArray(value) ? dedupeFilterValues(value).length : value ? 1 : 0),
+      0
+    ) +
+    (query ? 1 : 0) +
+    (priceRangeActive ? 1 : 0)
+  );
+}
+
+function areFilterStatesEqual(firstFilters, secondFilters) {
+  return filterFields.every((field) =>
+    areFilterValuesEqual(firstFilters?.[field.key], secondFilters?.[field.key])
+  );
+}
+
+function areFilterValuesEqual(firstValue, secondValue) {
+  const firstValues = normalizeFilterValuesForCompare(firstValue);
+  const secondValues = normalizeFilterValuesForCompare(secondValue);
+
+  return (
+    firstValues.length === secondValues.length &&
+    firstValues.every((value, index) => value === secondValues[index])
+  );
+}
+
+function normalizeFilterValuesForCompare(value) {
+  if (Array.isArray(value)) {
+    return dedupeFilterValues(value).map((item) => normalize(item)).filter(Boolean).sort();
+  }
+
+  const normalized = normalize(value);
+  return normalized ? [normalized] : [];
+}
+
+function arePriceRangesEqual(firstRange, secondRange) {
+  return (
+    getPriceRangeCompareValue(firstRange?.min) === getPriceRangeCompareValue(secondRange?.min) &&
+    getPriceRangeCompareValue(firstRange?.max) === getPriceRangeCompareValue(secondRange?.max)
+  );
+}
+
+function getPriceRangeCompareValue(value) {
+  return value === null || typeof value === 'undefined' ? '' : String(value);
 }
 
 function createPrintPayload({ rows, filters, priceRange, priceBounds, query, isFa, ui, totalCount }) {
