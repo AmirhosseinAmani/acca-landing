@@ -58,8 +58,8 @@ function buildBlogJsonLd(url, isFa) {
       datePublished: post.date,
       dateModified: post.date,
       inLanguage: isFa ? 'fa-IR' : 'en-US',
-      url: `${url}#${post.slug}`,
-      mainEntityOfPage: `${url}#${post.slug}`,
+      url: `${SITE_CANONICAL_ORIGIN}/blog/${post.slug}/`,
+      mainEntityOfPage: `${SITE_CANONICAL_ORIGIN}/blog/${post.slug}/`,
       image: toAbsoluteAssetUrl(post.image.src),
       about: post.tags,
       citation: post.sourceUrl,
@@ -172,7 +172,7 @@ function buildArticleJsonLd(post, url, isFa) {
             '@type': 'ListItem',
             position: 1,
             name: isFa ? 'بلاگ آکا' : 'ACCA Blog',
-            item: `${SITE_CANONICAL_ORIGIN}/?page=blog`,
+            item: `${SITE_CANONICAL_ORIGIN}/blog/`,
           },
           {
             '@type': 'ListItem',
@@ -203,7 +203,7 @@ function buildGlossarySetJsonLd(url, isFa) {
           name: term.title.fa,
           termCode: term.slug,
           description: term.summary,
-          url: `${SITE_CANONICAL_ORIGIN}${term.href.replace('?', '/?')}`,
+          url: `${SITE_CANONICAL_ORIGIN}/glossary/${term.slug}/`,
           image: term.visual?.src ? toAbsoluteAssetUrl(term.visual.src) : undefined,
         })),
       },
@@ -215,7 +215,7 @@ function buildGlossarySetJsonLd(url, isFa) {
           '@type': 'ListItem',
           position: index + 1,
           name: term.title.fa,
-          url: `${SITE_CANONICAL_ORIGIN}/?page=glossary&term=${encodeURIComponent(term.slug)}`,
+          url: `${SITE_CANONICAL_ORIGIN}/glossary/${term.slug}/`,
         })),
       },
     ],
@@ -231,7 +231,7 @@ function buildGlossaryTermJsonLd(term, url, isFa) {
         name: term.title.fa,
         termCode: term.slug,
         description: term.summary,
-        inDefinedTermSet: `${SITE_CANONICAL_ORIGIN}/?page=glossary`,
+        inDefinedTermSet: `${SITE_CANONICAL_ORIGIN}/glossary/`,
         url,
         image: term.visual?.src ? toAbsoluteAssetUrl(term.visual.src) : undefined,
       },
@@ -279,7 +279,7 @@ function buildGlossaryTermJsonLd(term, url, isFa) {
             '@type': 'ListItem',
             position: 1,
             name: isFa ? 'فرهنگ‌نامه آکا' : 'ACCA glossary',
-            item: `${SITE_CANONICAL_ORIGIN}/?page=glossary`,
+            item: `${SITE_CANONICAL_ORIGIN}/glossary/`,
           },
           {
             '@type': 'ListItem',
@@ -298,8 +298,8 @@ export function getKnowledgeRouteSeo({ page, params, isFa }) {
   if (page === 'glossary') {
     const term = getGlossaryTermBySlug(params.get('term'));
     const canonicalUrl = term
-      ? `${SITE_CANONICAL_ORIGIN}/?page=glossary&term=${encodeURIComponent(term.slug)}`
-      : `${SITE_CANONICAL_ORIGIN}/?page=glossary`;
+      ? `${SITE_CANONICAL_ORIGIN}/glossary/${term.slug}/`
+      : `${SITE_CANONICAL_ORIGIN}/glossary/`;
     return {
       title: term
         ? `${term.question.fa} | فرهنگ‌نامه تحصیل در ترکیه آکا | ${BRAND_TITLE}`
@@ -328,7 +328,7 @@ export function getKnowledgeRouteSeo({ page, params, isFa }) {
     const post = getBlogPostBySlug(params.get('post'));
     if (post) {
       const copy = isFa ? post.fa : post.en;
-      const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?page=blog&post=${encodeURIComponent(post.slug)}`;
+      const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/blog/${post.slug}/`;
       return {
         title: `${copy.title} | ${BRAND_TITLE}`,
         description: copy.excerpt,
@@ -340,7 +340,7 @@ export function getKnowledgeRouteSeo({ page, params, isFa }) {
       };
     }
 
-    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?page=blog`;
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/blog/`;
     return {
       title: isFa
         ? `بلاگ تحصیل در ترکیه، اقامت دانشجویی و پذیرش | ${BRAND_TITLE}`

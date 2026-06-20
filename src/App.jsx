@@ -6,6 +6,7 @@ import UniversityMarqueeSection from './components/sections/UniversityMarqueeSec
 import FloatingActions from './components/FloatingActions';
 import { buildUniversitySlug, istanbulUniversities } from './data/istanbulUniversities';
 import { getUniversityLogo } from './data/universityLogoMap';
+import { cleanCanonicalPath, parseCleanPath } from './lib/routes';
 
 const ProgramsSearchPage = lazy(() => import('./components/pages/ProgramsSearchPageV2'));
 const UniversitiesPage = lazy(() => import('./components/pages/UniversitiesPage'));
@@ -77,7 +78,11 @@ function getStaticRouteAlias(pathname = '/') {
   const normalized = `/${String(pathname || '/')
     .replace(/^\/+/, '')
     .replace(/\/+$/, '')}`;
-  return STATIC_ROUTE_ALIASES[normalized === '/' ? '/' : normalized] || null;
+  // Bespoke marketing routes win; dynamic content routes (/blog, /blog/<slug>,
+  // /glossary, /glossary/<slug>, /scholarships) fall through to routes.js.
+  return STATIC_ROUTE_ALIASES[normalized === '/' ? '/' : normalized]
+    || parseCleanPath(normalized)
+    || null;
 }
 
 function getUniversityProfileHref(universityName) {
@@ -154,7 +159,7 @@ function getRouteSeo({ page, params, isFa }) {
   }
 
   if (page === 'universities') {
-    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?page=universities`;
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/universities/`;
     return {
       title: isFa
         ? `\u062f\u0627\u0646\u0634\u06af\u0627\u0647\u200c\u0647\u0627\u06cc \u062e\u0635\u0648\u0635\u06cc \u0627\u0633\u062a\u0627\u0646\u0628\u0648\u0644 \u0648 \u062a\u0631\u06a9\u06cc\u0647 | ${BRAND_TITLE}`
@@ -176,8 +181,10 @@ function getRouteSeo({ page, params, isFa }) {
     if (programQuery) {
       canonicalParams.set('program', programQuery);
     }
-    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?${canonicalParams.toString()}`;
     const target = programUniversity?.name || programQuery;
+    const canonicalUrl = target
+      ? `${SITE_CANONICAL_ORIGIN}/?${canonicalParams.toString()}`
+      : `${SITE_CANONICAL_ORIGIN}/programs/`;
     return {
       title: target
         ? (isFa
@@ -200,7 +207,7 @@ function getRouteSeo({ page, params, isFa }) {
   }
 
   if (page === 'scholarships') {
-    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/?page=scholarships`;
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/scholarships/`;
     return {
       title: isFa ? `\u0628\u0648\u0631\u0633\u06cc\u0647\u200c\u0647\u0627\u06cc \u062f\u0627\u0646\u0634\u06af\u0627\u0647\u06cc \u062a\u0631\u06a9\u06cc\u0647 | ${BRAND_TITLE}` : `Turkey University Scholarships | ${BRAND_TITLE}`,
       description: isFa
@@ -513,6 +520,11 @@ export default function ACCALandingPage() {
 
   useEffect(() => {
     if (!isDesktopViewport) return undefined;
+    const isHomeShell =
+      window.location.pathname === '/' &&
+      !new URLSearchParams(window.location.search).get('page') &&
+      !new URLSearchParams(window.location.search).get('section');
+    if (!isHomeShell) return undefined;
     if (window.customElements?.get('model-viewer')) return undefined;
 
     ['https://unpkg.com', 'https://modelviewer.dev'].forEach((href) => {
@@ -716,8 +728,15 @@ export default function ACCALandingPage() {
     if (metaDesc && (staticRouteMeta?.description || PAGE_DESCS[page])) {
       metaDesc.setAttribute('content', staticRouteMeta?.description || PAGE_DESCS[page]);
     }
+    // Canonical consolidation: a view reached via ?page=programs and via the
+    // clean /programs/ path must declare ONE canonical (the clean path), so the
+    // two URLs stop competing as duplicate content. cleanCanonicalPath returns
+    // null for faceted/profile views, which keep their existing canonical.
+    const computedCleanPath = cleanCanonicalPath(page, params);
+    const cleanCanonical = staticCanonicalUrl
+      || (computedCleanPath ? `${SITE_CANONICAL_ORIGIN}${computedCleanPath}` : null);
     const canonicalPage = INDEXABLE_PAGES.has(page) ? page : null;
-    const canonicalUrl = staticCanonicalUrl || (canonicalPage
+    const canonicalUrl = cleanCanonical || (canonicalPage
       ? `${SITE_CANONICAL_ORIGIN}/?page=${canonicalPage}`
       : `${SITE_CANONICAL_ORIGIN}/`);
     const currentDescription = metaDesc?.getAttribute('content') || '';
@@ -750,7 +769,7 @@ export default function ACCALandingPage() {
     // loaded module so the large datasets stay out of the main bundle.
     const applyRichSeo = (routeSeo) => {
       if (!routeSeo) return;
-      if (staticCanonicalUrl) routeSeo = { ...routeSeo, canonicalUrl: staticCanonicalUrl };
+      if (cleanCanonical) routeSeo = { ...routeSeo, canonicalUrl: cleanCanonical };
       if (staticRouteMeta) {
         routeSeo = {
           ...routeSeo,
@@ -787,7 +806,13 @@ export default function ACCALandingPage() {
     };
 
     let cancelled = false;
-    if (page === 'blog' || page === 'glossary') {
+    if (page === 'blog') {
+      import('./lib/blogSeo')
+        .then(({ getBlogRouteSeo }) => {
+          if (!cancelled) applyRichSeo(getBlogRouteSeo({ params, isFa }));
+        })
+        .catch(() => { /* SEO enrichment is non-critical */ });
+    } else if (page === 'glossary') {
       import('./lib/knowledgeSeo')
         .then(({ getKnowledgeRouteSeo }) => {
           if (!cancelled) applyRichSeo(getKnowledgeRouteSeo({ page, params, isFa }));
@@ -1067,7 +1092,7 @@ export default function ACCALandingPage() {
               'Lower Cost Than Semester Tuition',
             ],
         ctaLabel: isFa ? 'لیست شهریه‌های عادی' : 'Regular Tuition List',
-        ctaHref: '?page=programs',
+        ctaHref: '/programs/',
       },
       {
         title: isFa ? 'بورسیه 100٪ ACCA' : 'ACCA 100% Scholarship',
@@ -1088,7 +1113,7 @@ export default function ACCALandingPage() {
             ],
         featured: true,
         ctaLabel: isFa ? 'لیست قیمت‌های بورسیه' : 'Scholarship Price List',
-        ctaHref: '?page=scholarships',
+        ctaHref: '/scholarships/',
       },
       {
         title: isFa ? 'پرداخت ترمیک' : 'Semester-Based Tuition',
@@ -1108,7 +1133,7 @@ export default function ACCALandingPage() {
               'Highest Final Cost',
             ],
         ctaLabel: isFa ? 'لیست شهریه‌های عادی' : 'Regular Tuition List',
-        ctaHref: '?page=programs',
+        ctaHref: '/programs/',
       },
     ],
     [isFa]
@@ -2093,7 +2118,7 @@ export default function ACCALandingPage() {
 
           <div className="hidden lg:flex items-center gap-5">
             <a
-              href="?page=blog"
+              href="/blog/"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -2105,7 +2130,7 @@ export default function ACCALandingPage() {
             <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
 
             <a
-              href="?page=universities"
+              href="/universities/"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -2117,7 +2142,7 @@ export default function ACCALandingPage() {
             <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
 
             <a
-              href="?page=programs"
+              href="/programs/"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -2130,7 +2155,7 @@ export default function ACCALandingPage() {
             <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
 
             <a
-              href="?page=scholarships"
+              href="/scholarships/"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
               <span className="inline-flex items-center gap-2">
@@ -2189,7 +2214,7 @@ export default function ACCALandingPage() {
           >
             <div className="grid gap-2">
               <a
-                href="?page=blog"
+                href="/blog/"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
@@ -2198,7 +2223,7 @@ export default function ACCALandingPage() {
               </a>
 
               <a
-                href="?page=universities"
+                href="/universities/"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
@@ -2207,7 +2232,7 @@ export default function ACCALandingPage() {
               </a>
 
               <a
-                href="?page=programs"
+                href="/programs/"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
@@ -2217,7 +2242,7 @@ export default function ACCALandingPage() {
 
 
               <a
-                href="?page=scholarships"
+                href="/scholarships/"
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >

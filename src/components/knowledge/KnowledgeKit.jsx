@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowUp, GraduationCap, List, MessageCircle, Moon, Sparkles, Sun } from 'lucide-react';
 import { scrollToId, tt } from './knowledgeUtils';
 import { BackButton, MainNav } from '../SiteNav';
@@ -15,38 +14,94 @@ import { COMPANY_WHATSAPP_URL } from '../../constants/contact';
 
 const EASE = [0.22, 1, 0.36, 1];
 
+function usePrefersReducedMotion() {
+  const [reduce, setReduce] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduce(media.matches);
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
+
+  return reduce;
+}
+
 /** Fade + rise into view. Renders a static element under reduced-motion.
  *  Extra props (id, aria-*, etc.) are forwarded to the rendered element so
  *  in-page anchors and the table of contents keep working. */
-export function Reveal({ children, className, delay = 0, y = 18, as = 'div', ...rest }) {
-  const reduce = useReducedMotion();
-  const MotionTag = motion[as] || motion.div;
-  if (reduce) {
-    const Tag = as;
-    return <Tag className={className} {...rest}>{children}</Tag>;
-  }
+export function Reveal({ children, className, delay = 0, y = 18, as = 'div', style, ...rest }) {
+  const reduce = usePrefersReducedMotion();
+  const ref = useRef(null);
+  const [visible, setVisible] = useState(false);
+  const isVisible = reduce || visible;
+  const Tag = as;
+
+  useEffect(() => {
+    if (reduce) return undefined;
+    const node = ref.current;
+    if (!node || typeof window === 'undefined') return undefined;
+    if (!('IntersectionObserver' in window)) {
+      const id = window.setTimeout(() => setVisible(true), 0);
+      return () => window.clearTimeout(id);
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.01 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [reduce]);
+
   return (
-    <MotionTag
+    <Tag
+      ref={ref}
       className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px 0px -8% 0px' }}
-      transition={{ duration: 0.6, delay, ease: EASE }}
+      style={{
+        ...style,
+        opacity: isVisible ? 1 : 0,
+        transform: isVisible ? 'translate3d(0, 0, 0)' : `translate3d(0, ${y}px, 0)`,
+        transition: reduce
+          ? 'none'
+          : `opacity 600ms cubic-bezier(${EASE.join(',')}), transform 600ms cubic-bezier(${EASE.join(',')})`,
+        transitionDelay: isVisible && delay ? `${delay}s` : undefined,
+      }}
       {...rest}
     >
       {children}
-    </MotionTag>
+    </Tag>
   );
 }
 
 /** Thin top reading-progress bar driven by document scroll. */
 export function ReadingProgress({ darkMode, isFa }) {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 });
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0);
+    };
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
   return (
-    <motion.div
+    <div
       aria-hidden
-      style={{ scaleX }}
+      style={{ transform: `scaleX(${progress})` }}
       className={`${darkMode ? 'bg-[#C6A768]' : 'bg-[#071A3D]'} ${isFa ? 'origin-right' : 'origin-left'} fixed inset-x-0 top-0 z-[70] h-[3px]`}
     />
   );
@@ -55,33 +110,24 @@ export function ReadingProgress({ darkMode, isFa }) {
 /** Soft, mostly-static gradient aurora. Gradients are blur-free (cheap paint);
  *  a single slow drift is added only when motion is allowed. */
 export function AuroraBackground({ darkMode }) {
-  const reduce = useReducedMotion();
   const blobs = [
     {
       style: { background: 'radial-gradient(circle, rgba(198,167,104,0.20), transparent 62%)', top: '-10rem', insetInlineEnd: '-8rem', width: '42rem', height: '42rem' },
-      anim: { x: [0, 26, 0], y: [0, 18, 0] },
-      dur: 19,
     },
     {
       style: { background: 'radial-gradient(circle, rgba(7,26,61,0.18), transparent 60%)', top: '24rem', insetInlineStart: '-10rem', width: '38rem', height: '38rem' },
-      anim: { x: [0, -22, 0], y: [0, 26, 0] },
-      dur: 23,
     },
     {
       style: { background: darkMode ? 'radial-gradient(circle, rgba(56,189,248,0.10), transparent 60%)' : 'radial-gradient(circle, rgba(16,185,129,0.10), transparent 60%)', bottom: '-6rem', insetInlineStart: '30%', width: '34rem', height: '34rem' },
-      anim: { x: [0, 18, 0], y: [0, -16, 0] },
-      dur: 27,
     },
   ];
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       {blobs.map((blob, index) => (
-        <motion.div
+        <div
           key={index}
           className="absolute rounded-full"
           style={blob.style}
-          animate={reduce ? undefined : blob.anim}
-          transition={reduce ? undefined : { duration: blob.dur, repeat: Infinity, ease: 'easeInOut' }}
         />
       ))}
     </div>
@@ -189,7 +235,7 @@ export function TableOfContents({ items, activeId, darkMode, isFa }) {
 /** Floating "back to top" affordance, appears after the first viewport. */
 export function BackToTop({ darkMode, isFa }) {
   const [show, setShow] = useState(false);
-  const reduce = useReducedMotion();
+  const reduce = usePrefersReducedMotion();
 
   useEffect(() => {
     const onScroll = () => setShow(window.scrollY > 900);

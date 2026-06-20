@@ -1,10 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import {
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-} from 'framer-motion';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,7 +20,7 @@ import {
   Sparkles,
   Star,
 } from 'lucide-react';
-import { getGlossaryTermForGlossaryItem, glossaryTerms } from '../../data/knowledgeGlossary';
+import { getGlossaryLinkForItem } from '../../data/knowledgeGlossaryLinks';
 import { getBlogPostBySlug, knowledgeBlogPosts } from '../../data/knowledgeBlogPosts';
 import {
   AuroraBackground,
@@ -37,12 +31,13 @@ import {
   Reveal,
   TableOfContents,
 } from '../knowledge/KnowledgeKit';
-import CommunitySection from '../knowledge/CommunitySection';
-import { fetchCommunityStats, popularityScore, statKey } from '../../lib/community';
 import { formatDate, scrollToId, tt, useActiveId } from '../knowledge/knowledgeUtils';
 
 const GLOSSARY_RETURN_KEY = 'acca:glossary-return';
 const GLOSSARY_RESTORE_KEY = 'acca:glossary-restore';
+const CommunitySection = lazy(() => import('../knowledge/CommunitySection'));
+const TRANSPARENT_IMAGE =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 10%22%3E%3C/svg%3E';
 
 function textFor(post, isFa) {
   return isFa ? post.fa : post.en;
@@ -74,6 +69,116 @@ function handleBlogImageError(event) {
   if (event.currentTarget.dataset.fallbackApplied) return;
   event.currentTarget.dataset.fallbackApplied = 'true';
   event.currentTarget.src = '/assets/og-cover.jpg';
+}
+
+function statKey(entityType, entitySlug) {
+  return `${entityType}:${entitySlug}`;
+}
+
+function popularityScore(stat) {
+  if (!stat) return 0;
+  return stat.avg * 10 + stat.commentCount * 2 + stat.ratingCount;
+}
+
+async function loadCommunityStats() {
+  const { fetchCommunityStats } = await import('../../lib/community');
+  return fetchCommunityStats();
+}
+
+function usePrefersReducedMotion() {
+  const [reduce, setReduce] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduce(media.matches);
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
+
+  return reduce;
+}
+
+function deferUntilIdle(callback, timeout = 12000) {
+  if (typeof window === 'undefined') return () => {};
+  let idleId = null;
+  let fallbackId = null;
+  let fired = false;
+  const events = ['pointerdown', 'keydown', 'scroll', 'touchstart'];
+
+  const cleanupListeners = () => {
+    events.forEach((eventName) => {
+      window.removeEventListener(eventName, schedule);
+    });
+  };
+
+  const run = () => {
+    if ('requestIdleCallback' in window) {
+      idleId = window.requestIdleCallback(callback, { timeout: 1500 });
+      return;
+    }
+    callback();
+  };
+
+  function schedule() {
+    if (fired) return;
+    fired = true;
+    cleanupListeners();
+    window.clearTimeout(fallbackId);
+    run();
+  }
+
+  fallbackId = window.setTimeout(schedule, timeout);
+  events.forEach((eventName) => {
+    window.addEventListener(eventName, schedule, { once: true, passive: true });
+  });
+
+  return () => {
+    cleanupListeners();
+    window.clearTimeout(fallbackId);
+    if (idleId !== null) window.cancelIdleCallback?.(idleId);
+  };
+}
+
+function LazyBlogImage({ src, alt, className, width = 1440, height = 900 }) {
+  const ref = useRef(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    if (shouldLoad) return undefined;
+    const node = ref.current;
+    if (!node || typeof window === 'undefined') return undefined;
+    if (!('IntersectionObserver' in window)) {
+      const id = window.setTimeout(() => setShouldLoad(true), 1200);
+      return () => window.clearTimeout(id);
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setShouldLoad(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '180px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [shouldLoad]);
+
+  return (
+    <img
+      ref={ref}
+      src={shouldLoad ? src : TRANSPARENT_IMAGE}
+      alt={alt}
+      width={width}
+      height={height}
+      loading="lazy"
+      decoding="async"
+      onError={shouldLoad ? handleBlogImageError : undefined}
+      className={className}
+    />
+  );
 }
 
 /** Reading time is stored in Persian; render an English equivalent in EN mode. */
@@ -131,7 +236,7 @@ function InlineGlossaryText({ text, glossary = [], darkMode }) {
   return text.split(pattern).map((part, index) => {
     const match = labels.find(({ label }) => label === part);
     if (!match) return <span key={`${part}-${index}`}>{part}</span>;
-    const term = getGlossaryTermForGlossaryItem(match.item);
+    const term = getGlossaryLinkForItem(match.item);
     if (!term) return <span key={`${part}-${index}`}>{part}</span>;
 
     return (
@@ -150,34 +255,34 @@ function InlineGlossaryText({ text, glossary = [], darkMode }) {
 
 /** Subtle pointer-driven 3D tilt. Disabled on touch + reduced motion. */
 function TiltCard({ children, className }) {
-  const reduce = useReducedMotion();
-  const rx = useMotionValue(0);
-  const ry = useMotionValue(0);
-  const srx = useSpring(rx, { stiffness: 150, damping: 18 });
-  const sry = useSpring(ry, { stiffness: 150, damping: 18 });
+  const reduce = usePrefersReducedMotion();
+  const ref = useRef(null);
 
   const handleMove = (event) => {
     if (reduce) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const px = (event.clientX - rect.left) / rect.width - 0.5;
     const py = (event.clientY - rect.top) / rect.height - 0.5;
-    ry.set(px * 6);
-    rx.set(-py * 6);
+    if (ref.current) {
+      ref.current.style.transform = `perspective(1000px) rotateX(${-py * 6}deg) rotateY(${px * 6}deg)`;
+    }
   };
   const reset = () => {
-    rx.set(0);
-    ry.set(0);
+    if (ref.current) {
+      ref.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+    }
   };
 
   return (
-    <motion.div
+    <div
+      ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={reset}
-      style={{ rotateX: srx, rotateY: sry, transformPerspective: 1000 }}
+      style={{ transition: reduce ? undefined : 'transform 180ms ease-out' }}
       className={className}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -244,6 +349,20 @@ function normalizeSearch(value) {
 function KnowledgeSearch({ darkMode, isFa }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
+  const [glossarySearchTerms, setGlossarySearchTerms] = useState([]);
+
+  useEffect(() => {
+    if (normalizeSearch(query).length < 2 || glossarySearchTerms.length > 0) return undefined;
+    let alive = true;
+    import('../../data/knowledgeGlossary')
+      .then(({ glossaryTerms }) => {
+        if (alive) setGlossarySearchTerms(glossaryTerms);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [query, glossarySearchTerms.length]);
 
   const results = useMemo(() => {
     const q = normalizeSearch(query);
@@ -261,7 +380,7 @@ function KnowledgeSearch({ darkMode, isFa }) {
       }
     }
 
-    for (const term of glossaryTerms) {
+    for (const term of glossarySearchTerms) {
       const hay = normalizeSearch(
         [...(term.labels || []), term.title?.fa, term.title?.en, term.question?.fa, term.question?.en]
           .filter(Boolean)
@@ -273,7 +392,7 @@ function KnowledgeSearch({ darkMode, isFa }) {
     }
 
     return out.slice(0, 7);
-  }, [query, isFa]);
+  }, [query, isFa, glossarySearchTerms]);
 
   const showPanel = open && normalizeSearch(query).length >= 2;
 
@@ -338,9 +457,12 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
 
   useEffect(() => {
     let alive = true;
-    fetchCommunityStats().then((data) => alive && setStats(data)).catch(() => {});
+    const cancelIdle = deferUntilIdle(() => {
+      loadCommunityStats().then((data) => alive && setStats(data)).catch(() => {});
+    });
     return () => {
       alive = false;
+      cancelIdle();
     };
   }, []);
 
@@ -434,6 +556,9 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
                   alt={featured.image.alt}
                   width="1440"
                   height="900"
+                  loading="eager"
+                  decoding="async"
+                  fetchPriority="high"
                   onError={handleBlogImageError}
                   className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
                 />
@@ -484,13 +609,11 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
                   className={`${darkMode ? 'border-white/10 bg-[#07111f] hover:border-[#C6A768]/40' : 'border-black/5 bg-white hover:border-[#C6A768]/50'} group flex h-full flex-col overflow-hidden rounded-[26px] border shadow-[0_14px_44px_rgba(7,26,61,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(7,26,61,0.14)]`}
                 >
                   <div className="relative aspect-[16/10] overflow-hidden">
-                    <img
+                    <LazyBlogImage
                       src={post.image.src}
                       alt={post.image.alt}
                       width="1440"
                       height="900"
-                      loading="lazy"
-                      onError={handleBlogImageError}
                       className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]"
                     />
                   </div>
@@ -529,6 +652,7 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
   const copy = textFor(post, isFa);
   const BackIcon = isFa ? ChevronRight : ChevronLeft;
   const [articleStat, setArticleStat] = useState({ avg: 0, ratingCount: 0, commentCount: 0 });
+  const [showCommunity, setShowCommunity] = useState(false);
 
   const toc = useMemo(() => [
     { id: 'quick-answer', label: tt('پاسخ کوتاه', 'Quick answer', isFa) },
@@ -549,7 +673,7 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
     const seen = new Set();
     const list = [];
     post.glossary.forEach((item) => {
-      const term = getGlossaryTermForGlossaryItem(item);
+      const term = getGlossaryLinkForItem(item);
       if (term && !seen.has(term.slug)) {
         seen.add(term.slug);
         list.push(term);
@@ -569,15 +693,20 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
 
   useEffect(() => {
     let alive = true;
-    fetchCommunityStats()
-      .then((data) => {
-        if (alive) setArticleStat(data[articleStatKey] || { avg: 0, ratingCount: 0, commentCount: 0 });
-      })
-      .catch(() => {});
+    const cancelIdle = deferUntilIdle(() => {
+      loadCommunityStats()
+        .then((data) => {
+          if (alive) setArticleStat(data[articleStatKey] || { avg: 0, ratingCount: 0, commentCount: 0 });
+        })
+        .catch(() => {});
+    });
     return () => {
       alive = false;
+      cancelIdle();
     };
   }, [articleStatKey]);
+
+  useEffect(() => deferUntilIdle(() => setShowCommunity(true), 12000), []);
 
   const facts = [
     { label: tt('زمان مطالعه', 'Reading time', isFa), value: readTimeLabel(post.readTime, isFa) },
@@ -647,6 +776,9 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
             alt={post.image.alt}
             width="1440"
             height="810"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             onError={handleBlogImageError}
             className="aspect-[16/9] w-full rounded-[28px] object-cover shadow-[0_28px_70px_rgba(7,26,61,0.18)]"
           />
@@ -915,7 +1047,11 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
 
         {/* Ratings + comments */}
         <div className="mt-14">
-          <CommunitySection entityType="blog" entitySlug={post.slug} darkMode={darkMode} isFa={isFa} />
+          {showCommunity && (
+            <Suspense fallback={null}>
+              <CommunitySection entityType="blog" entitySlug={post.slug} darkMode={darkMode} isFa={isFa} />
+            </Suspense>
+          )}
         </div>
 
         {/* Contextual lead CTA */}
@@ -941,7 +1077,7 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
                   className={`${darkMode ? 'border-white/10 bg-[#07111f] hover:border-[#C6A768]/40' : 'border-black/5 bg-white hover:border-[#C6A768]/50'} group flex flex-col overflow-hidden rounded-[24px] border shadow-[0_12px_40px_rgba(7,26,61,0.07)] transition hover:-translate-y-1`}
                 >
                   <div className="relative aspect-[16/10] overflow-hidden">
-                    <img src={item.image.src} alt={item.image.alt} loading="lazy" onError={handleBlogImageError} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]" />
+                    <LazyBlogImage src={item.image.src} alt={item.image.alt} className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.05]" />
                   </div>
                   <div className="p-4">
                     <p className={`${darkMode ? 'text-white/45' : 'text-neutral-400'} text-[11px] font-black`}>{catLabel(item.category, isFa)}</p>
