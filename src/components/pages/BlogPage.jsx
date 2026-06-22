@@ -44,7 +44,7 @@ function textFor(post, isFa) {
 }
 
 function postHref(slug) {
-  return `?page=blog&post=${encodeURIComponent(slug)}`;
+  return `/blog/${encodeURIComponent(slug)}/`;
 }
 
 const BLOG_CATEGORY_EN = {
@@ -522,7 +522,7 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
               <ForwardIcon size={17} />
             </button>
             <a
-              href="?page=glossary"
+              href="/glossary/"
               className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-white text-neutral-950 hover:bg-neutral-50'} inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-black shadow-[0_10px_30px_rgba(7,26,61,0.10)] transition`}
             >
               <LibraryBig size={17} className="text-[#C6A768]" />
@@ -720,7 +720,7 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
       <article className="mx-auto max-w-6xl">
         {/* Breadcrumb */}
         <Reveal className={`${darkMode ? 'text-white/55' : 'text-neutral-500'} flex flex-wrap items-center gap-2 text-xs font-black`}>
-          <a href="?page=blog" className="inline-flex items-center gap-1.5 transition hover:text-[#C6A768]">
+          <a href="/blog/" className="inline-flex items-center gap-1.5 transition hover:text-[#C6A768]">
             <BackIcon size={15} />
             {tt('بلاگ', 'Blog', isFa)}
           </a>
@@ -1104,7 +1104,7 @@ function ArticleNotFound({ darkMode, isFa }) {
         <p className={`${darkMode ? 'text-white/60' : 'text-neutral-600'} mt-3 text-sm font-semibold`}>
           {tt('این مقاله موجود نیست یا منتقل شده است.', 'This article does not exist or has moved.', isFa)}
         </p>
-        <a href="?page=blog" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#071A3D] px-6 py-3.5 text-sm font-black text-white">
+        <a href="/blog/" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#071A3D] px-6 py-3.5 text-sm font-black text-white">
           {tt('بازگشت به بلاگ', 'Back to blog', isFa)}
           <BackIcon size={16} />
         </a>
@@ -1174,7 +1174,7 @@ export default function BlogPage({
         isFa={isFa}
         ACCA_LOGO_SRC={ACCA_LOGO_SRC}
         activeNav="blog"
-        backFallback={isArticle ? '?page=blog' : '/'}
+        backFallback={isArticle ? '/blog/' : '/'}
         onToggleDarkMode={onToggleDarkMode}
         onToggleLanguage={onToggleLanguage}
         onConsultationClick={onConsultationClick}

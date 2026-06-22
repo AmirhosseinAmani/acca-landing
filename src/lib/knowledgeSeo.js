@@ -1,5 +1,6 @@
-import { BLOG_SEO_KEYWORDS, getBlogPostBySlug, knowledgeBlogPosts } from '../data/knowledgeBlogPosts';
-import { getGlossaryTermBySlug, glossaryTerms } from '../data/knowledgeGlossary';
+import { BLOG_SEO_KEYWORDS, getBlogPostBySlug, knowledgeBlogPosts } from '../data/knowledgeBlogPosts.js';
+import { getGlossaryTermBySlug, glossaryTerms } from '../data/knowledgeGlossary.js';
+import { BLOG_CANONICAL_OVERRIDE } from './routes.js';
 
 /* ============================================================================
  * Knowledge (blog + glossary) SEO / JSON-LD.
@@ -328,7 +329,7 @@ export function getKnowledgeRouteSeo({ page, params, isFa }) {
     const post = getBlogPostBySlug(params.get('post'));
     if (post) {
       const copy = isFa ? post.fa : post.en;
-      const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/blog/${post.slug}/`;
+      const canonicalUrl = `${SITE_CANONICAL_ORIGIN}${BLOG_CANONICAL_OVERRIDE[post.slug] || `/blog/${post.slug}/`}`;
       return {
         title: `${copy.title} | ${BRAND_TITLE}`,
         description: copy.excerpt,

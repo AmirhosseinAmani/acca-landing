@@ -52,7 +52,7 @@ export function getGlossaryLinkForItem(item) {
   if (!slug) return null;
   return {
     slug,
-    href: `?page=glossary&term=${encodeURIComponent(slug)}`,
+    href: `/glossary/${encodeURIComponent(slug)}/`,
     title: {
       fa: item.labels?.[0] || item.title,
       en: item.labels?.find((label) => /[A-Za-z]/.test(label)) || item.labels?.[0] || item.title,

@@ -283,7 +283,7 @@ function ScholarshipButtons({ consult, requirements, isDark, onConsultationClick
       </button>
 
       <a
-        href="?page=scholarships"
+        href="/scholarships/"
         target="_blank"
         rel="noreferrer"
         className={`w-full rounded-[22px] border px-7 py-4 text-center text-base font-black backdrop-blur-xl transition hover:scale-[1.02] sm:px-9 sm:py-5 sm:text-lg lg:w-auto ${
