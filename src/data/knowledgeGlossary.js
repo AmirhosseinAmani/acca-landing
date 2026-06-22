@@ -1,4 +1,4 @@
-import { knowledgeBlogPosts } from './knowledgeBlogPosts';
+import { knowledgeBlogPosts } from './knowledgeBlogPosts.js';
 
 const TERM_SLUG_BY_TITLE = {
   'ای‌کامِت چیست؟': 'e-ikamet',
@@ -1621,7 +1621,7 @@ function buildGlossaryTerms() {
         slug: post.slug,
         title: post.fa.title,
         excerpt: post.fa.excerpt,
-        href: `?page=blog&post=${post.slug}`,
+        href: `/blog/${post.slug}/`,
       });
     });
   });
@@ -1631,7 +1631,7 @@ function buildGlossaryTerms() {
     return {
       slug,
       ...detail,
-      href: `?page=glossary&term=${encodeURIComponent(slug)}`,
+      href: `/glossary/${encodeURIComponent(slug)}/`,
       visual: {
         src: `/assets/glossary/${slug}.svg`,
         alt: `${detail.title.fa} - تصویر آموزشی فرهنگ‌نامه آکا`,

@@ -118,7 +118,7 @@ export default function PartnerScholarshipSection({ darkMode, isFa, scholarshipC
                 </div>
 
                 <a
-                  href={item.ctaHref || '?page=programs'}
+                  href={item.ctaHref || '/programs/'}
                   className="inline-flex w-full items-center justify-center bg-black text-white py-4 rounded-2xl font-black text-lg"
                 >
                   {item.ctaLabel || (isFa ? 'لیست شهریه‌ها' : 'Tuition List')}

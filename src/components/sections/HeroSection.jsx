@@ -91,7 +91,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
               </a>
 
               <a
-                href="?page=blog&post=student-residence-e-ikamet-2026"
+                href="/residence-permit/"
                 className={`${darkMode ? 'border-white/15 bg-white/8 text-white hover:bg-white/12' : 'border-black/10 bg-white/70 text-neutral-900 hover:bg-white'} inline-flex items-center gap-2 rounded-full border px-5 py-3.5 text-sm font-black shadow-[0_10px_30px_rgba(7,26,61,0.08)] transition sm:px-6`}
               >
                 {isFa ? 'راهنمای اقامت دانشجویی' : 'Student residence guide'}

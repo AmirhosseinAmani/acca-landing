@@ -152,7 +152,7 @@ export default function UniversitiesPage({
   const closeDetails = () => {
     setSelectedUniversity(null);
     try {
-      window.history.replaceState(null, '', '?page=universities');
+      window.history.replaceState(null, '', '/universities/');
     } catch {
       /* ignore */
     }

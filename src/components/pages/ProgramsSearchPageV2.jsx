@@ -946,7 +946,7 @@ function ProgramsPrintPreview({
               className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white transition hover:scale-[1.03]">
               {darkMode ? <Sun size={16} /> : <Moon size={16} />}
             </button>
-            <a href="?page=programs"
+            <a href="/programs/"
               className="inline-flex items-center gap-2 rounded-full bg-black/6 px-5 py-2.5 text-sm font-black text-black transition hover:scale-[1.02]">
               <ArrowLeft size={15} className={isFa ? 'rotate-180' : ''} />
               {previewUi.back}

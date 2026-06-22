@@ -294,7 +294,7 @@ function TermReader({ term, darkMode, isFa, onConsultationClick, returnTarget, o
   const activeId = useActiveId(toc.map((item) => item.id));
   const quickDef = (isFa ? term.sourceDefinitions[0] : copy.summary) || copy.summary;
 
-  const returnHref = returnTarget?.url || '?page=blog';
+  const returnHref = returnTarget?.url || '/blog/';
   const returnLabel = returnTarget?.label
     ? `${tt('بازگشت به مقاله', 'Back to', isFa)}: ${returnTarget.label}`
     : tt('بازگشت به بلاگ', 'Back to blog', isFa);
@@ -308,7 +308,7 @@ function TermReader({ term, darkMode, isFa, onConsultationClick, returnTarget, o
             <BackIcon size={15} />
             {returnLabel}
           </a>
-          <a href="?page=glossary" className={`${darkMode ? 'bg-white/10 text-white/75 hover:bg-white/15' : 'bg-white text-neutral-700 hover:bg-neutral-50'} inline-flex items-center gap-1.5 rounded-full px-4 py-2 transition`}>
+          <a href="/glossary/" className={`${darkMode ? 'bg-white/10 text-white/75 hover:bg-white/15' : 'bg-white text-neutral-700 hover:bg-neutral-50'} inline-flex items-center gap-1.5 rounded-full px-4 py-2 transition`}>
             <LibraryBig size={14} />
             {tt('همه اصطلاحات', 'All terms', isFa)}
           </a>
@@ -462,7 +462,7 @@ function TermReader({ term, darkMode, isFa, onConsultationClick, returnTarget, o
               {term.relatedPosts.map((post) => (
                 <a
                   key={post.slug}
-                  href={`?page=blog&post=${encodeURIComponent(post.slug)}`}
+                  href={`/blog/${encodeURIComponent(post.slug)}/`}
                   className={`${darkMode ? 'border-white/10 bg-[#07111f] hover:border-[#C6A768]/40' : 'border-black/5 bg-white hover:border-[#C6A768]/50'} flex items-center justify-between gap-3 rounded-2xl border p-4 text-sm font-bold leading-7 transition hover:-translate-y-0.5`}
                 >
                   <span className="line-clamp-2">{post.title}</span>
@@ -532,7 +532,7 @@ export default function GlossaryPage({
         isFa={isFa}
         ACCA_LOGO_SRC={ACCA_LOGO_SRC}
         activeNav="blog"
-        backFallback={selectedTerm ? '?page=glossary' : '?page=blog'}
+        backFallback={selectedTerm ? '/glossary/' : '/blog/'}
         onToggleDarkMode={onToggleDarkMode}
         onToggleLanguage={onToggleLanguage}
         onConsultationClick={onConsultationClick}

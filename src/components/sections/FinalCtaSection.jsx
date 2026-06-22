@@ -32,7 +32,7 @@ export default function FinalCtaSection({ darkMode, isFa, onConsultationClick })
               </button>
 
               <a
-                href="?page=universities"
+                href="/universities/"
                 target="_blank"
                 rel="noreferrer"
                 className={`${darkMode ? 'darkGlass text-white' : 'glass text-black'} px-10 py-5 rounded-3xl font-black text-lg`}

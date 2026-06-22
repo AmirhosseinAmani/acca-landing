@@ -19,7 +19,7 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
           {universityCards.map((uni) => (
             <a
               key={uni.name}
-              href={uni.href || '?page=universities'}
+              href={uni.href || '/universities/'}
               className={`${darkMode ? 'darkGlass' : 'glass'} block rounded-[28px] p-6 hover:scale-[1.02] transition-all duration-500`}
               aria-label={`${isFa ? 'مشاهده پروفایل' : 'View profile'} ${uni.name}`}
             >

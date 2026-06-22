@@ -149,7 +149,7 @@ const currencyTranslations = {
 export default function SmartScholarshipCalculator({
   darkMode = false,
   language = 'fa',
-  programsHref = '?page=programs',
+  programsHref = '/programs/',
 }) {
   const sectionRef = useRef(null);
   const [shouldLoadData, setShouldLoadData] = useState(false);
