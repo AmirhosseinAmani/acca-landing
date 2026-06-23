@@ -541,6 +541,8 @@ function Select({ darkMode, isFa, children, value, onChange, loading, loadingLab
     );
   }, [options, search]);
 
+  const searchInputRef = useRef(null);
+
   const closeDropdown = () => {
     setOpen(false);
     setSearch('');
@@ -555,6 +557,13 @@ function Select({ darkMode, isFa, children, value, onChange, loading, loadingLab
     }
     document.addEventListener('mousedown', handleOutside);
     return () => document.removeEventListener('mousedown', handleOutside);
+  }, [open]);
+
+  // Focus the search field only when the dropdown opens — and with
+  // preventScroll so the browser never auto-scrolls the page to this section
+  // on mount (the panel is always in the DOM, just hidden when closed).
+  useEffect(() => {
+    if (open) searchInputRef.current?.focus({ preventScroll: true });
   }, [open]);
 
   return (
@@ -600,7 +609,7 @@ function Select({ darkMode, isFa, children, value, onChange, loading, loadingLab
             <label className={`${darkMode ? 'bg-white/8' : 'bg-black/[0.04]'} flex items-center gap-2 rounded-[16px] px-3 py-2`}>
               <Search size={15} className="shrink-0 opacity-45" />
               <input
-                autoFocus
+                ref={searchInputRef}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={isFa ? 'جستجو...' : 'Search...'}
