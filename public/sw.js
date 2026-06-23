@@ -1,4 +1,4 @@
-const APP_VERSION = 'acca-edu-pwa-v1.0.1';
+const APP_VERSION = 'acca-edu-pwa-v1.1.0';
 const SHELL_CACHE = `${APP_VERSION}-shell`;
 const RUNTIME_CACHE = `${APP_VERSION}-runtime`;
 
@@ -7,10 +7,12 @@ const APP_SHELL = [
   '/index.html',
   '/offline.html',
   '/manifest.webmanifest',
-  '/pwa/icon-192.png',
-  '/pwa/icon-512.png',
-  '/pwa/maskable-icon-512.png',
-  '/pwa/apple-touch-icon.png',
+  '/favicon.ico',
+  '/favicon.svg',
+  '/apple-touch-icon.png',
+  '/android-chrome-192x192.png',
+  '/android-chrome-512x512.png',
+  '/maskable-icon-512x512.png',
 ];
 
 self.addEventListener('install', (event) => {
