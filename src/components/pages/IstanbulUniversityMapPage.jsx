@@ -112,13 +112,18 @@ const copy = {
     universities: 'universities',
     programsCount: 'programs',
     campuses: 'campuses',
-    dragHint: 'Drag to rotate, scroll to zoom, and click a pin for a university profile.',
+    dragHint: 'Drag to move across the city, scroll to zoom, and hold Shift while dragging to rotate.',
     sideLabel: 'Side',
     districtLabel: 'Area',
     selectedTitle: 'Quick university profile',
     listTitle: 'Universities on the map',
     empty: 'No university matched this search.',
     sourceNote: 'Locations are approximate for visual navigation; profile data is loaded from the site database.',
+    mapControls: 'Map controls',
+    openControls: 'Open controls',
+    minimize: 'Minimize',
+    openProfile: 'Open profile',
+    close: 'Close',
   },
 };
 
@@ -134,6 +139,8 @@ export default function IstanbulUniversityMapPage({
   const sceneApiRef = useRef(null);
   const [sideFilter, setSideFilter] = useState('all');
   const [query, setQuery] = useState('');
+  const [overviewOpen, setOverviewOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const ui = isFa ? copy.fa : copy.en;
 
   const mapItems = useMemo(() => createMapItems(), []);
@@ -172,13 +179,17 @@ export default function IstanbulUniversityMapPage({
       canvas,
       darkMode,
       items: mapItems,
-      onPick: setSelectedId,
+      onPick: (id) => {
+        setSelectedId(id);
+        setProfileOpen(true);
+      },
       apiRef: sceneApiRef,
     });
   }, [darkMode, mapItems]);
 
   const handleSelect = (id) => {
     setSelectedId(id);
+    setProfileOpen(true);
     sceneApiRef.current?.focusUniversity(id);
   };
 
@@ -246,93 +257,97 @@ export default function IstanbulUniversityMapPage({
         </div>
       </header>
 
-      <main className="pointer-events-none relative z-10 flex min-h-screen flex-col justify-between gap-4 px-3 pb-4 pt-28 sm:px-6 sm:pb-6 sm:pt-32 lg:flex-row lg:items-end lg:gap-6">
-        <section className="pointer-events-auto w-full max-w-xl">
-          <div className={`${darkMode ? 'border-white/12 bg-[#061018]/72' : 'border-white/75 bg-white/72'} rounded-[28px] border p-4 shadow-[0_26px_90px_rgba(7,26,61,0.18)] backdrop-blur-2xl sm:p-5`}>
-            <div className={`${darkMode ? 'text-emerald-200' : 'text-emerald-700'} text-[11px] font-black uppercase tracking-[0.32em]`}>
-              {ui.eyebrow}
-            </div>
-            <h1 className="mt-3 text-2xl font-black leading-tight sm:text-4xl">
-              {ui.title}
-            </h1>
-            <p className={`${darkMode ? 'text-white/68' : 'text-[#071A3D]/70'} mt-3 hidden text-sm font-medium leading-7 sm:block sm:text-[15px]`}>
-              {ui.subtitle}
-            </p>
-
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              <MetricCard label={ui.universities} value={mapItems.length} darkMode={darkMode} isFa={isFa} />
-              <MetricCard label={ui.europe} value={stats.europe} darkMode={darkMode} isFa={isFa} />
-              <MetricCard label={ui.asia} value={stats.asia} darkMode={darkMode} isFa={isFa} />
-            </div>
-
-            <div className={`${darkMode ? 'bg-white/8' : 'bg-[#071A3D]/[0.04]'} mt-4 rounded-[20px] p-2`}>
-              <div className="flex items-center gap-2 rounded-[16px] bg-white px-3 py-2 text-[#071A3D] shadow-[0_10px_26px_rgba(7,26,61,0.08)]">
-                <Search size={17} />
-                <input
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder={ui.search}
-                  className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#071A3D]/42"
-                />
-                {query ? (
-                  <button
-                    type="button"
-                    onClick={() => setQuery('')}
-                    aria-label="Clear search"
-                    className="grid h-7 w-7 place-items-center rounded-full bg-[#071A3D]/5 text-[#071A3D]"
-                  >
-                    <X size={15} />
-                  </button>
-                ) : null}
+      <main className="pointer-events-none fixed inset-0 z-10 px-3 pb-3 pt-24 sm:px-6 sm:pb-6 sm:pt-28">
+        <section className={`pointer-events-auto ${isFa ? 'ml-auto' : 'mr-auto'} w-full max-w-[430px]`}>
+          {overviewOpen ? (
+            <div className={`${darkMode ? 'border-white/12 bg-[#061018]/72' : 'border-white/75 bg-white/72'} max-h-[58vh] overflow-hidden rounded-[24px] border p-3 shadow-[0_22px_80px_rgba(7,26,61,0.18)] backdrop-blur-2xl sm:max-h-[66vh] sm:p-4`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className={`${darkMode ? 'text-emerald-200' : 'text-emerald-700'} text-[10px] font-black uppercase tracking-[0.28em]`}>
+                    {ui.eyebrow}
+                  </div>
+                  <h1 className="mt-2 text-xl font-black leading-tight sm:text-2xl">
+                    {ui.title}
+                  </h1>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOverviewOpen(false)}
+                  aria-label={ui.minimize || (isFa ? 'جمع کردن پنل' : 'Minimize')}
+                  className={`${darkMode ? 'bg-white/10 text-white' : 'bg-[#071A3D]/[0.06] text-[#071A3D]'} grid h-9 w-9 shrink-0 place-items-center rounded-full transition hover:scale-[1.04]`}
+                >
+                  <X size={16} />
+                </button>
               </div>
 
-              <div className="mt-2 grid grid-cols-3 gap-2">
-                {['all', 'europe', 'asia'].map((side) => (
-                  <button
-                    key={side}
-                    type="button"
-                    onClick={() => setSideFilter(side)}
-                    className={`min-h-10 rounded-[14px] px-2 text-xs font-black transition ${
-                      sideFilter === side
-                        ? 'bg-[#071A3D] text-white'
-                        : darkMode
-                          ? 'bg-white/8 text-white/72 hover:bg-white/12'
-                          : 'bg-white/84 text-[#071A3D]/72 hover:bg-white'
-                    }`}
-                  >
-                    {ui[side]}
-                  </button>
-                ))}
+              <div className="mt-3 grid grid-cols-3 gap-1.5">
+                <MetricCard label={ui.universities} value={mapItems.length} darkMode={darkMode} isFa={isFa} />
+                <MetricCard label={ui.europe} value={stats.europe} darkMode={darkMode} isFa={isFa} />
+                <MetricCard label={ui.asia} value={stats.asia} darkMode={darkMode} isFa={isFa} />
               </div>
-            </div>
 
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-              <p className={`${darkMode ? 'text-white/50' : 'text-[#071A3D]/55'} hidden max-w-sm text-[11px] font-bold leading-5 sm:block`}>
-                {ui.dragHint}
-              </p>
-              <button
-                type="button"
-                onClick={handleReset}
-                className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-[#071A3D]/[0.06] text-[#071A3D] hover:bg-[#071A3D]/10'} inline-flex h-10 items-center gap-2 rounded-full px-4 text-xs font-black transition`}
-              >
-                <RotateCcw size={15} />
-                {ui.reset}
-              </button>
-            </div>
-          </div>
+              <div className={`${darkMode ? 'bg-white/8' : 'bg-[#071A3D]/[0.04]'} mt-3 rounded-[18px] p-2`}>
+                <div className="flex items-center gap-2 rounded-[14px] bg-white px-3 py-2 text-[#071A3D] shadow-[0_10px_26px_rgba(7,26,61,0.08)]">
+                  <Search size={16} />
+                  <input
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder={ui.search}
+                    className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:text-[#071A3D]/42"
+                  />
+                  {query ? (
+                    <button
+                      type="button"
+                      onClick={() => setQuery('')}
+                      aria-label="Clear search"
+                      className="grid h-7 w-7 place-items-center rounded-full bg-[#071A3D]/5 text-[#071A3D]"
+                    >
+                      <X size={14} />
+                    </button>
+                  ) : null}
+                </div>
 
-          <div className={`${darkMode ? 'border-white/10 bg-[#061018]/58' : 'border-white/75 bg-white/64'} mt-3 hidden max-h-[34vh] overflow-y-auto rounded-[24px] border p-2 shadow-[0_18px_70px_rgba(7,26,61,0.12)] backdrop-blur-2xl md:block`}>
-            <div className="px-3 py-2 text-xs font-black uppercase tracking-[0.22em] opacity-65">
-              {ui.listTitle}
-            </div>
-            {visibleItems.length ? (
-              <div className="grid gap-1.5">
-                {visibleItems.map((item) => (
+                <div className="mt-2 grid grid-cols-3 gap-1.5">
+                  {['all', 'europe', 'asia'].map((side) => (
+                    <button
+                      key={side}
+                      type="button"
+                      onClick={() => setSideFilter(side)}
+                      className={`min-h-9 rounded-[13px] px-2 text-xs font-black transition ${
+                        sideFilter === side
+                          ? 'bg-[#071A3D] text-white'
+                          : darkMode
+                            ? 'bg-white/8 text-white/72 hover:bg-white/12'
+                            : 'bg-white/84 text-[#071A3D]/72 hover:bg-white'
+                      }`}
+                    >
+                      {ui[side]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <p className={`${darkMode ? 'text-white/50' : 'text-[#071A3D]/55'} hidden text-[11px] font-bold leading-5 sm:block`}>
+                  {isFa ? 'نقشه را درگ کنید تا روی شهر حرکت کنید؛ برای زوم اسکرول کنید؛ برای چرخش Shift را نگه دارید.' : ui.dragHint}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-[#071A3D]/[0.06] text-[#071A3D] hover:bg-[#071A3D]/10'} inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-3 text-xs font-black transition`}
+                >
+                  <RotateCcw size={14} />
+                  {ui.reset}
+                </button>
+              </div>
+
+              <div className="mt-2 hidden max-h-[22vh] overflow-y-auto rounded-[18px] md:block">
+                {visibleItems.length ? visibleItems.slice(0, 12).map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => handleSelect(item.id)}
-                    className={`flex items-center justify-between gap-3 rounded-[17px] px-3 py-2.5 text-start transition ${
+                    className={`mt-1 flex w-full items-center justify-between gap-3 rounded-[15px] px-3 py-2 text-start transition ${
                       selected?.id === item.id
                         ? 'bg-[#071A3D] text-white'
                         : darkMode
@@ -340,30 +355,56 @@ export default function IstanbulUniversityMapPage({
                           : 'text-[#071A3D]/74 hover:bg-[#071A3D]/[0.05]'
                     }`}
                   >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-black">{item.name}</span>
-                      <span className="mt-0.5 block truncate text-[11px] font-bold opacity-68">
-                        {item.district} · {ui[item.side]}
-                      </span>
-                    </span>
-                    <MapPin size={16} className="shrink-0" />
+                    <span className="min-w-0 truncate text-xs font-black">{item.name}</span>
+                    <span className="shrink-0 text-[10px] font-bold opacity-70">{item.district}</span>
                   </button>
-                ))}
+                )) : (
+                  <div className="px-3 py-4 text-sm font-bold opacity-60">{ui.empty}</div>
+                )}
               </div>
-            ) : (
-              <div className="px-3 py-4 text-sm font-bold opacity-60">{ui.empty}</div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setOverviewOpen(true)}
+              className={`${darkMode ? 'border-white/12 bg-[#061018]/68 text-white' : 'border-white/80 bg-white/72 text-[#071A3D]'} inline-flex max-w-full items-center gap-3 rounded-full border px-3 py-2.5 shadow-[0_16px_52px_rgba(7,26,61,0.16)] backdrop-blur-2xl transition hover:scale-[1.02]`}
+            >
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-[#071A3D] text-white">
+                <MapPin size={16} />
+              </span>
+              <span className="min-w-0 text-start">
+                <span className="block truncate text-sm font-black">{ui.mapControls || (isFa ? 'کنترل نقشه' : 'Map controls')}</span>
+                <span className="block text-[11px] font-bold opacity-65">{formatNumber(mapItems.length, isFa)} {ui.universities}</span>
+              </span>
+            </button>
+          )}
         </section>
 
-        <aside className="pointer-events-auto w-full lg:max-w-md">
-          <SelectedUniversityCard
-            darkMode={darkMode}
-            isFa={isFa}
-            ui={ui}
-            item={selected}
-            onConsultationClick={onConsultationClick}
-          />
+        <aside className={`pointer-events-auto absolute bottom-3 ${isFa ? 'left-3' : 'right-3'} w-[min(430px,calc(100vw-24px))] sm:bottom-6 ${isFa ? 'sm:left-6' : 'sm:right-6'}`}>
+          {profileOpen ? (
+            <SelectedUniversityCard
+              darkMode={darkMode}
+              isFa={isFa}
+              ui={ui}
+              item={selected}
+              onConsultationClick={onConsultationClick}
+              onMinimize={() => setProfileOpen(false)}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => setProfileOpen(true)}
+              className={`${darkMode ? 'border-white/12 bg-[#061018]/70 text-white' : 'border-white/80 bg-white/76 text-[#071A3D]'} flex w-full items-center justify-between gap-3 rounded-[22px] border px-3 py-2.5 shadow-[0_18px_58px_rgba(7,26,61,0.18)] backdrop-blur-2xl transition hover:scale-[1.01]`}
+            >
+              <span className="min-w-0 text-start">
+                <span className="block truncate text-sm font-black">{selected?.name}</span>
+                <span className="mt-0.5 block truncate text-[11px] font-bold opacity-65">{selected?.district} · {selected ? ui[selected.side] : ''}</span>
+              </span>
+              <span className="inline-flex h-9 shrink-0 items-center justify-center rounded-full bg-[#071A3D] px-3 text-xs font-black text-white">
+                {ui.openProfile || (isFa ? 'باز کردن پروفایل' : 'Open profile')}
+              </span>
+            </button>
+          )}
         </aside>
       </main>
     </div>
@@ -372,14 +413,14 @@ export default function IstanbulUniversityMapPage({
 
 function MetricCard({ label, value, darkMode, isFa }) {
   return (
-    <div className={`${darkMode ? 'border-white/10 bg-white/8' : 'border-white/70 bg-white/78'} rounded-[18px] border px-3 py-3 text-center`}>
-      <div className="text-xl font-black sm:text-2xl">{formatNumber(value, isFa)}</div>
-      <div className="mt-1 text-[10px] font-black uppercase tracking-wide opacity-60">{label}</div>
+    <div className={`${darkMode ? 'border-white/10 bg-white/8' : 'border-white/70 bg-white/78'} rounded-[15px] border px-2 py-2.5 text-center`}>
+      <div className="text-lg font-black sm:text-xl">{formatNumber(value, isFa)}</div>
+      <div className="mt-0.5 text-[9px] font-black uppercase tracking-wide opacity-60">{label}</div>
     </div>
   );
 }
 
-function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick }) {
+function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick, onMinimize }) {
   if (!item) return null;
 
   const summary = isFa ? item.summaryFa : item.summaryEn;
@@ -388,10 +429,10 @@ function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick 
   return (
     <article
       data-selected-university-card
-      className={`${darkMode ? 'border-white/12 bg-[#061018]/74 text-white' : 'border-white/80 bg-white/78 text-[#071A3D]'} rounded-[28px] border p-4 shadow-[0_28px_95px_rgba(7,26,61,0.22)] backdrop-blur-2xl sm:p-5`}
+      className={`${darkMode ? 'border-white/12 bg-[#061018]/74 text-white' : 'border-white/80 bg-white/78 text-[#071A3D]'} max-h-[38vh] overflow-y-auto rounded-[24px] border p-3 shadow-[0_24px_82px_rgba(7,26,61,0.22)] backdrop-blur-2xl sm:max-h-[52vh] sm:p-4`}
     >
       <div className="flex items-start gap-3">
-        <div className={`${darkMode ? 'bg-white text-[#071A3D]' : 'bg-[#071A3D] text-white'} grid h-14 w-14 shrink-0 place-items-center rounded-[18px] overflow-hidden`}>
+        <div className={`${darkMode ? 'bg-white text-[#071A3D]' : 'bg-[#071A3D] text-white'} grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-[16px] sm:h-14 sm:w-14`}>
           {item.logo ? (
             <img src={item.logo} alt={`${item.name} logo`} className="h-full w-full object-contain p-2" loading="lazy" />
           ) : (
@@ -399,11 +440,21 @@ function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick 
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <div className={`${darkMode ? 'text-amber-200' : 'text-amber-700'} flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.22em]`}>
-            <Sparkles size={14} />
-            {ui.selectedTitle}
+          <div className="flex items-start justify-between gap-2">
+            <div className={`${darkMode ? 'text-amber-200' : 'text-amber-700'} flex min-w-0 items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em]`}>
+              <Sparkles size={13} />
+              <span className="truncate">{ui.selectedTitle}</span>
+            </div>
+            <button
+              type="button"
+              onClick={onMinimize}
+              aria-label={ui.minimize || (isFa ? 'جمع کردن پنل' : 'Minimize')}
+              className={`${darkMode ? 'bg-white/10 text-white' : 'bg-[#071A3D]/[0.06] text-[#071A3D]'} grid h-8 w-8 shrink-0 place-items-center rounded-full transition hover:scale-[1.04]`}
+            >
+              <X size={14} />
+            </button>
           </div>
-          <h2 className="mt-2 text-xl font-black leading-7 sm:text-2xl">{item.name}</h2>
+          <h2 className="mt-1.5 text-lg font-black leading-6 sm:text-xl">{item.name}</h2>
           <div className={`${darkMode ? 'text-white/58' : 'text-[#071A3D]/58'} mt-2 flex flex-wrap items-center gap-2 text-xs font-black`}>
             <span className="inline-flex items-center gap-1">
               <MapPin size={14} />
@@ -414,27 +465,27 @@ function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick 
         </div>
       </div>
 
-      <p className={`${darkMode ? 'text-white/66' : 'text-[#071A3D]/68'} mt-4 text-sm font-medium leading-7`}>
+      <p className={`${darkMode ? 'text-white/66' : 'text-[#071A3D]/68'} mt-3 line-clamp-3 text-sm font-medium leading-6 sm:line-clamp-4`}>
         {summary}
       </p>
 
-      <div className="mt-4 grid grid-cols-3 gap-2">
+      <div className="mt-3 grid grid-cols-3 gap-2">
         <MiniFact icon={<GraduationCap size={17} />} label={ui.programsCount} value={item.programsCount || 0} darkMode={darkMode} isFa={isFa} />
         <MiniFact icon={<Building2 size={17} />} label={ui.campuses} value={campuses} darkMode={darkMode} isFa={isFa} />
         <MiniFact icon={<MapPin size={17} />} label={ui.districtLabel} value={item.district} darkMode={darkMode} isFa={isFa} compact />
       </div>
 
-      <div className="mt-5 grid gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <a
           href={item.profileHref}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[16px] bg-[#071A3D] px-4 py-3 text-center text-sm font-black text-white transition hover:scale-[1.02]"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[15px] bg-[#071A3D] px-4 py-2.5 text-center text-xs font-black text-white transition hover:scale-[1.02] sm:text-sm"
         >
           <ExternalLink size={16} />
           {ui.details}
         </a>
         <a
           href={item.programsHref}
-          className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-[#071A3D]/[0.06] text-[#071A3D] hover:bg-[#071A3D]/10'} inline-flex min-h-12 items-center justify-center gap-2 rounded-[16px] px-4 py-3 text-center text-sm font-black transition`}
+          className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-[#071A3D]/[0.06] text-[#071A3D] hover:bg-[#071A3D]/10'} inline-flex min-h-11 items-center justify-center gap-2 rounded-[15px] px-4 py-2.5 text-center text-xs font-black transition sm:text-sm`}
         >
           <BookOpen size={16} />
           {ui.programs}
@@ -444,12 +495,12 @@ function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick 
       <button
         type="button"
         onClick={onConsultationClick}
-        className={`${darkMode ? 'border-white/14 text-white/74 hover:bg-white/10' : 'border-[#071A3D]/10 text-[#071A3D]/70 hover:bg-[#071A3D]/[0.04]'} mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-[16px] border px-4 text-sm font-black transition`}
+        className={`${darkMode ? 'border-white/14 text-white/74 hover:bg-white/10' : 'border-[#071A3D]/10 text-[#071A3D]/70 hover:bg-[#071A3D]/[0.04]'} mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-[15px] border px-4 text-xs font-black transition sm:text-sm`}
       >
         {ui.consult}
       </button>
 
-      <p className={`${darkMode ? 'text-white/42' : 'text-[#071A3D]/48'} mt-3 text-[11px] font-bold leading-5`}>
+      <p className={`${darkMode ? 'text-white/42' : 'text-[#071A3D]/48'} mt-2 hidden text-[11px] font-bold leading-5 sm:block`}>
         {ui.sourceNote}
       </p>
     </article>
@@ -497,7 +548,7 @@ function createMapItems() {
 function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(darkMode ? 0x07111d : 0xbfeaf5);
-  scene.fog = new THREE.FogExp2(darkMode ? 0x07111d : 0xd6f4f8, darkMode ? 0.022 : 0.018);
+  scene.fog = new THREE.FogExp2(darkMode ? 0x07111d : 0xd6f4f8, darkMode ? 0.012 : 0.007);
 
   const renderer = new THREE.WebGLRenderer({
     canvas,
@@ -530,6 +581,7 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
   addLights(scene, darkMode);
   const cloudRig = createCloudRig(scene, darkMode);
   createTerrain(scene, darkMode);
+  createForestClusters(scene, darkMode);
   createCityBlocks(scene, darkMode);
   createRoadsAndBridges(scene, darkMode);
   createUniversityMarkers({
@@ -601,6 +653,8 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
       y: event.clientY,
       yaw: state.yaw,
       pitch: state.pitch,
+      targetX: state.targetGoal.x,
+      targetZ: state.targetGoal.z,
       moved: false,
     };
     canvas.setPointerCapture?.(event.pointerId);
@@ -616,8 +670,23 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
     const dx = event.clientX - pointerDown.x;
     const dy = event.clientY - pointerDown.y;
     if (Math.abs(dx) + Math.abs(dy) > 8) pointerDown.moved = true;
-    state.yaw = pointerDown.yaw - dx * 0.006;
-    state.pitch = THREE.MathUtils.clamp(pointerDown.pitch + dy * 0.0045, 0.42, 1.18);
+
+    if (event.shiftKey || event.altKey) {
+      state.yaw = pointerDown.yaw - dx * 0.006;
+      state.pitch = THREE.MathUtils.clamp(pointerDown.pitch + dy * 0.0045, 0.42, 1.18);
+      return;
+    }
+
+    const panScale = state.distance * 0.00155;
+    const right = new THREE.Vector3(Math.cos(state.yaw), 0, -Math.sin(state.yaw));
+    const forward = new THREE.Vector3(Math.sin(state.yaw), 0, Math.cos(state.yaw));
+    state.targetGoal.set(
+      pointerDown.targetX - dx * panScale * right.x + dy * panScale * forward.x,
+      0,
+      pointerDown.targetZ - dx * panScale * right.z + dy * panScale * forward.z
+    );
+    state.targetGoal.x = THREE.MathUtils.clamp(state.targetGoal.x, -30, 30);
+    state.targetGoal.z = THREE.MathUtils.clamp(state.targetGoal.z, -16, 16);
   };
 
   const handlePointerUp = (event) => {
@@ -707,58 +776,261 @@ function addLights(scene, darkMode) {
 
 function createTerrain(scene, darkMode) {
   const seaMaterial = new THREE.MeshPhysicalMaterial({
-    color: darkMode ? 0x064763 : 0x1399b2,
+    color: darkMode ? 0x043f5a : 0x147f9f,
+    map: makeWaterTexture(darkMode),
     roughness: 0.22,
     metalness: 0.06,
     transmission: 0,
     transparent: true,
     opacity: darkMode ? 0.86 : 0.78,
   });
-  const sea = new THREE.Mesh(new THREE.PlaneGeometry(118, 72, 1, 1), seaMaterial);
+  const sea = new THREE.Mesh(new THREE.PlaneGeometry(126, 78, 1, 1), seaMaterial);
   sea.rotation.x = -Math.PI / 2;
   sea.position.y = -0.22;
   sea.receiveShadow = true;
   scene.add(sea);
 
   const europeMaterial = new THREE.MeshStandardMaterial({
-    color: darkMode ? 0x1d624f : 0x8fbc78,
-    roughness: 0.82,
+    color: darkMode ? 0x286046 : 0x8faa72,
+    map: makeLandTexture(darkMode, 1),
+    roughness: 0.88,
     metalness: 0.02,
   });
   const asiaMaterial = new THREE.MeshStandardMaterial({
-    color: darkMode ? 0x275c48 : 0x9cc47f,
-    roughness: 0.82,
+    color: darkMode ? 0x2c654a : 0x97b875,
+    map: makeLandTexture(darkMode, 7),
+    roughness: 0.88,
     metalness: 0.02,
   });
 
   const europe = makeLandShape([
-    projectGeo(41.22, 28.51),
-    projectGeo(41.22, 28.9),
-    projectGeo(41.17, 28.98),
-    projectGeo(41.07, 28.96),
-    projectGeo(41.01, 28.91),
-    projectGeo(40.91, 28.78),
-    projectGeo(40.84, 28.58),
-    projectGeo(40.92, 28.51),
+    projectGeo(41.235, 28.50),
+    projectGeo(41.238, 28.78),
+    projectGeo(41.222, 28.93),
+    projectGeo(41.18, 29.01),
+    projectGeo(41.12, 29.018),
+    projectGeo(41.065, 29.005),
+    projectGeo(41.034, 28.995),
+    projectGeo(41.016, 28.986),
+    projectGeo(40.985, 28.945),
+    projectGeo(40.95, 28.845),
+    projectGeo(40.895, 28.72),
+    projectGeo(40.835, 28.57),
+    projectGeo(40.925, 28.505),
   ], europeMaterial);
   europe.position.y = 0.04;
   scene.add(europe);
 
   const asia = makeLandShape([
-    projectGeo(41.22, 29.0),
-    projectGeo(41.24, 29.62),
-    projectGeo(41.04, 29.65),
-    projectGeo(40.83, 29.42),
-    projectGeo(40.81, 29.14),
-    projectGeo(40.91, 29.0),
-    projectGeo(41.04, 29.03),
+    projectGeo(41.22, 29.035),
+    projectGeo(41.245, 29.65),
+    projectGeo(41.08, 29.665),
+    projectGeo(40.91, 29.52),
+    projectGeo(40.805, 29.27),
+    projectGeo(40.84, 29.10),
+    projectGeo(40.93, 29.02),
+    projectGeo(41.015, 29.03),
+    projectGeo(41.11, 29.05),
   ], asiaMaterial);
   asia.position.y = 0.05;
   scene.add(asia);
 
   addCoastline(scene, europe);
   addCoastline(scene, asia);
+  addBosphorusAndGoldenHorn(scene, seaMaterial);
+  addMarmaraIslands(scene, asiaMaterial);
+  addTerrainRelief(scene, darkMode);
   addHills(scene, darkMode);
+}
+
+function makeLandTexture(darkMode, salt = 1) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  const base = darkMode ? '#264d3c' : '#8fae72';
+  const field = darkMode ? '#315f45' : '#9fc080';
+  const urban = darkMode ? 'rgba(170,178,157,0.16)' : 'rgba(231,224,198,0.34)';
+  const forest = darkMode ? 'rgba(23,74,50,0.34)' : 'rgba(50,111,55,0.28)';
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, 512, 512);
+
+  for (let i = 0; i < 900; i++) {
+    const x = seeded(i * 3 + salt) * 512;
+    const y = seeded(i * 5 + salt) * 512;
+    const w = lerp(8, 54, seeded(i * 7 + salt));
+    const h = lerp(4, 34, seeded(i * 11 + salt));
+    ctx.fillStyle = seeded(i + salt) > 0.62 ? urban : (seeded(i + salt * 2) > 0.5 ? field : forest);
+    ctx.globalAlpha = lerp(0.22, 0.72, seeded(i * 13 + salt));
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(lerp(-0.8, 0.8, seeded(i * 17 + salt)));
+    ctx.fillRect(-w / 2, -h / 2, w, h);
+    ctx.restore();
+  }
+
+  ctx.globalAlpha = 1;
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2.6, 1.8);
+  texture.anisotropy = 4;
+  return texture;
+}
+
+function makeWaterTexture(darkMode) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+  gradient.addColorStop(0, darkMode ? '#05334a' : '#1f9eb7');
+  gradient.addColorStop(0.52, darkMode ? '#075b72' : '#36b8c8');
+  gradient.addColorStop(1, darkMode ? '#032b40' : '#0b6e91');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 512, 512);
+
+  for (let i = 0; i < 120; i++) {
+    ctx.strokeStyle = darkMode ? 'rgba(130,214,232,0.12)' : 'rgba(255,255,255,0.18)';
+    ctx.lineWidth = lerp(0.8, 2.2, seeded(i + 3));
+    ctx.beginPath();
+    const y = seeded(i + 5) * 512;
+    ctx.moveTo(-40, y);
+    ctx.bezierCurveTo(130, y + lerp(-24, 24, seeded(i + 9)), 310, y + lerp(-22, 22, seeded(i + 15)), 552, y + lerp(-16, 16, seeded(i + 21)));
+    ctx.stroke();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2.2, 1.6);
+  texture.anisotropy = 4;
+  return texture;
+}
+
+function addBosphorusAndGoldenHorn(scene, seaMaterial) {
+  const channelMaterial = seaMaterial.clone();
+  channelMaterial.opacity = 0.9;
+  channelMaterial.color = new THREE.Color(0x1c9fc0);
+
+  addTube(scene, [
+    projectGeo(41.235, 29.035),
+    projectGeo(41.16, 29.025),
+    projectGeo(41.09, 29.018),
+    projectGeo(41.045, 29.015),
+    projectGeo(40.99, 29.0),
+    projectGeo(40.88, 29.04),
+  ], channelMaterial, 0.42);
+
+  addTube(scene, [
+    projectGeo(41.075, 28.91),
+    projectGeo(41.062, 28.94),
+    projectGeo(41.045, 28.965),
+    projectGeo(41.025, 28.985),
+  ], channelMaterial, 0.34);
+
+  const wakeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.32 });
+  [
+    [projectGeo(41.18, 29.035), projectGeo(41.08, 29.022), projectGeo(40.96, 29.025)],
+    [projectGeo(41.06, 28.935), projectGeo(41.04, 28.96), projectGeo(41.025, 28.985)],
+  ].forEach((points) => {
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(points.map((point) => new THREE.Vector3(point.x, 0.35, point.z))),
+      wakeMaterial
+    );
+    scene.add(line);
+  });
+}
+
+function addMarmaraIslands(scene, landMaterial) {
+  [
+    [40.875, 29.068, 1.35],
+    [40.88, 29.095, 1.05],
+    [40.865, 29.115, 1.25],
+    [40.852, 29.126, 1.55],
+  ].forEach(([lat, lon, scale], index) => {
+    const center = projectGeo(lat, lon);
+    const points = Array.from({ length: 9 }, (_, i) => {
+      const angle = (Math.PI * 2 * i) / 9;
+      const wobble = lerp(0.72, 1.18, seeded(index * 21 + i));
+      return { x: center.x + Math.cos(angle) * scale * wobble, z: center.z + Math.sin(angle) * scale * 0.62 * wobble };
+    });
+    const island = makeLandShape(points, landMaterial.clone());
+    island.position.y = 0.08;
+    scene.add(island);
+    addCoastline(scene, island);
+  });
+}
+
+function addTerrainRelief(scene, darkMode) {
+  const material = new THREE.MeshStandardMaterial({
+    color: darkMode ? 0x315944 : 0x89a86b,
+    roughness: 0.92,
+    metalness: 0.01,
+    transparent: true,
+    opacity: darkMode ? 0.72 : 0.62,
+  });
+  const geometry = new THREE.SphereGeometry(1, 12, 8);
+  const matrix = new THREE.Matrix4();
+  const relief = new THREE.InstancedMesh(geometry, material, 120);
+  let count = 0;
+
+  for (let i = 0; i < 190 && count < 120; i++) {
+    const north = seeded(i + 4) > 0.42;
+    const lat = north ? lerp(41.08, 41.23, seeded(i + 9)) : lerp(40.86, 41.02, seeded(i + 13));
+    const lon = lerp(28.54, 29.62, seeded(i + 17));
+    if (!isApproxLand(lat, lon)) continue;
+    const point = projectGeo(lat, lon);
+    const sx = lerp(1.2, 4.8, seeded(i + 19));
+    const sz = lerp(0.8, 3.6, seeded(i + 23));
+    const sy = lerp(0.08, north ? 0.46 : 0.22, seeded(i + 29));
+    matrix.compose(
+      new THREE.Vector3(point.x, sy * 0.42, point.z),
+      new THREE.Quaternion(),
+      new THREE.Vector3(sx, sy, sz)
+    );
+    relief.setMatrixAt(count, matrix);
+    count += 1;
+  }
+
+  relief.count = count;
+  relief.receiveShadow = true;
+  scene.add(relief);
+}
+
+function createForestClusters(scene, darkMode) {
+  const trunkMaterial = new THREE.MeshStandardMaterial({ color: darkMode ? 0x3d2a1b : 0x6a4d31, roughness: 0.8 });
+  const leafMaterial = new THREE.MeshStandardMaterial({ color: darkMode ? 0x15583a : 0x2f7d4e, roughness: 0.9 });
+  const trunkGeometry = new THREE.CylinderGeometry(0.035, 0.055, 0.28, 5);
+  const leafGeometry = new THREE.ConeGeometry(0.22, 0.58, 7);
+  const trunks = new THREE.InstancedMesh(trunkGeometry, trunkMaterial, 420);
+  const leaves = new THREE.InstancedMesh(leafGeometry, leafMaterial, 420);
+  const matrix = new THREE.Matrix4();
+  let count = 0;
+
+  for (let i = 0; i < 720 && count < 420; i++) {
+    const forestBand = seeded(i + 5);
+    const lat = forestBand > 0.36 ? lerp(41.12, 41.24, seeded(i + 11)) : lerp(40.9, 41.04, seeded(i + 13));
+    const lon = forestBand > 0.36 ? lerp(28.55, 29.65, seeded(i + 17)) : lerp(29.12, 29.45, seeded(i + 19));
+    if (!isApproxLand(lat, lon)) continue;
+    const { x, z } = projectGeo(lat, lon);
+    const scale = lerp(0.7, 1.45, seeded(i + 23));
+    const rotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), seeded(i + 29) * Math.PI * 2);
+
+    matrix.compose(new THREE.Vector3(x, 0.18 * scale, z), rotation, new THREE.Vector3(scale, scale, scale));
+    trunks.setMatrixAt(count, matrix);
+    matrix.compose(new THREE.Vector3(x, 0.55 * scale, z), rotation, new THREE.Vector3(scale, scale, scale));
+    leaves.setMatrixAt(count, matrix);
+    count += 1;
+  }
+
+  trunks.count = count;
+  leaves.count = count;
+  trunks.castShadow = true;
+  leaves.castShadow = true;
+  scene.add(trunks, leaves);
 }
 
 function createRoadsAndBridges(scene, darkMode) {
@@ -792,29 +1064,30 @@ function createRoadsAndBridges(scene, darkMode) {
 }
 
 function createCityBlocks(scene, darkMode) {
-  const geometry = new THREE.BoxGeometry(0.42, 1, 0.42);
+  const geometry = new THREE.BoxGeometry(0.32, 1, 0.32);
   const material = new THREE.MeshStandardMaterial({
-    color: darkMode ? 0x0e2a36 : 0xd8e7dd,
-    roughness: 0.78,
+    color: darkMode ? 0x33404a : 0xd8d6c7,
+    roughness: 0.82,
     metalness: 0.03,
     transparent: true,
-    opacity: darkMode ? 0.88 : 0.82,
+    opacity: darkMode ? 0.82 : 0.76,
   });
-  const blocks = new THREE.InstancedMesh(geometry, material, 210);
+  const blocks = new THREE.InstancedMesh(geometry, material, 560);
   const matrix = new THREE.Matrix4();
   let count = 0;
 
-  for (let i = 0; i < 330 && count < 210; i++) {
+  for (let i = 0; i < 980 && count < 560; i++) {
     const lon = lerp(28.54, 29.56, seeded(i * 2 + 3));
     const lat = lerp(40.86, 41.18, seeded(i * 2 + 7));
     if (!isApproxLand(lat, lon)) continue;
     const { x, z } = projectGeo(lat, lon);
-    const height = lerp(0.18, 1.25, seeded(i + 17));
-    const sx = lerp(0.45, 1.25, seeded(i + 29));
-    const sz = lerp(0.45, 1.35, seeded(i + 41));
+    const nearCore = Math.abs(lon - 29.0) < 0.16 && lat > 40.95 && lat < 41.11;
+    const height = lerp(0.12, nearCore ? 1.45 : 0.78, seeded(i + 17));
+    const sx = lerp(0.35, nearCore ? 1.05 : 0.82, seeded(i + 29));
+    const sz = lerp(0.35, nearCore ? 1.12 : 0.86, seeded(i + 41));
     matrix.compose(
       new THREE.Vector3(x, 0.1 + height / 2, z),
-      new THREE.Quaternion(),
+      new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), seeded(i + 53) * Math.PI * 2),
       new THREE.Vector3(sx, height, sz)
     );
     blocks.setMatrixAt(count, matrix);
@@ -836,19 +1109,17 @@ function createUniversityMarkers({ scene, items, markersById, markerPickables, a
     const sideColor = item.side === 'asia'
       ? (darkMode ? 0x45e3c2 : 0x049d81)
       : (darkMode ? 0xffcf72 : 0xc99a3b);
-    const pinMaterial = new THREE.MeshStandardMaterial({
+    const campusMaterial = new THREE.MeshStandardMaterial({
+      color: darkMode ? 0xdce7ee : 0xf4f0e6,
+      roughness: 0.54,
+      metalness: 0.05,
+    });
+    const accentMaterial = new THREE.MeshStandardMaterial({
       color: sideColor,
       roughness: 0.34,
       metalness: 0.18,
       emissive: sideColor,
       emissiveIntensity: darkMode ? 0.3 : 0.08,
-    });
-    const coreMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      roughness: 0.22,
-      metalness: 0.1,
-      emissive: darkMode ? 0x9eefff : 0x000000,
-      emissiveIntensity: darkMode ? 0.18 : 0,
     });
     const haloMaterial = new THREE.MeshBasicMaterial({
       color: sideColor,
@@ -867,36 +1138,57 @@ function createUniversityMarkers({ scene, items, markersById, markerPickables, a
     marker.add(base);
     animatedRings.push({ ring: base, index, marker });
 
-    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.12, 1.18, 12), pinMaterial);
-    stem.position.y = 0.64;
-    stem.castShadow = true;
-    stem.userData.markerId = item.id;
-    marker.add(stem);
+    const platform = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.54, 0.12, 8), accentMaterial);
+    platform.position.y = 0.11;
+    platform.userData.markerId = item.id;
+    platform.castShadow = true;
+    marker.add(platform);
 
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.36, 24, 16), pinMaterial);
-    head.position.y = 1.32;
-    head.castShadow = true;
-    head.userData.markerId = item.id;
-    marker.add(head);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.48, 0.44), campusMaterial);
+    body.position.y = 0.48;
+    body.userData.markerId = item.id;
+    body.castShadow = true;
+    marker.add(body);
 
-    const core = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), coreMaterial);
-    core.position.y = 1.36;
-    core.position.z = -0.03;
-    core.userData.markerId = item.id;
-    marker.add(core);
+    const tower = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.82, 0.24), campusMaterial);
+    tower.position.set(-0.28, 0.66, 0.02);
+    tower.userData.markerId = item.id;
+    tower.castShadow = true;
+    marker.add(tower);
 
-    markerPickables.push(stem, head, core, base);
+    const annex = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.36, 0.34), campusMaterial);
+    annex.position.set(0.36, 0.38, -0.03);
+    annex.userData.markerId = item.id;
+    annex.castShadow = true;
+    marker.add(annex);
+
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.24, 4), accentMaterial);
+    roof.position.set(-0.28, 1.2, 0.02);
+    roof.rotation.y = Math.PI / 4;
+    roof.userData.markerId = item.id;
+    roof.castShadow = true;
+    marker.add(roof);
+
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), accentMaterial);
+    glow.position.set(0.18, 0.82, -0.16);
+    glow.userData.markerId = item.id;
+    marker.add(glow);
+
+    markerPickables.push(platform, body, tower, annex, roof, glow, base);
     markers.add(marker);
     markersById.set(item.id, marker);
   });
 }
 
 function createCloudRig(scene, darkMode) {
-  const material = new THREE.MeshLambertMaterial({
-    color: darkMode ? 0xbfd7ef : 0xffffff,
+  const texture = makeCloudTexture();
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    color: darkMode ? 0xc9dff2 : 0xffffff,
     transparent: true,
-    opacity: darkMode ? 0.42 : 0.58,
+    opacity: darkMode ? 0.24 : 0.18,
     depthWrite: false,
+    depthTest: true,
   });
   const rig = {
     left: new THREE.Group(),
@@ -905,45 +1197,84 @@ function createCloudRig(scene, darkMode) {
     material,
   };
 
-  makeCloudField(rig.left, material, -19, 15);
-  makeCloudField(rig.right, material, 19, -14);
-  makeCloudField(rig.far, material, 0, 22, 12);
+  makeCloudField(rig.left, material, -30, 14, 10, 0.85);
+  makeCloudField(rig.right, material, 30, -15, 10, 0.85);
+  makeCloudField(rig.far, material, 0, 28, 8, 0.55);
   scene.add(rig.left, rig.right, rig.far);
   return rig;
 }
 
-function makeCloudField(group, material, centerX, centerZ, count = 16) {
+function makeCloudField(group, material, centerX, centerZ, count = 16, density = 1) {
   for (let i = 0; i < count; i++) {
     const cloud = new THREE.Group();
-    const parts = 3 + Math.floor(seeded(i + centerX * 5) * 4);
+    const parts = 4 + Math.floor(seeded(i + centerX * 5) * 5);
     for (let j = 0; j < parts; j++) {
-      const puff = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), material);
+      const puff = new THREE.Sprite(material.clone());
       puff.position.set(
-        (seeded(i * 11 + j) - 0.5) * 4,
-        (seeded(i * 7 + j) - 0.5) * 0.7,
-        (seeded(i * 17 + j) - 0.5) * 2.8
+        (seeded(i * 11 + j) - 0.5) * 6.5,
+        (seeded(i * 7 + j) - 0.5) * 0.9,
+        (seeded(i * 17 + j) - 0.5) * 4.2
       );
-      const scale = lerp(0.9, 2.4, seeded(i * 19 + j));
-      puff.scale.set(scale * 1.35, scale * 0.5, scale);
+      const scale = lerp(2.2, 5.6, seeded(i * 19 + j)) * density;
+      puff.scale.set(scale * 1.65, scale * 0.66, 1);
+      puff.material.opacity = lerp(0.035, 0.16, seeded(i * 31 + j)) * density;
+      puff.material.userData.baseOpacity = puff.material.opacity;
       cloud.add(puff);
     }
     cloud.position.set(
-      centerX + (seeded(i + 100) - 0.5) * 17,
-      lerp(10, 20, seeded(i + 200)),
-      centerZ + (seeded(i + 300) - 0.5) * 14
+      centerX + (seeded(i + 100) - 0.5) * 13,
+      lerp(16, 28, seeded(i + 200)),
+      centerZ + (seeded(i + 300) - 0.5) * 12
     );
     group.add(cloud);
   }
 }
 
+function makeCloudTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 256, 128);
+
+  [
+    [72, 72, 58],
+    [116, 54, 68],
+    [160, 70, 56],
+    [128, 80, 88],
+  ].forEach(([x, y, r], index) => {
+    const gradient = ctx.createRadialGradient(x, y, 0, x, y, r);
+    gradient.addColorStop(0, `rgba(255,255,255,${index === 3 ? 0.82 : 0.72})`);
+    gradient.addColorStop(0.48, 'rgba(255,255,255,0.42)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = 4;
+  return texture;
+}
+
 function animateClouds(rig, introProgress, time) {
-  const shift = (1 - easeOutCubic(introProgress)) * 12;
+  const shift = 4 + (1 - easeOutCubic(introProgress)) * 18;
   rig.left.position.x = -shift;
   rig.right.position.x = shift;
-  rig.left.position.y = (1 - introProgress) * -1.5 + Math.sin(time * 0.18) * 0.35;
-  rig.right.position.y = (1 - introProgress) * -1.5 + Math.cos(time * 0.16) * 0.35;
-  rig.far.position.y = Math.sin(time * 0.11) * 0.5;
-  rig.material.opacity = 0.16 + (1 - introProgress) * 0.48;
+  rig.left.position.y = (1 - introProgress) * -2.5 + Math.sin(time * 0.18) * 0.28;
+  rig.right.position.y = (1 - introProgress) * -2.5 + Math.cos(time * 0.16) * 0.28;
+  rig.far.position.y = 1.2 + Math.sin(time * 0.11) * 0.32;
+  const opacityBoost = 0.72 + (1 - introProgress) * 0.22;
+  [rig.left, rig.right, rig.far].forEach((group) => {
+    group.traverse((object) => {
+      if (object.material?.opacity) {
+        const baseOpacity = object.material.userData.baseOpacity || object.material.opacity;
+        object.material.opacity = Math.min(0.18, baseOpacity * opacityBoost);
+      }
+    });
+  });
 }
 
 function animateMarkers(animatedRings, markersById, selectedId, time) {
