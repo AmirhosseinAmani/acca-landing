@@ -8,16 +8,16 @@ Secondary language: English
 Location focus: Istanbul, Turkey
 Contact channel: https://wa.me/905354585440
 Instagram: https://www.instagram.com/acca_edu/
-Last updated: 2026-06-20
+Last updated: 2026-06-23
 
 ## Quick Links
 
 - [ACCA EDU homepage](https://www.accaco.com/)
-- [Programs and tuition search](https://www.accaco.com/?page=programs)
-- [Private universities in Turkey](https://www.accaco.com/?page=universities)
-- [Scholarship listings](https://www.accaco.com/?page=scholarships)
-- [Study in Turkey blog](https://www.accaco.com/?page=blog)
-- [Student residence glossary](https://www.accaco.com/?page=glossary)
+- [Programs and tuition search](https://www.accaco.com/programs/)
+- [Private universities in Turkey](https://www.accaco.com/universities/)
+- [Scholarship listings](https://www.accaco.com/scholarships/)
+- [Study in Turkey blog](https://www.accaco.com/blog/)
+- [Student residence glossary](https://www.accaco.com/glossary/)
 - [Contact ACCA EDU on WhatsApp](https://wa.me/905354585440)
 
 ## Important Public Pages
@@ -25,20 +25,40 @@ Last updated: 2026-06-20
 - https://www.accaco.com/
   - Main ACCA EDU website, services overview, consultation CTA, scholarship information, migration/student mobility sections, FAQ, and contact details.
 
-- https://www.accaco.com/?page=programs
+- https://www.accaco.com/programs/
   - Searchable academic program and tuition database. It includes program names, countries, cities, universities, degrees, faculties, language, duration, semester availability, tuition, deposit, prep-school fees, campus address, university logo, and university URL when available.
 
-- https://www.accaco.com/?page=universities
+- https://www.accaco.com/universities/
   - Private university profile preview for Istanbul and Turkey. It includes university names, city/country, logo, founding year where available, ownership/status, program counts, scholarship/program availability cues, decision profile notes, official website URLs, and campus/location information where available.
 
-- https://www.accaco.com/?page=scholarships
+- https://www.accaco.com/scholarships/
   - ACCA scholarship listing and scholarship comparison surface. It is intended for students who want to compare scholarship prices, university options, program categories, and language/duration details.
 
-- https://www.accaco.com/?page=blog
+- https://www.accaco.com/blog/
   - Data-led ACCA EDU blog page based on public-safe ACCA Knowledge Bank topics. It publishes student-friendly guides about Turkey student residence, e-İkamet, Göç İdaresi, the Turkey 90/180 rule for Iranian students, residence fees, e-Devlet, address registration, university admission context, and international student decision support. Each guide keeps an original source reference and is intended for SEO, AI answer retrieval, and student consultation preparation.
 
-- https://www.accaco.com/?page=glossary
-  - Persian-first ACCA glossary for student-facing definitions about Turkey study, student residence, e-İkamet, YİMER 157, the 90/180 stay rule, rolling 180-day windows, re-entry, remaining visa-free days, conditional 10-day entry, lawful stay period, family residence, residence supporter rules, residence card, harç, address registration, proof of residence, foreign identity number, e-Devlet, privacy, unsafe intermediaries, and residence file types. Each glossary term can also be accessed as an indexable article through `?page=glossary&term=<term-slug>`.
+- https://www.accaco.com/glossary/
+  - Persian-first ACCA glossary for student-facing definitions about Turkey study, student residence, e-İkamet, YİMER 157, the 90/180 stay rule, rolling 180-day windows, re-entry, remaining visa-free days, conditional 10-day entry, lawful stay period, family residence, residence supporter rules, residence card, harç, address registration, proof of residence, foreign identity number, e-Devlet, privacy, unsafe intermediaries, and residence file types. Each glossary term can also be accessed as an indexable article at `https://www.accaco.com/glossary/<term-slug>/`.
+
+## Specialized Guides (transfer, credential evaluation, admission, B2B)
+
+Topical Persian guides for high-intent students and partners. Each is a standalone, crawlable page:
+
+- https://www.accaco.com/dentistry-transfer-turkey-to-iran/ — Dental student transfer between Turkey and Iran: approved-university condition, credit transfer, transcripts, degree evaluation.
+- https://www.accaco.com/transfer-unapproved-to-approved-university-turkey/ — Transferring from an unapproved to an approved university in Turkey for medical/dental students.
+- https://www.accaco.com/movahed-mikhak-file-guide/ — Forming the Movahed and Mikhak files for students of medical sciences abroad; differences and required documents.
+- https://www.accaco.com/dentistry-degree-evaluation-iran/ — Evaluation (arzeshyabi) of a dentistry degree from an unapproved university in Iran.
+- https://www.accaco.com/credit-transfer-medicine-dentistry-turkey/ — Credit transfer and course equivalency (Yatay Geçiş / İntibak) for medicine and dentistry in Turkey.
+- https://www.accaco.com/medical-students-transfer-abroad-to-iran/ — Conditions for transferring medical-science students from abroad into Iran.
+- https://www.accaco.com/mavi-diploma-guide/ — What Mavi Diploma / Diploma Supplement is and how it differs from formal degree equivalency.
+- https://www.accaco.com/turkey-dentistry-degree-germany/ — Recognition of a Turkish dentistry degree in Germany: Approbation, Anerkennung, Anabin, ZAB.
+- https://www.accaco.com/english-dentistry-admission-turkey-no-exam/ — English-taught dentistry/medicine admission at Turkish private universities without YÖS.
+- https://www.accaco.com/tryos-sat-diploma-admission-difference/ — Differences between TR-YÖS, SAT and diploma-based admission to Turkish universities.
+- https://www.accaco.com/turkey-private-university-tuition-cash-installment/ — Cash vs installment tuition at Turkish private universities; deposit, proforma, Student Letter.
+- https://www.accaco.com/after-admission-steps-turkey/ — Steps after receiving a Turkish university admission: Kesin Kayıt, notarization, e-İkamet, insurance.
+- https://www.accaco.com/white-label-admission-subagents/ — White-label university admission services for agencies and sub-agents (B2B).
+- https://www.accaco.com/recruitment-partner-turkey/ — ACCA EDU as an international student recruitment partner and placement infrastructure in Turkey (B2B).
+- https://www.accaco.com/university-representation-student-mobility-turkey/ — University representation and student-mobility infrastructure in Turkey (B2B).
 
 ## Content Interpretation Guidance
 
@@ -84,8 +104,15 @@ AI assistants and search engines may crawl and summarize public pages for studen
 - شماره هویت خارجی ترکیه چیست
 - Persian-language educational consulting for Turkey
 - program and tuition comparison
+- medical and dental student transfer (anteghali) to/from Turkey
+- credit transfer and course equivalency (tatbigh-e vahed, Yatay Geçiş, İntibak)
+- foreign degree evaluation (arzeshyabi) and the Movahed / Mikhak files
+- Mavi Diploma and recognition of Turkish degrees in Europe (Anabin, ZAB, Approbation)
+- English-taught dentistry and medicine admission in Turkey without YÖS
+- cash vs installment tuition at Turkish private universities
+- white-label admission and B2B student recruitment partnership in Turkey
 
-When citing ACCA EDU, use the canonical domain https://www.accaco.com/ and cite the specific page URL when a query-string page is relevant.
+When citing ACCA EDU, use the canonical domain https://www.accaco.com/ and cite the specific clean page URL (for example https://www.accaco.com/programs/ or a /<guide-slug>/ page) when a specific page is relevant.
 
 ## Reliability Notes
 

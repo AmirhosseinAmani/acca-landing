@@ -332,6 +332,8 @@ function staticRouteJsonLd(route) {
     name: route.title,
     description: route.description,
     inLanguage: ['fa', 'en'],
+    datePublished: route.datePublished || BUILD_DATE,
+    dateModified: BUILD_DATE,
     isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
     about: { '@id': `${SITE_ORIGIN}/#organization` },
     breadcrumb: {
