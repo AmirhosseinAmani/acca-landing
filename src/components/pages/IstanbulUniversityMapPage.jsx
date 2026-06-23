@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import * as THREE from 'three';
 import {
   BookOpen,
@@ -22,6 +23,67 @@ const ISTANBUL_BOUNDS = {
   lonMin: 28.5,
   lonMax: 29.66,
 };
+
+const env = import.meta.env || {};
+
+const MAP_CONFIG = {
+  provider: env.VITE_MAP_PROVIDER || env.NEXT_PUBLIC_MAP_PROVIDER || 'esri-world-imagery',
+  mapboxToken: env.VITE_MAPBOX_TOKEN || env.NEXT_PUBLIC_MAPBOX_TOKEN || '',
+  googleMapsApiKey: env.VITE_GOOGLE_MAPS_API_KEY || env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+  cesiumIonToken: env.VITE_CESIUM_ION_TOKEN || env.NEXT_PUBLIC_CESIUM_ION_TOKEN || '',
+  center: [29.015, 41.025],
+  bounds: [
+    [28.43, 40.74],
+    [29.78, 41.32],
+  ],
+  initial: {
+    zoom: 9.35,
+    pitch: 56,
+    bearing: -18,
+  },
+  limits: {
+    minZoom: 8.45,
+    maxZoom: 14.8,
+    maxPitch: 68,
+  },
+  terrain: {
+    exaggerationDesktop: 1.14,
+    exaggerationMobile: 0.88,
+  },
+  lighting: {
+    sunAzimuth: 248,
+    sunElevation: 34,
+    exposure: 0.92,
+    atmosphere: 0.42,
+  },
+  quality: {
+    desktopPixelRatio: 1.5,
+    mobilePixelRatio: 1.18,
+  },
+};
+
+let mapLibreModulePromise;
+
+function loadMapLibre() {
+  if (!mapLibreModulePromise) {
+    mapLibreModulePromise = import('maplibre-gl').then((module) => module.default || module);
+  }
+  return mapLibreModulePromise;
+}
+
+function supportsGeospatialWebGL(maplibregl) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+  if (typeof maplibregl?.supported === 'function') {
+    return maplibregl.supported({ failIfMajorPerformanceCaveat: false });
+  }
+
+  const canvas = document.createElement('canvas');
+  return Boolean(
+    canvas.getContext('webgl2')
+      || canvas.getContext('webgl')
+      || canvas.getContext('experimental-webgl')
+  );
+}
 
 const MAP_WIDTH = 72;
 const MAP_DEPTH = 36;
@@ -115,6 +177,80 @@ const BOSPHORUS_BRIDGES = [
     towerEnd: [41.206, 29.137],
   },
 ];
+
+const ISTANBUL_INFRASTRUCTURE = {
+  roads: [
+    {
+      id: 'o7-europe-black-sea-corridor',
+      name: 'O-7 European corridor',
+      kind: 'highway',
+      coordinates: [
+        [28.50, 41.00],
+        [28.64, 41.05],
+        [28.80, 41.10],
+        [28.98, 41.12],
+        [29.10, 41.15],
+        [29.24, 41.16],
+        [29.42, 41.16],
+        [29.62, 41.14],
+      ],
+    },
+    {
+      id: 'e80-trans-istanbul',
+      name: 'E80 / TEM corridor',
+      kind: 'highway',
+      coordinates: [
+        [28.55, 41.02],
+        [28.73, 41.04],
+        [28.90, 41.05],
+        [29.03, 41.07],
+        [29.16, 41.05],
+        [29.35, 40.99],
+        [29.58, 40.92],
+      ],
+    },
+    {
+      id: 'd100-marmara-corridor',
+      name: 'D100 coastal corridor',
+      kind: 'arterial',
+      coordinates: [
+        [28.54, 40.96],
+        [28.72, 40.97],
+        [28.90, 40.99],
+        [29.01, 41.00],
+        [29.12, 40.99],
+        [29.28, 40.92],
+        [29.48, 40.85],
+      ],
+    },
+  ],
+  bridges: BOSPHORUS_BRIDGES.map((bridge) => ({
+    id: bridge.id,
+    kind: 'bridge',
+    coordinates: [
+      [bridge.start[1], bridge.start[0]],
+      [bridge.end[1], bridge.end[0]],
+    ],
+  })),
+  airports: [
+    {
+      id: 'istanbul-airport',
+      name: 'Istanbul Airport',
+      center: [28.7519, 41.2608],
+      runwayBearing: -8,
+      runwayLength: 0.075,
+      runwayWidth: 0.012,
+    },
+    {
+      id: 'sabiha-gokcen-airport',
+      name: 'Sabiha Gokcen International Airport',
+      center: [29.3092, 40.8986],
+      runwayBearing: 64,
+      runwayLength: 0.052,
+      runwayWidth: 0.010,
+    },
+  ],
+};
 
 const GEO_POINTS = [
   ['Istanbul Galata University', 41.029, 28.974, 'Beyoglu', 'europe'],
@@ -226,20 +362,34 @@ export default function IstanbulUniversityMapPage({
   onToggleLanguage,
 }) {
   const canvasRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const geospatialApiRef = useRef(null);
   const sceneApiRef = useRef(null);
+  const selectedIdRef = useRef('');
   const [sideFilter, setSideFilter] = useState('all');
   const [query, setQuery] = useState('');
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
+  const [mapMode, setMapMode] = useState('loading');
+  const [debugSnapshot, setDebugSnapshot] = useState(null);
   const ui = isFa ? copy.fa : copy.en;
+  const debugMap = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('debugMap') === '1';
+  }, []);
 
   const mapItems = useMemo(() => createMapItems(), []);
+  const validationReport = useMemo(() => validateUniversityCoordinates(mapItems), [mapItems]);
   const [selectedId, setSelectedId] = useState(() => mapItems[0]?.id || '');
   const selected = useMemo(
     () => mapItems.find((item) => item.id === selectedId) || mapItems[0],
     [mapItems, selectedId]
   );
+
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
 
   const visibleItems = useMemo(() => {
     const normalizedQuery = normalizeKey(query);
@@ -263,43 +413,113 @@ export default function IstanbulUniversityMapPage({
   }, [mapItems]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    window.__accaUniversityGeoValidation = validationReport;
+  }, [validationReport]);
+
+  useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return undefined;
+    const container = mapContainerRef.current;
+    if (!canvas || !container) return undefined;
     let active = true;
     const startedAt = performance.now();
+    let geospatialCleanup = null;
+    let fallbackCleanup = null;
     setSceneReady(false);
+    setMapMode('loading');
 
-    const cleanup = initIstanbulScene({
-      canvas,
-      darkMode,
-      items: mapItems,
-      onPick: (id) => {
-        setSelectedId(id);
-        setProfileOpen(true);
-      },
-      onReady: () => {
-        const remaining = Math.max(0, 1200 - (performance.now() - startedAt));
-        window.setTimeout(() => {
-          if (active) setSceneReady(true);
-        }, remaining);
-      },
-      apiRef: sceneApiRef,
-    });
+    const markReady = () => {
+      const remaining = Math.max(0, 1200 - (performance.now() - startedAt));
+      window.setTimeout(() => {
+        if (active) setSceneReady(true);
+      }, remaining);
+    };
+
+    const startFallback = (reason) => {
+      if (!active || fallbackCleanup) return;
+      window.__accaMapFallbackReason = reason?.message || String(reason || 'unknown fallback trigger');
+      geospatialCleanup?.();
+      geospatialApiRef.current = null;
+      setMapMode('fallback');
+      fallbackCleanup = initIstanbulScene({
+        canvas,
+        darkMode,
+        items: mapItems,
+        onPick: (id) => {
+          setSelectedId(id);
+          setProfileOpen(true);
+        },
+        onReady: markReady,
+        apiRef: sceneApiRef,
+      });
+    };
+
+    loadMapLibre()
+      .then((maplibregl) => {
+        if (!active) return;
+        try {
+          geospatialCleanup = initGeospatialMap({
+            maplibregl,
+            container,
+            darkMode,
+            items: mapItems,
+            selectedId: selectedIdRef.current,
+            onPick: (id) => {
+              setSelectedId(id);
+              setProfileOpen(true);
+            },
+            onReady: () => {
+              if (!active) return;
+              setMapMode('geospatial');
+              markReady();
+            },
+            onError: startFallback,
+            apiRef: geospatialApiRef,
+          });
+        } catch (error) {
+          startFallback(error);
+        }
+      })
+      .catch(startFallback);
 
     return () => {
       active = false;
-      cleanup?.();
+      geospatialCleanup?.();
+      fallbackCleanup?.();
+      geospatialApiRef.current = null;
     };
-  }, [darkMode, mapItems]);
+  }, [darkMode, mapItems, validationReport]);
+
+  useEffect(() => {
+    if (!debugMap) return undefined;
+    const update = () => {
+      setDebugSnapshot({
+        engine: window.__accaMapEngine || mapMode,
+        ready: Boolean(window.__acca3DMapReady || window.__accaGeospatialMapReady),
+        markerCount: window.__acca3DMapMarkerCount || window.__accaGeospatialMarkerCount || mapItems.length,
+        adjustedMarkerCount: window.__acca3DMapAdjustedMarkerCount || 0,
+        validation: window.__accaUniversityGeoValidation || validationReport,
+        quality: window.__accaMapQualityTier || 'unknown',
+        zoom: window.__accaMapZoom,
+        pitch: window.__accaMapPitch,
+        bearing: window.__accaMapBearing,
+      });
+    };
+    update();
+    const interval = window.setInterval(update, 900);
+    return () => window.clearInterval(interval);
+  }, [debugMap, mapItems.length, mapMode, validationReport]);
 
   const handleSelect = (id) => {
     setSelectedId(id);
     setProfileOpen(true);
-    sceneApiRef.current?.focusUniversity(id);
+    if (mapMode === 'geospatial') geospatialApiRef.current?.focusUniversity(id);
+    else sceneApiRef.current?.focusUniversity(id);
   };
 
   const handleReset = () => {
-    sceneApiRef.current?.resetView();
+    if (mapMode === 'geospatial') geospatialApiRef.current?.resetView();
+    else sceneApiRef.current?.resetView();
   };
 
   return (
@@ -307,11 +527,16 @@ export default function IstanbulUniversityMapPage({
       className={`${darkMode ? 'bg-[#061018] text-white' : 'bg-[#EAF6F8] text-[#071A3D]'} relative min-h-screen overflow-hidden`}
       dir={isFa ? 'rtl' : 'ltr'}
     >
+      <div
+        ref={mapContainerRef}
+        data-istanbul-geospatial-map
+        className={`absolute inset-0 h-full min-h-screen w-full transition-opacity duration-700 ${mapMode === 'fallback' ? 'opacity-0' : 'opacity-100'}`}
+      />
       <canvas
         ref={canvasRef}
         data-istanbul-map-canvas
         aria-label={isFa ? 'نقشه سه بعدی دانشگاه های استانبول' : '3D map of Istanbul universities'}
-        className="absolute inset-0 h-full min-h-screen w-full touch-none"
+        className={`absolute inset-0 h-full min-h-screen w-full touch-none transition-opacity duration-700 ${mapMode === 'fallback' ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       />
 
       <style>
@@ -330,6 +555,112 @@ export default function IstanbulUniversityMapPage({
           @keyframes acca-map-pulse {
             0%, 100% { transform: scale(.96); opacity: .55; }
             50% { transform: scale(1.04); opacity: 1; }
+          }
+          .acca-mapbox-canvas,
+          .maplibregl-canvas { outline: none; }
+          .maplibregl-ctrl-attrib {
+            border-radius: 999px 0 0 0;
+            background: rgba(255,255,255,.72) !important;
+            color: rgba(7,26,61,.68) !important;
+            font: 700 10px/1.4 ui-sans-serif, system-ui, sans-serif;
+            backdrop-filter: blur(16px);
+          }
+          .acca-geo-beacon {
+            width: 34px;
+            height: 48px;
+            position: relative;
+            transform-origin: 50% 100%;
+            transition: transform .28s ease, opacity .28s ease, filter .28s ease;
+            cursor: pointer;
+          }
+          .acca-geo-beacon::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 3px;
+            width: 28px;
+            height: 28px;
+            border: 1px solid rgba(216,176,91,.62);
+            border-radius: 999px;
+            transform: translateX(-50%) rotateX(62deg);
+            background: radial-gradient(circle, rgba(216,176,91,.22), rgba(216,176,91,0) 68%);
+            box-shadow: 0 0 18px rgba(216,176,91,.28);
+            animation: acca-map-pulse 2.8s ease-in-out infinite;
+          }
+          .acca-geo-beacon::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 13px;
+            width: 2px;
+            height: 30px;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, rgba(255,255,255,0), rgba(216,176,91,.86), rgba(216,176,91,0));
+            filter: drop-shadow(0 0 8px rgba(216,176,91,.38));
+          }
+          .acca-geo-beacon__core {
+            position: absolute;
+            left: 50%;
+            bottom: 28px;
+            display: grid;
+            width: 24px;
+            height: 24px;
+            place-items: center;
+            transform: translateX(-50%);
+            border: 1px solid rgba(255,255,255,.82);
+            border-radius: 9px;
+            background: linear-gradient(145deg, rgba(7,26,61,.94), rgba(17,48,91,.88));
+            color: #fff;
+            box-shadow: 0 12px 30px rgba(7,26,61,.28), 0 0 0 3px rgba(216,176,91,.12);
+            font: 900 10px/1 ui-sans-serif, system-ui, sans-serif;
+          }
+          .acca-geo-beacon.is-asia .acca-geo-beacon__core {
+            box-shadow: 0 12px 30px rgba(7,26,61,.28), 0 0 0 3px rgba(31,171,148,.16);
+          }
+          .acca-geo-beacon.is-selected {
+            z-index: 5;
+            transform: scale(1.38);
+            filter: drop-shadow(0 20px 34px rgba(7,26,61,.30));
+          }
+          .acca-geo-beacon.is-muted {
+            opacity: .54;
+            transform: scale(.82);
+          }
+          .acca-geo-label {
+            position: absolute;
+            left: 50%;
+            bottom: 54px;
+            min-width: 120px;
+            transform: translateX(-50%) translateY(6px);
+            border: 1px solid rgba(255,255,255,.74);
+            border-radius: 15px;
+            background: rgba(255,255,255,.74);
+            color: #071A3D;
+            padding: 7px 9px;
+            text-align: center;
+            box-shadow: 0 16px 46px rgba(7,26,61,.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .22s ease, transform .22s ease;
+            backdrop-filter: blur(18px);
+          }
+          .acca-geo-beacon.is-selected .acca-geo-label,
+          .acca-geo-beacon:hover .acca-geo-label {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+          .acca-geo-label strong {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font: 900 11px/1.25 ui-sans-serif, system-ui, sans-serif;
+          }
+          .acca-geo-label span {
+            display: block;
+            margin-top: 3px;
+            color: rgba(7,26,61,.58);
+            font: 800 9px/1.2 ui-sans-serif, system-ui, sans-serif;
           }
         `}
       </style>
@@ -590,6 +921,30 @@ export default function IstanbulUniversityMapPage({
           )}
         </aside>
       </main>
+
+      {debugMap ? (
+        <aside className={`${darkMode ? 'border-white/12 bg-[#061018]/82 text-white' : 'border-white/80 bg-white/82 text-[#071A3D]'} pointer-events-none fixed bottom-4 right-4 z-40 hidden w-72 rounded-[18px] border p-3 text-[11px] font-bold shadow-[0_18px_60px_rgba(7,26,61,0.18)] backdrop-blur-2xl lg:block`}>
+          <div className="mb-2 text-[10px] font-black uppercase tracking-[0.26em] text-amber-600">Map Debug</div>
+          {[
+            ['engine', debugSnapshot?.engine],
+            ['ready', String(debugSnapshot?.ready)],
+            ['quality', debugSnapshot?.quality],
+            ['markers', debugSnapshot?.markerCount],
+            ['adjusted', debugSnapshot?.adjustedMarkerCount],
+            ['zoom', debugSnapshot?.zoom],
+            ['pitch', debugSnapshot?.pitch],
+            ['bearing', debugSnapshot?.bearing],
+            ['invalid coords', debugSnapshot?.validation?.invalid?.length || 0],
+            ['water-risk', debugSnapshot?.validation?.waterRisk?.length || 0],
+            ['duplicates', debugSnapshot?.validation?.duplicates?.length || 0],
+          ].map(([label, value]) => (
+            <div key={label} className="flex items-center justify-between gap-3 border-t border-current/10 py-1">
+              <span className="opacity-58">{label}</span>
+              <span className="font-black">{value ?? '-'}</span>
+            </div>
+          ))}
+        </aside>
+      ) : null}
     </div>
   );
 }
@@ -730,6 +1085,311 @@ function createMapItems() {
       programsHref: `?page=programs&university=${encodeURIComponent(university.name)}`,
     };
   });
+}
+
+function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId, onPick, onReady, onError, apiRef }) {
+  if (!supportsGeospatialWebGL(maplibregl)) {
+    throw new Error('MapLibre WebGL is not supported');
+  }
+
+  container.innerHTML = '';
+  const compactViewport = window.innerWidth < 760 || window.devicePixelRatio > 2;
+  const markersById = new Map();
+  let loaded = false;
+
+  const map = new maplibregl.Map({
+    container,
+    style: createGeospatialStyle(darkMode),
+    center: MAP_CONFIG.center,
+    zoom: compactViewport ? 8.85 : MAP_CONFIG.initial.zoom,
+    pitch: compactViewport ? 43 : MAP_CONFIG.initial.pitch,
+    bearing: compactViewport ? -12 : MAP_CONFIG.initial.bearing,
+    minZoom: MAP_CONFIG.limits.minZoom,
+    maxZoom: MAP_CONFIG.limits.maxZoom,
+    maxPitch: MAP_CONFIG.limits.maxPitch,
+    maxBounds: MAP_CONFIG.bounds,
+    renderWorldCopies: false,
+    attributionControl: true,
+    cooperativeGestures: false,
+  });
+
+  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true }), 'bottom-right');
+
+  const syncDebug = () => {
+    window.__accaMapEngine = 'maplibre';
+    window.__accaGeospatialMapReady = loaded;
+    window.__accaGeospatialMarkerCount = items.length;
+    window.__accaMapQualityTier = compactViewport ? 'medium-mobile' : 'high-desktop';
+    window.__accaMapZoom = Number(map.getZoom().toFixed(2));
+    window.__accaMapPitch = Number(map.getPitch().toFixed(1));
+    window.__accaMapBearing = Number(map.getBearing().toFixed(1));
+  };
+
+  const setSelectedMarker = (id) => {
+    markersById.forEach((element, markerId) => {
+      element.classList.toggle('is-selected', markerId === id);
+      element.classList.toggle('is-muted', markerId !== id);
+    });
+  };
+
+  const focusUniversity = (id) => {
+    const item = items.find((entry) => entry.id === id);
+    if (!item) return;
+    setSelectedMarker(id);
+    map.flyTo({
+      center: [item.lon, item.lat],
+      zoom: compactViewport ? 11.15 : 12.15,
+      pitch: compactViewport ? 48 : 62,
+      bearing: item.side === 'asia' ? -28 : 18,
+      speed: 0.72,
+      curve: 1.38,
+      essential: false,
+    });
+  };
+
+  const resetView = () => {
+    map.flyTo({
+      center: MAP_CONFIG.center,
+      zoom: compactViewport ? 8.85 : MAP_CONFIG.initial.zoom,
+      pitch: compactViewport ? 43 : MAP_CONFIG.initial.pitch,
+      bearing: compactViewport ? -12 : MAP_CONFIG.initial.bearing,
+      speed: 0.78,
+      curve: 1.32,
+      essential: false,
+    });
+  };
+
+  apiRef.current = { focusUniversity, resetView };
+
+  map.on('load', () => {
+    loaded = true;
+    window.__accaMapFallbackReason = '';
+    addGeospatialInfrastructure(map, darkMode);
+    addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity });
+    setSelectedMarker(selectedId);
+    syncDebug();
+    onReady?.();
+  });
+
+  map.on('move', syncDebug);
+  map.on('zoom', syncDebug);
+  map.on('pitch', syncDebug);
+  map.on('error', (event) => {
+    if (!loaded && event?.error) onError?.(event.error);
+  });
+
+  return () => {
+    markersById.clear();
+    apiRef.current = null;
+    window.__accaGeospatialMapReady = false;
+    map.remove();
+  };
+}
+
+function createGeospatialStyle(darkMode) {
+  const terrainDemSource = {
+    type: 'raster-dem',
+    tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+    encoding: 'terrarium',
+    tileSize: 256,
+    maxzoom: 13,
+    attribution: 'Terrain tiles © AWS Open Data / Mapzen',
+  };
+  const mapboxSatellite = MAP_CONFIG.mapboxToken
+    ? {
+        type: 'raster',
+        tiles: [
+          `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/512/{z}/{x}/{y}@2x?access_token=${MAP_CONFIG.mapboxToken}`,
+        ],
+        tileSize: 512,
+        attribution: '© Mapbox © OpenStreetMap',
+      }
+    : null;
+
+  const satelliteSource = MAP_CONFIG.provider === 'mapbox' && mapboxSatellite
+    ? mapboxSatellite
+    : {
+        type: 'raster',
+        tiles: [
+          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        ],
+        tileSize: 256,
+        attribution: 'Tiles © Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+      };
+
+  return {
+    version: 8,
+    sources: {
+      satellite: satelliteSource,
+      'terrain-dem': {
+        ...terrainDemSource,
+      },
+      'terrain-hillshade-dem': {
+        ...terrainDemSource,
+      },
+    },
+    layers: [
+      {
+        id: 'satellite',
+        type: 'raster',
+        source: 'satellite',
+        paint: {
+          'raster-saturation': darkMode ? -0.46 : -0.22,
+          'raster-contrast': darkMode ? 0.18 : 0.08,
+          'raster-brightness-min': darkMode ? 0.08 : 0.02,
+          'raster-brightness-max': darkMode ? 0.82 : 0.94,
+        },
+      },
+      {
+        id: 'terrain-hillshade',
+        type: 'hillshade',
+        source: 'terrain-hillshade-dem',
+        paint: {
+          'hillshade-shadow-color': darkMode ? '#071A3D' : '#34475f',
+          'hillshade-highlight-color': darkMode ? '#d8b05b' : '#fff3d2',
+          'hillshade-accent-color': darkMode ? '#102944' : '#5d7c89',
+          'hillshade-exaggeration': darkMode ? 0.23 : 0.16,
+        },
+      },
+    ],
+    terrain: {
+      source: 'terrain-dem',
+      exaggeration: window.innerWidth < 760
+        ? MAP_CONFIG.terrain.exaggerationMobile
+        : MAP_CONFIG.terrain.exaggerationDesktop,
+    },
+    sky: {
+      'sky-color': darkMode ? '#07111d' : '#c8eef8',
+      'sky-horizon-blend': 0.08,
+      'horizon-color': darkMode ? '#0d2a3d' : '#eaf6f8',
+      'fog-color': darkMode ? '#07111d' : '#dff4f6',
+      'fog-ground-blend': MAP_CONFIG.lighting.atmosphere,
+    },
+    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+  };
+}
+
+function addGeospatialInfrastructure(map, darkMode) {
+  const infrastructure = createInfrastructureFeatureCollections();
+  map.addSource('acca-roads', { type: 'geojson', data: infrastructure.roads });
+  map.addSource('acca-bridges', { type: 'geojson', data: infrastructure.bridges });
+  map.addSource('acca-airports', { type: 'geojson', data: infrastructure.airports });
+
+  map.addLayer({
+    id: 'acca-airport-fill',
+    type: 'fill',
+    source: 'acca-airports',
+    paint: {
+      'fill-color': darkMode ? 'rgba(216,176,91,0.25)' : 'rgba(7,26,61,0.16)',
+      'fill-outline-color': darkMode ? 'rgba(255,255,255,0.48)' : 'rgba(7,26,61,0.42)',
+    },
+  });
+  map.addLayer({
+    id: 'acca-road-glow',
+    type: 'line',
+    source: 'acca-roads',
+    paint: {
+      'line-color': darkMode ? 'rgba(255,255,255,0.44)' : 'rgba(255,255,255,0.66)',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.2, 12, 4.6],
+      'line-blur': 1.4,
+    },
+  });
+  map.addLayer({
+    id: 'acca-road-core',
+    type: 'line',
+    source: 'acca-roads',
+    paint: {
+      'line-color': ['match', ['get', 'kind'], 'highway', '#D8B05B', '#f4f0e6'],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.7, 12, 2.4],
+      'line-opacity': darkMode ? 0.78 : 0.68,
+    },
+  });
+  map.addLayer({
+    id: 'acca-bridge-core',
+    type: 'line',
+    source: 'acca-bridges',
+    paint: {
+      'line-color': '#D8B05B',
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 2.2, 12, 5.6],
+      'line-blur': 0.25,
+      'line-opacity': 0.96,
+    },
+  });
+}
+
+function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity }) {
+  items.forEach((item) => {
+    const element = document.createElement('button');
+    element.type = 'button';
+    element.className = `acca-geo-beacon ${item.side === 'asia' ? 'is-asia' : 'is-europe'}${item.id === selectedId ? ' is-selected' : ' is-muted'}`;
+    element.setAttribute('aria-label', `${item.name}, ${item.district}`);
+    element.innerHTML = `
+      <span class="acca-geo-label"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.district)} · ${item.side}</span></span>
+      <span class="acca-geo-beacon__core">${escapeHtml(getUniversityInitials(item.name))}</span>
+    `;
+    element.addEventListener('click', (event) => {
+      event.stopPropagation();
+      onPick(item.id);
+      focusUniversity(item.id);
+    });
+
+    new maplibregl.Marker({
+      element,
+      anchor: 'bottom',
+      pitchAlignment: 'map',
+      rotationAlignment: 'viewport',
+    })
+      .setLngLat([item.lon, item.lat])
+      .addTo(map);
+
+    markersById.set(item.id, element);
+  });
+}
+
+function createInfrastructureFeatureCollections() {
+  return {
+    roads: {
+      type: 'FeatureCollection',
+      features: ISTANBUL_INFRASTRUCTURE.roads.map((road) => ({
+        type: 'Feature',
+        properties: { id: road.id, name: road.name, kind: road.kind },
+        geometry: { type: 'LineString', coordinates: road.coordinates },
+      })),
+    },
+    bridges: {
+      type: 'FeatureCollection',
+      features: ISTANBUL_INFRASTRUCTURE.bridges.map((bridge) => ({
+        type: 'Feature',
+        properties: { id: bridge.id, kind: bridge.kind },
+        geometry: { type: 'LineString', coordinates: bridge.coordinates },
+      })),
+    },
+    airports: {
+      type: 'FeatureCollection',
+      features: ISTANBUL_INFRASTRUCTURE.airports.map((airport) => ({
+        type: 'Feature',
+        properties: { id: airport.id, name: airport.name },
+        geometry: { type: 'Polygon', coordinates: [makeRunwayPolygon(airport)] },
+      })),
+    },
+  };
+}
+
+function makeRunwayPolygon({ center, runwayBearing, runwayLength, runwayWidth }) {
+  const angle = (runwayBearing * Math.PI) / 180;
+  const ux = Math.cos(angle);
+  const uy = Math.sin(angle);
+  const px = -uy;
+  const py = ux;
+  const halfL = runwayLength / 2;
+  const halfW = runwayWidth / 2;
+  return [
+    [center[0] - ux * halfL - px * halfW, center[1] - uy * halfL - py * halfW],
+    [center[0] + ux * halfL - px * halfW, center[1] + uy * halfL - py * halfW],
+    [center[0] + ux * halfL + px * halfW, center[1] + uy * halfL + py * halfW],
+    [center[0] - ux * halfL + px * halfW, center[1] - uy * halfL + py * halfW],
+    [center[0] - ux * halfL - px * halfW, center[1] - uy * halfL - py * halfW],
+  ];
 }
 
 function initIstanbulScene({ canvas, darkMode, items, onPick, onReady, apiRef }) {
@@ -1723,6 +2383,42 @@ function findGeo(name, index) {
   };
 }
 
+function validateUniversityCoordinates(items) {
+  const seen = new Map();
+  const invalid = [];
+  const waterRisk = [];
+  const duplicates = [];
+
+  items.forEach((item) => {
+    const inBounds = item.lat >= ISTANBUL_BOUNDS.latMin
+      && item.lat <= ISTANBUL_BOUNDS.latMax
+      && item.lon >= ISTANBUL_BOUNDS.lonMin
+      && item.lon <= ISTANBUL_BOUNDS.lonMax;
+    if (!inBounds) invalid.push({ id: item.id, name: item.name, lat: item.lat, lon: item.lon });
+    if (isLikelyGeospatialWater(item.lat, item.lon)) {
+      waterRisk.push({ id: item.id, name: item.name, lat: item.lat, lon: item.lon });
+    }
+
+    const key = `${item.lat.toFixed(4)},${item.lon.toFixed(4)}`;
+    const prior = seen.get(key);
+    if (prior) duplicates.push({ key, names: [prior.name, item.name] });
+    else seen.set(key, item);
+  });
+
+  return {
+    checked: items.length,
+    invalid,
+    waterRisk,
+    duplicates,
+    adjustedForFallback: items.filter((item) => item.renderAdjusted).map((item) => ({
+      id: item.id,
+      name: item.name,
+      source: [item.lat, item.lon],
+      render: [item.renderLat, item.renderLon],
+    })),
+  };
+}
+
 function projectGeo(lat, lon) {
   const x = ((lon - ISTANBUL_BOUNDS.lonMin) / (ISTANBUL_BOUNDS.lonMax - ISTANBUL_BOUNDS.lonMin) - 0.5) * MAP_WIDTH;
   const z = -((lat - ISTANBUL_BOUNDS.latMin) / (ISTANBUL_BOUNDS.latMax - ISTANBUL_BOUNDS.latMin) - 0.5) * MAP_DEPTH;
@@ -1777,6 +2473,16 @@ function isApproxWater(lat, lon) {
   });
 }
 
+function isLikelyGeospatialWater(lat, lon) {
+  const point = projectGeo(lat, lon);
+  const bosphorusDistance = distanceToGeoPath(point, BOSPHORUS_PATH);
+  const goldenHornDistance = distanceToGeoPath(point, GOLDEN_HORN_PATH);
+  const obviousBosphorus = lon > 28.99 && lon < 29.11 && lat > 40.98 && lat < 41.22 && bosphorusDistance < 0.18;
+  const obviousGoldenHorn = lon > 28.93 && lon < 29.00 && lat > 41.015 && lat < 41.055 && goldenHornDistance < 0.12;
+  const obviousOpenSea = lat < 40.79 || lat > 41.31;
+  return obviousBosphorus || obviousGoldenHorn || obviousOpenSea;
+}
+
 function pointInLatLonPolygon(lat, lon, polygon) {
   let inside = false;
   for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
@@ -1808,6 +2514,25 @@ function distanceToSegment(point, a, b) {
   if (!lengthSq) return Math.hypot(point.x - a.x, point.z - a.z);
   const t = THREE.MathUtils.clamp(((point.x - a.x) * dx + (point.z - a.z) * dz) / lengthSq, 0, 1);
   return Math.hypot(point.x - (a.x + dx * t), point.z - (a.z + dz * t));
+}
+
+function getUniversityInitials(name) {
+  return String(name || 'U')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase();
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function normalizeKey(value) {
