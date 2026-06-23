@@ -20,7 +20,7 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
             <a
               key={uni.name}
               href={uni.href || '/universities/'}
-              className={`${darkMode ? 'darkGlass' : 'glass'} block rounded-[28px] p-6 hover:scale-[1.02] transition-all duration-500`}
+              className={`${darkMode ? 'darkGlass' : 'glass'} group block rounded-[28px] p-6 transition-all duration-500 hover:scale-[1.02] focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-400/55`}
               aria-label={`${isFa ? 'مشاهده پروفایل' : 'View profile'} ${uni.name}`}
             >
               <div className="flex items-center justify-between mb-5 gap-4">
@@ -74,6 +74,16 @@ export default function FeaturedUniversitiesSection({ darkMode, isFa, university
                     {uni.ministry}
                   </span>
                 </div>
+              </div>
+
+              {/* Click affordance — makes it obvious the whole card is a link */}
+              <div className={`${darkMode ? 'border-white/10 text-emerald-300' : 'border-black/10 text-emerald-700'} mt-6 flex items-center justify-between gap-3 border-t pt-4 text-sm font-black`}>
+                <span>{isFa ? 'مشاهده پروفایل دانشگاه' : 'View university profile'}</span>
+                <span className={`${darkMode ? 'bg-emerald-400/15' : 'bg-emerald-600/12'} ${isFa ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'} inline-flex h-8 w-8 items-center justify-center rounded-full transition-transform duration-300`}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className={isFa ? 'rotate-180' : ''} aria-hidden="true">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
               </div>
             </a>
           ))}

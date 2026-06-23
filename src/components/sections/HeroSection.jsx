@@ -41,7 +41,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
   }, [isDesktopViewport]);
 
   return (
-<section className="min-h-[64svh] lg:min-h-[52vh] flex items-start px-5 sm:px-6 pt-[96px] pb-5 sm:pt-[104px] md:pt-[112px] lg:pt-[72px] lg:pb-6 xl:pt-[78px] relative z-10">
+<section className="min-h-[64svh] lg:min-h-[52vh] flex items-start px-5 sm:px-6 pt-[96px] pb-5 sm:pt-[104px] md:pt-[112px] lg:pt-[124px] lg:pb-6 xl:pt-[132px] relative z-10">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-5 lg:gap-12 items-center w-full">
           <div className="relative z-10 max-w-xl lg:max-w-none">
             <div className={`${darkMode ? 'darkGlass text-white' : 'glass text-neutral-700'} inline-flex max-w-full items-center gap-3 px-4 py-2.5 rounded-full mb-5 text-xs font-bold sm:text-sm`}>
@@ -91,7 +91,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, MODEL_S
               </a>
 
               <a
-                href="/residence-permit/"
+                href="/blog/"
                 className={`${darkMode ? 'border-white/15 bg-white/8 text-white hover:bg-white/12' : 'border-black/10 bg-white/70 text-neutral-900 hover:bg-white'} inline-flex items-center gap-2 rounded-full border px-5 py-3.5 text-sm font-black shadow-[0_10px_30px_rgba(7,26,61,0.08)] transition sm:px-6`}
               >
                 {isFa ? 'راهنمای اقامت دانشجویی' : 'Student residence guide'}

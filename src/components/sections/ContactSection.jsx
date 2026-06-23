@@ -151,6 +151,24 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                   {isFa ? 'ارتباط واتساپ' : 'WhatsApp Contact'}
                 </a>
               </div>
+
+              {/* Minimal legal footer links */}
+              <nav
+                aria-label={isFa ? 'پیوندهای حقوقی' : 'Legal links'}
+                className={`${darkMode ? 'text-white/45' : 'text-black/45'} mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold`}
+              >
+                <a href="/privacy/" className="underline-offset-4 transition hover:underline hover:opacity-90">
+                  {isFa ? 'حریم خصوصی' : 'Privacy Policy'}
+                </a>
+                <span aria-hidden="true" className="opacity-40">•</span>
+                <a href="/terms/" className="underline-offset-4 transition hover:underline hover:opacity-90">
+                  {isFa ? 'قوانین و مقررات' : 'Terms of Service'}
+                </a>
+                <span aria-hidden="true" className="opacity-40">•</span>
+                <a href="/data-deletion/" className="underline-offset-4 transition hover:underline hover:opacity-90">
+                  {isFa ? 'حذف اطلاعات' : 'Data Deletion'}
+                </a>
+              </nav>
             </div>
 
             <div className="relative min-h-[720px] overflow-hidden">

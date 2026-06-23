@@ -22,7 +22,6 @@ const FeaturedUniversitiesSection = lazy(() => import('./components/sections/Fea
 const PopularMajorsSection = lazy(() => import('./components/sections/PopularMajorsSection'));
 const PartnerScholarshipSection = lazy(() => import('./components/sections/PartnerScholarshipSection'));
 const TestimonialsSection = lazy(() => import('./components/sections/TestimonialsSection'));
-const MigrationBlueprintSection = lazy(() => import('./components/sections/MigrationBlueprintSection'));
 const FaqSection = lazy(() => import('./components/sections/FaqSection'));
 const FinalCtaSection = lazy(() => import('./components/sections/FinalCtaSection'));
 const ContactSection = lazy(() => import('./components/sections/ContactSection'));
@@ -45,6 +44,34 @@ const STATIC_ROUTE_ALIASES = {
   '/accommodation': { page: 'blog', post: 'address-registration-nvi-turkey-student-warning', canonicalPath: '/accommodation/' },
   '/partner-with-acca-edu': { section: 'partners', canonicalPath: '/partner-with-acca-edu/' },
   '/contact': { section: 'contact', canonicalPath: '/contact/' },
+  '/privacy': { page: 'privacy', canonicalPath: '/privacy/' },
+  '/terms': { page: 'terms', canonicalPath: '/terms/' },
+  '/data-deletion': { page: 'data-deletion', canonicalPath: '/data-deletion/' },
+};
+
+// Lightweight legal/placeholder pages: title + short note, content TBD.
+const LEGAL_PAGES = {
+  privacy: {
+    title: { fa: 'حریم خصوصی', en: 'Privacy Policy' },
+    note: {
+      fa: 'متن کامل سیاست حریم خصوصی به‌زودی در این صفحه قرار می‌گیرد.',
+      en: 'The full privacy policy will be published on this page soon.',
+    },
+  },
+  terms: {
+    title: { fa: 'قوانین و مقررات', en: 'Terms of Service' },
+    note: {
+      fa: 'متن کامل قوانین و مقررات استفاده از خدمات به‌زودی منتشر می‌شود.',
+      en: 'The full terms of service will be published on this page soon.',
+    },
+  },
+  'data-deletion': {
+    title: { fa: 'حذف اطلاعات', en: 'Data Deletion' },
+    note: {
+      fa: 'راهنمای درخواست حذف اطلاعات کاربران به‌زودی در این صفحه قرار می‌گیرد.',
+      en: 'Instructions for requesting deletion of your data will be added here soon.',
+    },
+  },
 };
 const STATIC_ROUTE_META = {
   '/medical-universities-in-turkey/': {
@@ -58,6 +85,18 @@ const STATIC_ROUTE_META = {
   '/contact/': {
     title: 'تماس با ACCA EDU | مشاوره تحصیل در ترکیه و ارتباط واتساپ',
     description: 'تماس مستقیم با ACCA EDU برای مشاوره تحصیل در ترکیه، بررسی پذیرش، رشته‌ها، شهریه‌ها، اقامت دانشجویی و خدمات اسکان از طریق واتساپ و کانال‌های رسمی شرکت.',
+  },
+  '/privacy/': {
+    title: 'حریم خصوصی | ACCA EDU',
+    description: 'سیاست حریم خصوصی ACCA EDU درباره جمع‌آوری، استفاده و حفاظت از اطلاعات کاربران.',
+  },
+  '/terms/': {
+    title: 'قوانین و مقررات | ACCA EDU',
+    description: 'قوانین و مقررات استفاده از خدمات و وب‌سایت ACCA EDU.',
+  },
+  '/data-deletion/': {
+    title: 'حذف اطلاعات | ACCA EDU',
+    description: 'راهنمای درخواست حذف اطلاعات کاربران در ACCA EDU.',
   },
 };
 
@@ -1025,6 +1064,45 @@ export default function ACCALandingPage() {
         </main>
       </div>
     );
+  } else if (LEGAL_PAGES[page]) {
+    const legal = LEGAL_PAGES[page];
+    pageContent = (
+      <div
+        className={`${darkMode ? 'bg-[#050816] text-white' : 'bg-[#F7F1E8] text-neutral-950'} min-h-screen overflow-hidden px-6 py-8`}
+        dir={isFa ? 'rtl' : 'ltr'}
+      >
+        <div className={`${darkMode ? 'darkGlass' : 'glass'} mx-auto flex max-w-7xl items-center justify-between gap-4 rounded-full px-5 py-4 sm:px-7`}>
+          <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
+            <img
+              src={ACCA_LOGO_SRC}
+              alt="ACCA EDU Logo"
+              width="160"
+              height="44"
+              className="h-10 w-auto object-contain sm:h-11"
+            />
+          </a>
+
+          <a
+            href="/"
+            className={`${darkMode ? 'bg-white/10 text-white hover:bg-white/15' : 'bg-black/5 text-black hover:bg-black/10'} rounded-full px-4 py-3 text-xs font-black transition sm:px-6 sm:text-sm`}
+          >
+            {isFa ? 'بازگشت' : 'Back'}
+          </a>
+        </div>
+
+        <main className="mx-auto flex min-h-[calc(100vh-120px)] max-w-3xl flex-col items-center justify-center text-center">
+          <div className={`${darkMode ? 'text-white/40' : 'text-black/40'} mb-6 text-sm font-black uppercase tracking-[0.35em]`}>
+            ACCA EDU
+          </div>
+          <h1 className="text-4xl font-black leading-tight md:text-6xl">
+            {isFa ? legal.title.fa : legal.title.en}
+          </h1>
+          <p className={`${darkMode ? 'text-white/60' : 'text-black/55'} mt-8 max-w-2xl text-lg font-medium leading-9`}>
+            {isFa ? legal.note.fa : legal.note.en}
+          </p>
+        </main>
+      </div>
+    );
   }
 
   const floatingObjects = useMemo(
@@ -1043,28 +1121,40 @@ export default function ACCALandingPage() {
   const registrationSteps = useMemo(
     () => [
       {
+        icon: '📌',
         title: isFa ? 'مشاوره اولیه' : 'Initial Consultation',
         desc: isFa
           ? 'بررسی شرایط، انتخاب رشته و برنامه‌ریزی مسیر تحصیلی.'
           : 'Reviewing your profile, selecting a major, and planning your academic path.',
+        ctaType: 'consult',
+        ctaLabel: isFa ? 'شروع مشاوره رایگان' : 'Start free consultation',
       },
       {
+        icon: '🎯',
         title: isFa ? 'انتخاب دانشگاه' : 'University Selection',
         desc: isFa
           ? 'معرفی بهترین دانشگاه‌ها براساس بودجه و آینده شغلی.'
           : 'Choosing the best universities based on budget and career goals.',
+        ctaHref: '/universities/',
+        ctaLabel: isFa ? 'مشاهده دانشگاه‌ها' : 'Explore universities',
       },
       {
+        icon: '📝',
         title: isFa ? 'اخذ پذیرش' : 'Admission Process',
         desc: isFa
           ? 'ترجمه مدارک، اپلای و دریافت پذیرش رسمی.'
           : 'Document translation, application submission, and official admission.',
+        ctaHref: '/programs/',
+        ctaLabel: isFa ? 'رشته‌ها و شهریه‌ها' : 'Programs & tuition',
       },
       {
-        title: isFa ? 'ورود به ترکیه' : 'Arrival in Turkey',
+        icon: '✈️',
+        title: isFa ? 'ورود و اقامت' : 'Arrival & Residence',
         desc: isFa
           ? 'اقامت، خوابگاه و پشتیبانی کامل بعد از ورود.'
           : 'Residence setup, accommodation, and full post-arrival support.',
+        ctaHref: '/residence-permit/',
+        ctaLabel: isFa ? 'راهنمای اقامت' : 'Residence guide',
       },
     ],
     [isFa]
@@ -2305,6 +2395,7 @@ export default function ACCALandingPage() {
             darkMode={darkMode}
             isFa={isFa}
             registrationSteps={registrationSteps}
+            onConsultationClick={() => setConsultationOpen(true)}
           />
         </DeferredHomeSection>
 
@@ -2342,13 +2433,6 @@ export default function ACCALandingPage() {
 
         <DeferredHomeSection eager={eagerHomeSections} minHeight={760}>
           <TestimonialsSection
-            darkMode={darkMode}
-            isFa={isFa}
-          />
-        </DeferredHomeSection>
-
-        <DeferredHomeSection eager={eagerHomeSections} minHeight={1020}>
-          <MigrationBlueprintSection
             darkMode={darkMode}
             isFa={isFa}
           />

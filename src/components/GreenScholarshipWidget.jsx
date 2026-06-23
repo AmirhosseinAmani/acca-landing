@@ -1,12 +1,57 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const PLAN_KEYS = {
   normal: "normal",
   green: "green",
 };
 
-function getPlanPercent(planKey) {
-  return planKey === PLAN_KEYS.green ? "60%" : "0%";
+const PLAN_PERCENT = {
+  [PLAN_KEYS.green]: 60,
+  [PLAN_KEYS.normal]: 0,
+};
+
+/**
+ * Smoothly animates a whole number from its current value to `target`
+ * (easeOutCubic). Used for the scholarship "savings %" counter so the figure
+ * visibly ticks up/down when the visitor switches plans. Honours the OS
+ * reduce-motion setting by snapping straight to the target.
+ */
+function useAnimatedNumber(target, duration = 700) {
+  const [value, setValue] = useState(target);
+  const valueRef = useRef(target);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    const from = valueRef.current;
+    const to = target;
+    if (from === to) return undefined;
+
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) {
+      setValue(to);
+      return undefined;
+    }
+
+    let raf = 0;
+    let start = 0;
+    const step = (ts) => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(Math.round(from + (to - from) * eased));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+
+  return value;
 }
 
 export default function GreenScholarshipWidget({
@@ -57,20 +102,41 @@ export default function GreenScholarshipWidget({
     [PLAN_KEYS.normal]: {
       label: copy.normal,
       value: "$12K",
-      percent: getPlanPercent(PLAN_KEYS.normal),
       desc: copy.normalDesc,
       variant: "darkGlass",
     },
     [PLAN_KEYS.green]: {
       label: copy.green,
       value: "$4.8K",
-      percent: getPlanPercent(PLAN_KEYS.green),
       desc: copy.greenDesc,
       variant: "featured",
     },
   };
 
-  const selectedPercent = plans[selectedPlan]?.percent ?? plans.green.percent;
+  const isGreen = selectedPlan === PLAN_KEYS.green;
+  const animatedPercent = useAnimatedNumber(PLAN_PERCENT[selectedPlan] ?? 0);
+
+  // The advantage panel + figure shift from a calm/pale state (normal tuition)
+  // to a vibrant emerald state (ACCA scholarship) so the win is felt visually.
+  const advantageBoxClass = isGreen
+    ? isDark
+      ? "border-emerald-300/30 bg-gradient-to-r from-emerald-400/30 to-emerald-300/10"
+      : "border-emerald-500/25 bg-gradient-to-r from-emerald-500/18 to-emerald-300/12"
+    : isDark
+      ? "border-white/10 bg-gradient-to-r from-white/10 to-white/[0.04]"
+      : "border-black/10 bg-gradient-to-r from-black/[0.05] to-white/20";
+
+  const advantageLabelClass = isGreen
+    ? isDark ? "text-emerald-200" : "text-[#245847]"
+    : isDark ? "text-white/55" : "text-black/45";
+
+  const percentFigureClass = isGreen
+    ? isDark
+      ? "text-emerald-200 drop-shadow-[0_0_30px_rgba(16,185,129,0.4)]"
+      : "text-[#245847] drop-shadow-[0_0_30px_rgba(16,185,129,0.35)]"
+    : isDark
+      ? "text-white/40"
+      : "text-black/30";
 
   return (
     <section
@@ -218,18 +284,12 @@ export default function GreenScholarshipWidget({
                   </div>
 
                   <div
-                    className={`rounded-[26px] border p-5 sm:rounded-[30px] sm:p-7 ${
-                      isDark
-                        ? "border-emerald-200/10 bg-gradient-to-r from-emerald-400/20 to-emerald-200/5"
-                        : "border-[#245847]/10 bg-gradient-to-r from-[#245847]/12 to-white/20"
-                    }`}
+                    className={`rounded-[26px] border p-5 transition-colors duration-500 sm:rounded-[30px] sm:p-7 ${advantageBoxClass}`}
                   >
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
                         <div
-                          className={`mb-3 text-xs font-black uppercase tracking-[0.2em] sm:text-sm sm:tracking-[0.25em] ${
-                            isDark ? "text-emerald-200" : "text-[#245847]"
-                          }`}
+                          className={`mb-3 text-xs font-black uppercase tracking-[0.2em] transition-colors duration-500 sm:text-sm sm:tracking-[0.25em] ${advantageLabelClass}`}
                         >
                           {copy.advantage}
                         </div>
@@ -245,11 +305,9 @@ export default function GreenScholarshipWidget({
                       </div>
 
                       <div
-                        className={`shrink-0 text-center text-6xl font-black leading-none drop-shadow-[0_0_30px_rgba(16,185,129,0.4)] sm:text-7xl ${
-                          isDark ? "text-emerald-200" : "text-[#245847]"
-                        }`}
+                        className={`shrink-0 text-center text-6xl font-black leading-none tabular-nums transition-colors duration-500 sm:text-7xl ${percentFigureClass}`}
                       >
-                        {selectedPercent}
+                        {animatedPercent}%
                       </div>
                     </div>
                   </div>
