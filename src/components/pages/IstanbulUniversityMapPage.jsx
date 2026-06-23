@@ -26,6 +26,96 @@ const ISTANBUL_BOUNDS = {
 const MAP_WIDTH = 72;
 const MAP_DEPTH = 36;
 
+const EUROPE_LAND_POLYGON = [
+  [40.825, 28.48],
+  [40.885, 28.60],
+  [40.93, 28.76],
+  [40.965, 28.88],
+  [40.992, 28.955],
+  [41.002, 28.988],
+  [41.018, 29.006],
+  [41.036, 29.018],
+  [41.055, 29.028],
+  [41.078, 29.042],
+  [41.108, 29.056],
+  [41.148, 29.062],
+  [41.195, 29.088],
+  [41.245, 29.058],
+  [41.262, 28.68],
+  [41.178, 28.50],
+];
+
+const ASIA_LAND_POLYGON = [
+  [40.805, 29.08],
+  [40.86, 29.045],
+  [40.925, 29.032],
+  [40.985, 29.034],
+  [41.020, 29.046],
+  [41.046, 29.058],
+  [41.072, 29.071],
+  [41.096, 29.084],
+  [41.130, 29.094],
+  [41.178, 29.106],
+  [41.232, 29.116],
+  [41.248, 29.66],
+  [41.080, 29.68],
+  [40.900, 29.54],
+  [40.805, 29.28],
+];
+
+const BOSPHORUS_PATH = [
+  [40.875, 29.020],
+  [40.950, 29.018],
+  [40.995, 29.021],
+  [41.025, 29.030],
+  [41.048, 29.038],
+  [41.074, 29.056],
+  [41.094, 29.069],
+  [41.130, 29.079],
+  [41.166, 29.083],
+  [41.205, 29.116],
+  [41.245, 29.132],
+];
+
+const GOLDEN_HORN_PATH = [
+  [41.023, 28.976],
+  [41.034, 28.963],
+  [41.047, 28.946],
+  [41.062, 28.928],
+  [41.078, 28.905],
+];
+
+const ISTANBUL_LAKES = [
+  { center: [41.030, 28.758], rx: 1.9, rz: 3.2, rotation: -0.22 },
+  { center: [41.015, 28.585], rx: 2.4, rz: 3.4, rotation: -0.28 },
+  { center: [41.170, 28.620], rx: 2.2, rz: 1.7, rotation: 0.16 },
+  { center: [41.065, 29.345], rx: 2.7, rz: 2.0, rotation: 0.28 },
+];
+
+const BOSPHORUS_BRIDGES = [
+  {
+    id: 'bosphorus-bridge',
+    start: [41.047, 29.025],
+    end: [41.043, 29.053],
+    towerStart: [41.047, 29.030],
+    towerEnd: [41.044, 29.048],
+  },
+  {
+    id: 'fsm-bridge',
+    start: [41.092, 29.055],
+    end: [41.088, 29.078],
+    towerStart: [41.092, 29.060],
+    towerEnd: [41.089, 29.073],
+  },
+  {
+    id: 'yss-bridge',
+    start: [41.205, 29.106],
+    end: [41.206, 29.145],
+    towerStart: [41.205, 29.114],
+    towerEnd: [41.206, 29.137],
+  },
+];
+
 const GEO_POINTS = [
   ['Istanbul Galata University', 41.029, 28.974, 'Beyoglu', 'europe'],
   ['Bezmialem Vakif University', 41.017, 28.941, 'Fatih', 'europe'],
@@ -141,6 +231,7 @@ export default function IstanbulUniversityMapPage({
   const [query, setQuery] = useState('');
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
   const ui = isFa ? copy.fa : copy.en;
 
   const mapItems = useMemo(() => createMapItems(), []);
@@ -174,8 +265,11 @@ export default function IstanbulUniversityMapPage({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
+    let active = true;
+    const startedAt = performance.now();
+    setSceneReady(false);
 
-    return initIstanbulScene({
+    const cleanup = initIstanbulScene({
       canvas,
       darkMode,
       items: mapItems,
@@ -183,8 +277,19 @@ export default function IstanbulUniversityMapPage({
         setSelectedId(id);
         setProfileOpen(true);
       },
+      onReady: () => {
+        const remaining = Math.max(0, 1200 - (performance.now() - startedAt));
+        window.setTimeout(() => {
+          if (active) setSceneReady(true);
+        }, remaining);
+      },
       apiRef: sceneApiRef,
     });
+
+    return () => {
+      active = false;
+      cleanup?.();
+    };
   }, [darkMode, mapItems]);
 
   const handleSelect = (id) => {
@@ -209,6 +314,26 @@ export default function IstanbulUniversityMapPage({
         className="absolute inset-0 h-full min-h-screen w-full touch-none"
       />
 
+      <style>
+        {`
+          @keyframes acca-map-loader-sweep {
+            0% { transform: translateX(-110%) rotate(10deg); opacity: 0; }
+            18% { opacity: .82; }
+            78% { opacity: .35; }
+            100% { transform: translateX(110%) rotate(10deg); opacity: 0; }
+          }
+          @keyframes acca-map-scan {
+            0% { transform: translateY(-18%) scaleX(.86); opacity: 0; }
+            28% { opacity: .55; }
+            100% { transform: translateY(118%) scaleX(1.04); opacity: 0; }
+          }
+          @keyframes acca-map-pulse {
+            0%, 100% { transform: scale(.96); opacity: .55; }
+            50% { transform: scale(1.04); opacity: 1; }
+          }
+        `}
+      </style>
+
       <div
         aria-hidden="true"
         className={`pointer-events-none absolute inset-0 ${
@@ -217,6 +342,64 @@ export default function IstanbulUniversityMapPage({
             : 'bg-[linear-gradient(180deg,rgba(234,246,248,0.08)_0%,rgba(234,246,248,0.00)_44%,rgba(234,246,248,0.62)_100%)]'
         }`}
       />
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 ${
+          darkMode
+            ? 'bg-[radial-gradient(circle_at_50%_42%,rgba(7,26,61,0)_0%,rgba(7,26,61,0)_42%,rgba(7,26,61,0.42)_82%,rgba(1,8,20,0.86)_100%)]'
+            : 'bg-[radial-gradient(circle_at_50%_42%,rgba(234,246,248,0)_0%,rgba(234,246,248,0)_46%,rgba(234,246,248,0.42)_84%,rgba(7,26,61,0.18)_100%)]'
+        }`}
+      />
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-x-0 top-24 h-px transition-opacity duration-500 ${sceneReady ? 'opacity-0' : 'opacity-100'}`}
+        style={{
+          animation: sceneReady ? 'none' : 'acca-map-scan 2.8s ease-out infinite',
+          background: darkMode
+            ? 'linear-gradient(90deg, transparent, rgba(122,240,255,.72), transparent)'
+            : 'linear-gradient(90deg, transparent, rgba(7,26,61,.34), transparent)',
+        }}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-1/2 top-1/2 z-10 hidden h-12 w-12 -translate-x-1/2 -translate-y-1/2 opacity-35 mix-blend-overlay sm:block"
+      >
+        <span className="absolute left-1/2 top-0 h-3 w-px -translate-x-1/2 bg-white" />
+        <span className="absolute bottom-0 left-1/2 h-3 w-px -translate-x-1/2 bg-white" />
+        <span className="absolute left-0 top-1/2 h-px w-3 -translate-y-1/2 bg-white" />
+        <span className="absolute right-0 top-1/2 h-px w-3 -translate-y-1/2 bg-white" />
+        <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white" />
+      </div>
+
+      <div
+        aria-live="polite"
+        aria-busy={!sceneReady}
+        className={`${sceneReady ? 'pointer-events-none opacity-0' : 'pointer-events-auto opacity-100'} fixed inset-0 z-50 grid place-items-center px-6 transition-opacity duration-700`}
+      >
+        <div className={`${darkMode ? 'border-white/14 bg-[#061018]/86 text-white' : 'border-white/90 bg-white/84 text-[#071A3D]'} relative w-full max-w-sm overflow-hidden rounded-[28px] border p-5 text-center shadow-[0_32px_110px_rgba(7,26,61,0.28)] backdrop-blur-2xl`}>
+          <div
+            aria-hidden="true"
+            className="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            style={{ animation: 'acca-map-loader-sweep 2.1s ease-in-out infinite' }}
+          />
+          <div className="relative mx-auto grid h-16 w-16 place-items-center rounded-full bg-[#071A3D] text-white shadow-[0_18px_45px_rgba(7,26,61,0.24)]">
+            <div className="absolute inset-2 rounded-full border border-[#D8B05B]/70" style={{ animation: 'acca-map-pulse 1.8s ease-in-out infinite' }} />
+            <MapPin size={24} />
+          </div>
+          <div className={`${darkMode ? 'text-amber-200' : 'text-amber-700'} relative mt-4 text-[10px] font-black uppercase tracking-[0.34em]`}>
+            ACCA Tactical Atlas
+          </div>
+          <div className="relative mt-2 text-lg font-black">
+            {isFa ? 'آماده‌سازی نقشه استانبول' : 'Preparing Istanbul map'}
+          </div>
+          <div className={`${darkMode ? 'text-white/58' : 'text-[#071A3D]/58'} relative mt-2 text-xs font-bold leading-6`}>
+            {isFa ? 'زمین، بوغاز، ابرها و موقعیت دانشگاه‌ها در حال هماهنگ‌سازی است.' : 'Terrain, Bosphorus, clouds and university beacons are being aligned.'}
+          </div>
+          <div className={`${darkMode ? 'bg-white/10' : 'bg-[#071A3D]/10'} relative mt-4 h-1.5 overflow-hidden rounded-full`}>
+            <div className="h-full w-2/3 rounded-full bg-[#D8B05B]" style={{ animation: 'acca-map-loader-sweep 1.65s ease-in-out infinite' }} />
+          </div>
+        </div>
+      </div>
 
       <header className="pointer-events-none fixed left-0 right-0 top-0 z-30 px-3 py-3 sm:px-6 sm:py-4">
         <div
@@ -520,7 +703,8 @@ function MiniFact({ icon, label, value, darkMode, isFa, compact = false }) {
 function createMapItems() {
   return istanbulUniversities.map((university, index) => {
     const geo = findGeo(university.name, index);
-    const coords = projectGeo(geo.lat, geo.lon);
+    const renderGeo = snapGeoToRenderableLand(geo);
+    const coords = projectGeo(renderGeo.lat, renderGeo.lon);
     const campuses = (university.campuses || []).filter(Boolean);
     const profileValue = university.slug || university.name;
 
@@ -530,6 +714,9 @@ function createMapItems() {
       logo: university.logo,
       lat: geo.lat,
       lon: geo.lon,
+      renderLat: renderGeo.lat,
+      renderLon: renderGeo.lon,
+      renderAdjusted: Boolean(renderGeo.renderAdjusted),
       x: coords.x,
       z: coords.z,
       side: geo.side,
@@ -545,7 +732,7 @@ function createMapItems() {
   });
 }
 
-function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
+function initIstanbulScene({ canvas, darkMode, items, onPick, onReady, apiRef }) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(darkMode ? 0x07111d : 0xbfeaf5);
   scene.fog = new THREE.FogExp2(darkMode ? 0x07111d : 0xd6f4f8, darkMode ? 0.012 : 0.007);
@@ -558,9 +745,10 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
     preserveDrawingBuffer: true,
   });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled = true;
+  const compactViewport = window.innerWidth < 760 || window.devicePixelRatio > 2;
+  renderer.shadowMap.enabled = !compactViewport;
   renderer.shadowMap.type = THREE.PCFShadowMap;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, compactViewport ? 1.25 : 1.55));
 
   const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 220);
   const reducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -572,6 +760,9 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
     targetGoal: new THREE.Vector3(0, 0, 0),
     selectedId: items[0]?.id || '',
     startTime: performance.now(),
+    lastFrameTime: performance.now(),
+    focus: null,
+    userInteracted: false,
   };
 
   const markerPickables = [];
@@ -584,6 +775,7 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
   createForestClusters(scene, darkMode);
   createCityBlocks(scene, darkMode);
   createRoadsAndBridges(scene, darkMode);
+  createTacticalOverlay(scene, darkMode);
   createUniversityMarkers({
     scene,
     items,
@@ -598,6 +790,7 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
   let animationFrame = 0;
   let isDragging = false;
   let pointerDown = null;
+  let readyNotified = false;
 
   const resize = () => {
     const width = Math.max(canvas.clientWidth || window.innerWidth, 1);
@@ -607,27 +800,64 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
     camera.updateProjectionMatrix();
   };
 
-  const updateCamera = (introProgress = 1) => {
-    state.target.lerp(state.targetGoal, 0.055);
+  const updateCamera = (introProgress = 1, time = 0, delta = 0) => {
     const easedIntro = easeOutCubic(introProgress);
-    const distance = state.distance + (1 - easedIntro) * 28;
-    const phi = THREE.MathUtils.clamp(state.pitch - (1 - easedIntro) * 0.28, 0.34, 1.24);
-    const x = state.target.x + distance * Math.sin(phi) * Math.sin(state.yaw);
-    const y = state.target.y + distance * Math.cos(phi) + (1 - easedIntro) * 26;
-    const z = state.target.z + distance * Math.sin(phi) * Math.cos(state.yaw);
+    let travelLift = 0;
+
+    if (state.focus) {
+      const progress = THREE.MathUtils.clamp((performance.now() - state.focus.startedAt) / state.focus.duration, 0, 1);
+      const eased = easeInOutCubic(progress);
+      state.target.lerpVectors(state.focus.fromTarget, state.focus.toTarget, eased);
+      state.distance = lerp(state.focus.fromDistance, state.focus.toDistance, eased);
+      state.pitch = lerp(state.focus.fromPitch, state.focus.toPitch, eased);
+      state.yaw = lerp(state.focus.fromYaw, state.focus.toYaw, eased);
+      travelLift = Math.sin(progress * Math.PI) * 9;
+      if (progress >= 1) {
+        state.focus = null;
+        state.targetGoal.copy(state.target);
+      }
+    } else {
+      if (!state.userInteracted && introProgress >= 1) state.yaw += delta * 0.00055;
+      state.target.lerp(state.targetGoal, 0.055);
+    }
+
+    const cameraTarget = state.target;
+    const distance = state.distance + (1 - easedIntro) * 30;
+    const pitch = THREE.MathUtils.clamp(state.pitch - (1 - easedIntro) * 0.30, 0.34, 1.24);
+    const yaw = state.yaw;
+
+    const breathingLift = state.focus ? 0 : Math.sin(time * 0.24) * 0.18;
+    const phi = THREE.MathUtils.clamp(pitch, 0.34, 1.24);
+    const x = cameraTarget.x + distance * Math.sin(phi) * Math.sin(yaw);
+    const y = cameraTarget.y + distance * Math.cos(phi) + (1 - easedIntro) * 28 + travelLift + breathingLift;
+    const z = cameraTarget.z + distance * Math.sin(phi) * Math.cos(yaw);
     camera.position.set(x, y, z);
-    camera.lookAt(state.target.x, state.target.y + 0.8, state.target.z);
+    camera.lookAt(cameraTarget.x, cameraTarget.y + 0.8, cameraTarget.z);
   };
 
   const focusUniversity = (id) => {
     const marker = markersById.get(id);
     if (!marker) return;
+    const sideDirection = marker.position.x >= state.target.x ? -0.18 : 0.18;
     state.selectedId = id;
-    state.targetGoal.set(marker.position.x, 0.3, marker.position.z);
-    state.distance = THREE.MathUtils.clamp(state.distance, 34, 54);
+    state.focus = {
+      startedAt: performance.now(),
+      duration: reducedMotion ? 200 : 1650,
+      fromTarget: state.target.clone(),
+      toTarget: new THREE.Vector3(marker.position.x, 0.34, marker.position.z),
+      fromDistance: state.distance,
+      toDistance: THREE.MathUtils.clamp(state.distance, 34, 48),
+      fromPitch: state.pitch,
+      toPitch: 0.70,
+      fromYaw: state.yaw,
+      toYaw: state.yaw + sideDirection,
+    };
+    state.targetGoal.set(marker.position.x, 0.34, marker.position.z);
   };
 
   const resetView = () => {
+    state.focus = null;
+    state.userInteracted = false;
     state.yaw = -0.55;
     state.pitch = 0.78;
     state.distance = 70;
@@ -647,6 +877,8 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
   };
 
   const handlePointerDown = (event) => {
+    state.focus = null;
+    state.userInteracted = true;
     isDragging = true;
     pointerDown = {
       x: event.clientX,
@@ -707,6 +939,8 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
 
   const handleWheel = (event) => {
     event.preventDefault();
+    state.focus = null;
+    state.userInteracted = true;
     state.distance = THREE.MathUtils.clamp(state.distance + event.deltaY * 0.035, 30, 88);
   };
 
@@ -714,14 +948,21 @@ function initIstanbulScene({ canvas, darkMode, items, onPick, apiRef }) {
     const elapsed = performance.now() - state.startTime;
     const introProgress = reducedMotion ? 1 : THREE.MathUtils.clamp(elapsed / 3200, 0, 1);
     const time = (performance.now() - state.startTime) / 1000;
+    const delta = performance.now() - state.lastFrameTime;
+    state.lastFrameTime = performance.now();
 
-    updateCamera(introProgress);
+    updateCamera(introProgress, time, delta);
     animateClouds(cloudRig, introProgress, time);
     animateMarkers(animatedRings, markersById, state.selectedId, time);
 
     renderer.render(scene, camera);
-    window.__acca3DMapReady = true;
+    if (!readyNotified && (reducedMotion || introProgress > 0.58)) {
+      readyNotified = true;
+      onReady?.();
+    }
+    window.__acca3DMapReady = readyNotified;
     window.__acca3DMapMarkerCount = items.length;
+    window.__acca3DMapAdjustedMarkerCount = items.filter((item) => item.renderAdjusted).length;
     window.__acca3DMapSelectedId = state.selectedId;
     animationFrame = requestAnimationFrame(animate);
   };
@@ -803,41 +1044,18 @@ function createTerrain(scene, darkMode) {
     metalness: 0.02,
   });
 
-  const europe = makeLandShape([
-    projectGeo(41.235, 28.50),
-    projectGeo(41.238, 28.78),
-    projectGeo(41.222, 28.93),
-    projectGeo(41.18, 29.01),
-    projectGeo(41.12, 29.018),
-    projectGeo(41.065, 29.005),
-    projectGeo(41.034, 28.995),
-    projectGeo(41.016, 28.986),
-    projectGeo(40.985, 28.945),
-    projectGeo(40.95, 28.845),
-    projectGeo(40.895, 28.72),
-    projectGeo(40.835, 28.57),
-    projectGeo(40.925, 28.505),
-  ], europeMaterial);
+  const europe = makeGeoLandShape(EUROPE_LAND_POLYGON, europeMaterial);
   europe.position.y = 0.04;
   scene.add(europe);
 
-  const asia = makeLandShape([
-    projectGeo(41.22, 29.035),
-    projectGeo(41.245, 29.65),
-    projectGeo(41.08, 29.665),
-    projectGeo(40.91, 29.52),
-    projectGeo(40.805, 29.27),
-    projectGeo(40.84, 29.10),
-    projectGeo(40.93, 29.02),
-    projectGeo(41.015, 29.03),
-    projectGeo(41.11, 29.05),
-  ], asiaMaterial);
+  const asia = makeGeoLandShape(ASIA_LAND_POLYGON, asiaMaterial);
   asia.position.y = 0.05;
   scene.add(asia);
 
   addCoastline(scene, europe);
   addCoastline(scene, asia);
   addBosphorusAndGoldenHorn(scene, seaMaterial);
+  addIstanbulLakes(scene, seaMaterial);
   addMarmaraIslands(scene, asiaMaterial);
   addTerrainRelief(scene, darkMode);
   addHills(scene, darkMode);
@@ -915,32 +1133,46 @@ function addBosphorusAndGoldenHorn(scene, seaMaterial) {
   channelMaterial.opacity = 0.9;
   channelMaterial.color = new THREE.Color(0x1c9fc0);
 
-  addTube(scene, [
-    projectGeo(41.235, 29.035),
-    projectGeo(41.16, 29.025),
-    projectGeo(41.09, 29.018),
-    projectGeo(41.045, 29.015),
-    projectGeo(40.99, 29.0),
-    projectGeo(40.88, 29.04),
-  ], channelMaterial, 0.42);
-
-  addTube(scene, [
-    projectGeo(41.075, 28.91),
-    projectGeo(41.062, 28.94),
-    projectGeo(41.045, 28.965),
-    projectGeo(41.025, 28.985),
-  ], channelMaterial, 0.34);
+  addTube(scene, BOSPHORUS_PATH.map(([lat, lon]) => projectGeo(lat, lon)), channelMaterial, 0.52);
+  addTube(scene, GOLDEN_HORN_PATH.map(([lat, lon]) => projectGeo(lat, lon)), channelMaterial, 0.38);
 
   const wakeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.32 });
   [
-    [projectGeo(41.18, 29.035), projectGeo(41.08, 29.022), projectGeo(40.96, 29.025)],
-    [projectGeo(41.06, 28.935), projectGeo(41.04, 28.96), projectGeo(41.025, 28.985)],
+    BOSPHORUS_PATH.filter((_, index) => index % 2 === 0).map(([lat, lon]) => projectGeo(lat, lon)),
+    GOLDEN_HORN_PATH.map(([lat, lon]) => projectGeo(lat, lon)),
   ].forEach((points) => {
     const line = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints(points.map((point) => new THREE.Vector3(point.x, 0.35, point.z))),
       wakeMaterial
     );
     scene.add(line);
+  });
+}
+
+function addIstanbulLakes(scene, seaMaterial) {
+  const lakeMaterial = seaMaterial.clone();
+  lakeMaterial.opacity = 0.72;
+  lakeMaterial.color = new THREE.Color(0x1988a8);
+
+  ISTANBUL_LAKES.forEach(({ center, rx, rz, rotation }) => {
+    const point = projectGeo(center[0], center[1]);
+    const shape = new THREE.Shape();
+    const segments = 42;
+    for (let i = 0; i < segments; i++) {
+      const angle = (Math.PI * 2 * i) / segments;
+      const localX = Math.cos(angle) * rx;
+      const localZ = Math.sin(angle) * rz;
+      const x = point.x + localX * Math.cos(rotation) - localZ * Math.sin(rotation);
+      const z = point.z + localX * Math.sin(rotation) + localZ * Math.cos(rotation);
+      if (i === 0) shape.moveTo(x, z);
+      else shape.lineTo(x, z);
+    }
+    shape.closePath();
+    const lake = new THREE.Mesh(new THREE.ShapeGeometry(shape, 24), lakeMaterial);
+    lake.rotation.x = Math.PI / 2;
+    lake.position.y = 0.17;
+    lake.receiveShadow = true;
+    scene.add(lake);
   });
 }
 
@@ -1057,10 +1289,87 @@ function createRoadsAndBridges(scene, darkMode) {
     [projectGeo(40.88, 29.12), projectGeo(40.9, 29.28), projectGeo(40.91, 29.5)],
   ].forEach((points) => addTube(scene, points, roadMaterial, 0.035));
 
-  addTube(scene, [projectGeo(41.047, 28.992), projectGeo(41.048, 29.039)], goldMaterial, 0.09);
-  addTube(scene, [projectGeo(41.088, 29.02), projectGeo(41.088, 29.065)], goldMaterial, 0.08);
-  addBridgeTowers(scene, projectGeo(41.047, 28.995), projectGeo(41.047, 29.036), goldMaterial);
-  addBridgeTowers(scene, projectGeo(41.088, 29.023), projectGeo(41.088, 29.062), goldMaterial);
+  BOSPHORUS_BRIDGES.forEach((bridge, index) => {
+    addTube(scene, [projectGeo(...bridge.start), projectGeo(...bridge.end)], goldMaterial, index === 2 ? 0.07 : 0.085);
+    addBridgeTowers(scene, projectGeo(...bridge.towerStart), projectGeo(...bridge.towerEnd), goldMaterial);
+  });
+
+  const tunnelMaterial = new THREE.LineDashedMaterial({
+    color: darkMode ? 0x9fd7ff : 0x071a3d,
+    transparent: true,
+    opacity: darkMode ? 0.28 : 0.20,
+    dashSize: 0.34,
+    gapSize: 0.22,
+  });
+  [
+    [projectGeo(41.004, 28.972), projectGeo(41.000, 29.035)],
+    [projectGeo(40.995, 28.985), projectGeo(40.992, 29.055)],
+  ].forEach((points) => {
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(points.map((point) => new THREE.Vector3(point.x, 0.31, point.z))),
+      tunnelMaterial
+    );
+    line.computeLineDistances();
+    scene.add(line);
+  });
+}
+
+function createTacticalOverlay(scene, darkMode) {
+  const gridMaterial = new THREE.LineBasicMaterial({
+    color: darkMode ? 0x9bdcff : 0x071a3d,
+    transparent: true,
+    opacity: darkMode ? 0.10 : 0.065,
+  });
+  const contourMaterial = new THREE.LineBasicMaterial({
+    color: darkMode ? 0xf8d98a : 0x7b6330,
+    transparent: true,
+    opacity: darkMode ? 0.18 : 0.12,
+  });
+
+  for (let x = -30; x <= 30; x += 10) {
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(x, 0.37, -15.5),
+        new THREE.Vector3(x, 0.37, 15.5),
+      ]),
+      gridMaterial
+    );
+    scene.add(line);
+  }
+  for (let z = -15; z <= 15; z += 7.5) {
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(-32, 0.37, z),
+        new THREE.Vector3(32, 0.37, z),
+      ]),
+      gridMaterial
+    );
+    scene.add(line);
+  }
+
+  [
+    [41.18, 29.50, 3.2, 1.9],
+    [41.18, 28.66, 2.8, 1.8],
+    [41.11, 29.55, 2.4, 1.55],
+    [40.91, 29.34, 2.2, 1.28],
+  ].forEach(([lat, lon, rx, rz], index) => {
+    const center = projectGeo(lat, lon);
+    for (let ring = 0; ring < 3; ring++) {
+      const points = [];
+      const scale = 1 + ring * 0.42;
+      for (let i = 0; i <= 72; i++) {
+        const angle = (Math.PI * 2 * i) / 72;
+        points.push(new THREE.Vector3(
+          center.x + Math.cos(angle) * rx * scale,
+          0.40 + ring * 0.012,
+          center.z + Math.sin(angle) * rz * scale
+        ));
+      }
+      const contour = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), contourMaterial);
+      contour.userData.contourIndex = index * 3 + ring;
+      scene.add(contour);
+    }
+  });
 }
 
 function createCityBlocks(scene, darkMode) {
@@ -1127,6 +1436,13 @@ function createUniversityMarkers({ scene, items, markersById, markerPickables, a
       opacity: darkMode ? 0.34 : 0.24,
       depthWrite: false,
     });
+    const beamMaterial = new THREE.MeshBasicMaterial({
+      color: sideColor,
+      transparent: true,
+      opacity: darkMode ? 0.28 : 0.18,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
 
     const marker = new THREE.Group();
     marker.position.set(item.x, 0.22, item.z);
@@ -1136,37 +1452,39 @@ function createUniversityMarkers({ scene, items, markersById, markerPickables, a
     base.rotation.x = Math.PI / 2;
     base.userData.markerId = item.id;
     marker.add(base);
-    animatedRings.push({ ring: base, index, marker });
+    const animationPayload = { ring: base, index, marker, beam: null, haloMaterial, beamMaterial };
+    animatedRings.push(animationPayload);
+
+    const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.012, 3.6, 8, 1, true), beamMaterial);
+    beam.position.y = 2.0;
+    beam.userData.markerId = item.id;
+    marker.add(beam);
+    animationPayload.beam = beam;
 
     const platform = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.54, 0.12, 8), accentMaterial);
     platform.position.y = 0.11;
     platform.userData.markerId = item.id;
-    platform.castShadow = true;
     marker.add(platform);
 
     const body = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.48, 0.44), campusMaterial);
     body.position.y = 0.48;
     body.userData.markerId = item.id;
-    body.castShadow = true;
     marker.add(body);
 
     const tower = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.82, 0.24), campusMaterial);
     tower.position.set(-0.28, 0.66, 0.02);
     tower.userData.markerId = item.id;
-    tower.castShadow = true;
     marker.add(tower);
 
     const annex = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.36, 0.34), campusMaterial);
     annex.position.set(0.36, 0.38, -0.03);
     annex.userData.markerId = item.id;
-    annex.castShadow = true;
     marker.add(annex);
 
     const roof = new THREE.Mesh(new THREE.ConeGeometry(0.26, 0.24, 4), accentMaterial);
     roof.position.set(-0.28, 1.2, 0.02);
     roof.rotation.y = Math.PI / 4;
     roof.userData.markerId = item.id;
-    roof.castShadow = true;
     marker.add(roof);
 
     const glow = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), accentMaterial);
@@ -1174,7 +1492,12 @@ function createUniversityMarkers({ scene, items, markersById, markerPickables, a
     glow.userData.markerId = item.id;
     marker.add(glow);
 
-    markerPickables.push(platform, body, tower, annex, roof, glow, base);
+    const objective = new THREE.Mesh(new THREE.OctahedronGeometry(0.18, 0), accentMaterial);
+    objective.position.y = 4.0;
+    objective.userData.markerId = item.id;
+    marker.add(objective);
+
+    markerPickables.push(platform, body, tower, annex, roof, glow, base, objective);
     markers.add(marker);
     markersById.set(item.id, marker);
   });
@@ -1278,12 +1601,18 @@ function animateClouds(rig, introProgress, time) {
 }
 
 function animateMarkers(animatedRings, markersById, selectedId, time) {
-  animatedRings.forEach(({ ring, index, marker }) => {
+  animatedRings.forEach(({ ring, index, marker, beam, haloMaterial, beamMaterial }) => {
     ring.rotation.z = time * 0.8 + index * 0.28;
     const pulse = 1 + Math.sin(time * 2.2 + index) * 0.08;
     ring.scale.setScalar(pulse);
     const selected = marker.userData.markerId === selectedId;
-    marker.scale.lerp(new THREE.Vector3(selected ? 1.55 : 1, selected ? 1.55 : 1, selected ? 1.55 : 1), 0.1);
+    marker.scale.lerp(new THREE.Vector3(selected ? 1.62 : 0.94, selected ? 1.62 : 0.94, selected ? 1.62 : 0.94), 0.1);
+    if (beam) {
+      beam.rotation.y = time * 0.22 + index;
+      beam.scale.y = selected ? 1.18 : 0.78 + Math.sin(time * 1.4 + index) * 0.04;
+    }
+    if (haloMaterial) haloMaterial.opacity = selected ? 0.46 : 0.18;
+    if (beamMaterial) beamMaterial.opacity = selected ? 0.42 : 0.13;
   });
 
   const selected = markersById.get(selectedId);
@@ -1303,6 +1632,10 @@ function makeLandShape(points, material) {
   mesh.receiveShadow = true;
   mesh.userData.outlinePoints = points;
   return mesh;
+}
+
+function makeGeoLandShape(points, material) {
+  return makeLandShape(points.map(([lat, lon]) => projectGeo(lat, lon)), material);
 }
 
 function addCoastline(scene, landMesh) {
@@ -1396,10 +1729,85 @@ function projectGeo(lat, lon) {
   return { x, z };
 }
 
+function snapGeoToRenderableLand(geo) {
+  if (isApproxLand(geo.lat, geo.lon)) return geo;
+
+  const lonDirection = geo.side === 'asia' ? 1 : -1;
+  const candidates = [
+    [0, lonDirection * 0.010],
+    [0, lonDirection * 0.018],
+    [0.006, lonDirection * 0.016],
+    [-0.006, lonDirection * 0.016],
+    [0.010, lonDirection * 0.024],
+    [-0.010, lonDirection * 0.024],
+  ];
+
+  const candidate = candidates
+    .map(([latOffset, lonOffset]) => ({
+      ...geo,
+      lat: geo.lat + latOffset,
+      lon: geo.lon + lonOffset,
+      renderAdjusted: true,
+    }))
+    .find((point) => isApproxLand(point.lat, point.lon));
+
+  return candidate || geo;
+}
+
 function isApproxLand(lat, lon) {
-  if (lon < 28.98) return lat > 40.86 && lat < 41.23;
-  if (lon > 29.02) return lat > 40.82 && lat < 41.24;
-  return false;
+  const inLand = pointInLatLonPolygon(lat, lon, EUROPE_LAND_POLYGON)
+    || pointInLatLonPolygon(lat, lon, ASIA_LAND_POLYGON);
+  return inLand && !isApproxWater(lat, lon);
+}
+
+function isApproxWater(lat, lon) {
+  const point = projectGeo(lat, lon);
+  const bosphorusDistance = distanceToGeoPath(point, BOSPHORUS_PATH);
+  const goldenHornDistance = distanceToGeoPath(point, GOLDEN_HORN_PATH);
+  if (bosphorusDistance < 0.58) return true;
+  if (goldenHornDistance < 0.44) return true;
+
+  return ISTANBUL_LAKES.some(({ center, rx, rz, rotation }) => {
+    const lake = projectGeo(center[0], center[1]);
+    const dx = point.x - lake.x;
+    const dz = point.z - lake.z;
+    const localX = dx * Math.cos(-rotation) - dz * Math.sin(-rotation);
+    const localZ = dx * Math.sin(-rotation) + dz * Math.cos(-rotation);
+    return (localX * localX) / (rx * rx) + (localZ * localZ) / (rz * rz) < 1;
+  });
+}
+
+function pointInLatLonPolygon(lat, lon, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const yi = polygon[i][0];
+    const xi = polygon[i][1];
+    const yj = polygon[j][0];
+    const xj = polygon[j][1];
+    const intersects = ((yi > lat) !== (yj > lat))
+      && (lon < ((xj - xi) * (lat - yi)) / (yj - yi || Number.EPSILON) + xi);
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function distanceToGeoPath(point, path) {
+  let min = Infinity;
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = projectGeo(path[i][0], path[i][1]);
+    const b = projectGeo(path[i + 1][0], path[i + 1][1]);
+    min = Math.min(min, distanceToSegment(point, a, b));
+  }
+  return min;
+}
+
+function distanceToSegment(point, a, b) {
+  const dx = b.x - a.x;
+  const dz = b.z - a.z;
+  const lengthSq = dx * dx + dz * dz;
+  if (!lengthSq) return Math.hypot(point.x - a.x, point.z - a.z);
+  const t = THREE.MathUtils.clamp(((point.x - a.x) * dx + (point.z - a.z) * dz) / lengthSq, 0, 1);
+  return Math.hypot(point.x - (a.x + dx * t), point.z - (a.z + dz * t));
 }
 
 function normalizeKey(value) {
@@ -1429,4 +1837,10 @@ function lerp(a, b, t) {
 
 function easeOutCubic(value) {
   return 1 - Math.pow(1 - value, 3);
+}
+
+function easeInOutCubic(value) {
+  return value < 0.5
+    ? 4 * value * value * value
+    : 1 - Math.pow(-2 * value + 2, 3) / 2;
 }
