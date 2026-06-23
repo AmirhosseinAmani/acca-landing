@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { MAIN_NAV, goBack } from '../lib/navigation';
 
-/** Shared cross-navigation for the three main content pages
+/** Shared cross-navigation for the main content pages
  *  (Blog · Universities · Programs). Hidden below `lg`. */
 export function MainNav({ active, isFa, darkMode }) {
   return (

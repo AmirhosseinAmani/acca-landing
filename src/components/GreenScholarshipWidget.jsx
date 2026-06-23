@@ -34,8 +34,8 @@ function useAnimatedNumber(target, duration = 700) {
       window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) {
-      setValue(to);
-      return undefined;
+      const raf = requestAnimationFrame(() => setValue(to));
+      return () => cancelAnimationFrame(raf);
     }
 
     let raf = 0;

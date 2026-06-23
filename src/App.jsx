@@ -1,5 +1,5 @@
 import { lazy, memo, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Award, BookOpen, Building2, Menu, Newspaper, UserRound, X } from 'lucide-react';
+import { Award, BookOpen, Building2, MapPin, Menu, Newspaper, UserRound, X } from 'lucide-react';
 import ConsultationModal from './components/ConsultationModal';
 import HeroSection from './components/sections/HeroSection';
 import UniversityMarqueeSection from './components/sections/UniversityMarqueeSection';
@@ -12,6 +12,7 @@ import { SEO_LANDING_BY_SLUG, SEO_LANDING_PAGES } from './data/seoLandingPages';
 const SeoLandingPage = lazy(() => import('./components/pages/SeoLandingPage'));
 const ProgramsSearchPage = lazy(() => import('./components/pages/ProgramsSearchPageV2'));
 const UniversitiesPage = lazy(() => import('./components/pages/UniversitiesPage'));
+const IstanbulUniversityMapPage = lazy(() => import('./components/pages/IstanbulUniversityMapPage'));
 const ScholarshipsPage = lazy(() => import('./components/pages/ScholarshipsPage'));
 const BlogPage = lazy(() => import('./components/pages/BlogPage'));
 const GlossaryPage = lazy(() => import('./components/pages/GlossaryPage'));
@@ -34,13 +35,14 @@ const SITE_CANONICAL_ORIGIN = 'https://www.accaco.com';
 const BRAND_NAME = 'ACCA EDU';
 const BRAND_TAGLINE = 'Study in Turkey & International Student Placement';
 const BRAND_TITLE = `${BRAND_NAME} — ${BRAND_TAGLINE}`;
-const INDEXABLE_PAGES = new Set(['programs', 'universities', 'scholarships', 'blog', 'glossary']);
+const INDEXABLE_PAGES = new Set(['programs', 'universities', 'istanbul-map', 'scholarships', 'blog', 'glossary']);
 const LANGUAGE_STORAGE_KEY = 'acca:language';
 const SUPPORTED_LANGUAGES = new Set(['fa', 'en']);
 const STATIC_ROUTE_ALIASES = {
   '/programs': { page: 'programs', canonicalPath: '/programs/' },
   '/study-in-turkey': { canonicalPath: '/study-in-turkey/' },
   '/universities': { page: 'universities', canonicalPath: '/universities/' },
+  '/istanbul-university-map': { page: 'istanbul-map', canonicalPath: '/istanbul-university-map/' },
   '/medical-universities-in-turkey': { page: 'programs', canonicalPath: '/medical-universities-in-turkey/' },
   '/residence-permit': { page: 'blog', post: 'student-residence-e-ikamet-2026', canonicalPath: '/residence-permit/' },
   '/accommodation': { page: 'blog', post: 'address-registration-nvi-turkey-student-warning', canonicalPath: '/accommodation/' },
@@ -226,6 +228,21 @@ function getRouteSeo({ page, params, isFa }) {
       canonicalUrl,
       shouldIndex: true,
       structuredData: buildItemListJsonLd(canonicalUrl),
+    };
+  }
+
+  if (page === 'istanbul-map') {
+    const canonicalUrl = `${SITE_CANONICAL_ORIGIN}/istanbul-university-map/`;
+    return {
+      title: isFa
+        ? `نقشه سه بعدی دانشگاه های استانبول | ${BRAND_TITLE}`
+        : `3D Istanbul University Map | ${BRAND_TITLE}`,
+      description: isFa
+        ? 'نقشه سه بعدی و تعاملی دانشگاه های استانبول در دیتابیس ACCA EDU؛ مشاهده موقعیت تقریبی دانشگاه ها در بخش اروپایی و آسیایی استانبول همراه با خلاصه پروفایل و لینک جزئیات.'
+        : 'Interactive 3D map of Istanbul universities in the ACCA EDU database, with approximate European and Asian side locations, quick summaries, and links to full university profiles.',
+      canonicalUrl,
+      shouldIndex: true,
+      structuredData: buildWebPageJsonLd('3D Istanbul University Map', canonicalUrl),
     };
   }
 
@@ -753,6 +770,7 @@ export default function ACCALandingPage() {
   // ── SEO: update <title> and meta description per page ─────────────────────
   useEffect(() => {
     const PAGE_TITLES = {
+      'istanbul-map': isFa ? `نقشه سه بعدی دانشگاه های استانبول | ${BRAND_TITLE}` : `3D Istanbul University Map | ${BRAND_TITLE}`,
       programs:     isFa ? `رشته‌ها و شهریه‌ها | ${BRAND_TITLE}` : `Programs & Tuition | ${BRAND_TITLE}`,
       universities: isFa ? `دانشگاه‌ها | ${BRAND_TITLE}`          : `Universities | ${BRAND_TITLE}`,
       scholarships: isFa ? `بورسیه‌ها | ${BRAND_TITLE}`            : `Scholarships | ${BRAND_TITLE}`,
@@ -761,6 +779,9 @@ export default function ACCALandingPage() {
       glossary:     isFa ? `فرهنگ‌نامه تحصیل در ترکیه، اقامت و زندگی دانشجویی | ${BRAND_TITLE}` : `Study in Turkey Glossary | ${BRAND_TITLE}`,
     };
     const PAGE_DESCS = {
+      'istanbul-map': isFa
+        ? 'نقشه سه بعدی تعاملی دانشگاه های استانبول در دیتابیس ACCA EDU با موقعیت تقریبی، خلاصه پروفایل و لینک جزئیات.'
+        : 'Interactive 3D map of Istanbul universities in the ACCA EDU database with approximate locations, quick profiles, and detail links.',
       programs:     isFa
         ? 'جستجو در بیش از ۱۶۰۰ رشته دانشگاهی در ترکیه همراه با شهریه، بورسیه و اطلاعات پذیرش.'
         : 'Search over 1,600 university programs in Turkey with tuition, scholarships and admission info.',
@@ -947,6 +968,27 @@ export default function ACCALandingPage() {
           onToggleDarkMode={() => setDarkMode(!darkMode)}
           onToggleLanguage={toggleLanguage}
         />
+        </Suspense>
+        <ConsultationModal
+          open={consultationOpen}
+          onClose={() => setConsultationOpen(false)}
+          darkMode={darkMode}
+          isFa={isFa}
+        />
+      </>
+    );
+  } else if (page === 'istanbul-map') {
+    pageContent = (
+      <>
+        <Suspense fallback={<PageLoadingScreen darkMode={darkMode} isFa={isFa} />}>
+          <IstanbulUniversityMapPage
+            darkMode={darkMode}
+            isFa={isFa}
+            ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+            onConsultationClick={() => setConsultationOpen(true)}
+            onToggleDarkMode={() => setDarkMode(!darkMode)}
+            onToggleLanguage={toggleLanguage}
+          />
         </Suspense>
         <ConsultationModal
           open={consultationOpen}
@@ -2264,6 +2306,18 @@ export default function ACCALandingPage() {
             <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
 
             <a
+              href="/istanbul-university-map/"
+              className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
+            >
+              <span className="inline-flex items-center gap-2">
+                <MapPin size={17} strokeWidth={2.4} />
+                {isFa ? 'نقشه 3D' : '3D Map'}
+              </span>
+            </a>
+
+            <div className={`w-px h-7 ${darkMode ? 'bg-white/20 shadow-[0_0_12px_rgba(255,255,255,0.18)]' : 'bg-black/10 shadow-[0_0_12px_rgba(0,0,0,0.08)]'}`} />
+
+            <a
               href="/programs/"
               className={`${darkMode ? 'text-white/80 hover:text-white' : 'text-black/70 hover:text-black'} font-bold transition-all duration-300`}
             >
@@ -2351,6 +2405,15 @@ export default function ACCALandingPage() {
               >
                 <span>{isFa ? 'مشاهده دانشگاه‌ها' : 'View Universities'}</span>
                 <Building2 size={19} />
+              </a>
+
+              <a
+                href="/istanbul-university-map/"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
+              >
+                <span>{isFa ? 'نقشه 3D' : '3D Map'}</span>
+                <MapPin size={19} />
               </a>
 
               <a

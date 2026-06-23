@@ -19,6 +19,7 @@ export const SITE_ORIGIN = 'https://www.accaco.com';
 export const CLEAN_PAGE_PATH = {
   programs: '/programs/',
   universities: '/universities/',
+  'istanbul-map': '/istanbul-university-map/',
   scholarships: '/scholarships/',
   blog: '/blog/',
   glossary: '/glossary/',
@@ -82,6 +83,7 @@ export function cleanCanonicalPath(page, params) {
     const faceted = get('profile') || get('university');
     return faceted ? null : '/universities/';
   }
+  if (page === 'istanbul-map') return '/istanbul-university-map/';
   return null;
 }
 
@@ -110,6 +112,9 @@ export function parseCleanPath(pathname = '/') {
   }
   if (head === 'scholarships' && !slug) {
     return { page: 'scholarships', canonicalPath: '/scholarships/' };
+  }
+  if (head === 'istanbul-university-map' && !slug) {
+    return { page: 'istanbul-map', canonicalPath: '/istanbul-university-map/' };
   }
   return null;
 }
