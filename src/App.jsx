@@ -7,7 +7,9 @@ import FloatingActions from './components/FloatingActions';
 import { buildUniversitySlug, istanbulUniversities } from './data/istanbulUniversities';
 import { getUniversityLogo } from './data/universityLogoMap';
 import { cleanCanonicalPath, parseCleanPath } from './lib/routes';
+import { SEO_LANDING_BY_SLUG, SEO_LANDING_PAGES } from './data/seoLandingPages';
 
+const SeoLandingPage = lazy(() => import('./components/pages/SeoLandingPage'));
 const ProgramsSearchPage = lazy(() => import('./components/pages/ProgramsSearchPageV2'));
 const UniversitiesPage = lazy(() => import('./components/pages/UniversitiesPage'));
 const ScholarshipsPage = lazy(() => import('./components/pages/ScholarshipsPage'));
@@ -99,6 +101,21 @@ const STATIC_ROUTE_META = {
     description: 'راهنمای درخواست حذف اطلاعات کاربران در ACCA EDU.',
   },
 };
+
+// Register the topical SEO landing pages (src/data/seoLandingPages.js) into the
+// routing + meta maps so each /slug/ resolves to its in-app page and head tags.
+// The same data drives the static prerender + sitemap in scripts/.
+SEO_LANDING_PAGES.forEach((seoPage) => {
+  STATIC_ROUTE_ALIASES[`/${seoPage.slug}`] = {
+    page: 'seo',
+    seoSlug: seoPage.slug,
+    canonicalPath: `/${seoPage.slug}/`,
+  };
+  STATIC_ROUTE_META[`/${seoPage.slug}/`] = {
+    title: seoPage.title,
+    description: seoPage.description,
+  };
+});
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 1024px) and (pointer: fine)';
 
@@ -1102,6 +1119,21 @@ export default function ACCALandingPage() {
           </p>
         </main>
       </div>
+    );
+  } else if (page === 'seo' && SEO_LANDING_BY_SLUG[params.get('seoSlug')]) {
+    pageContent = (
+      <>
+        <Suspense fallback={<PageLoadingScreen darkMode={darkMode} isFa={isFa} />}>
+          <SeoLandingPage
+            slug={params.get('seoSlug')}
+            data={SEO_LANDING_BY_SLUG[params.get('seoSlug')]}
+            darkMode={darkMode}
+            ACCA_LOGO_SRC={ACCA_LOGO_SRC}
+            onToggleDarkMode={() => setDarkMode(!darkMode)}
+          />
+        </Suspense>
+        {floatingActions}
+      </>
     );
   }
 

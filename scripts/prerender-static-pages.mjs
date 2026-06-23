@@ -4,6 +4,7 @@ import { getKnowledgeRouteSeo } from '../src/lib/knowledgeSeo.js';
 import { knowledgeBlogPosts } from '../src/data/knowledgeBlogPosts.js';
 import { glossaryTerms } from '../src/data/knowledgeGlossary.js';
 import { BLOG_CANONICAL_OVERRIDE, SITE_ORIGIN } from '../src/lib/routes.js';
+import { SEO_LANDING_BY_SLUG, SEO_LANDING_PAGES } from '../src/data/seoLandingPages.js';
 
 const DIST_DIR = path.resolve('dist');
 const INDEX_PATH = path.join(DIST_DIR, 'index.html');
@@ -174,6 +175,32 @@ function renderStaticFallback(route) {
     bodyHtml: `<ul style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:34px 0 0;padding:0;list-style:none;">${points}</ul>`,
     primaryHref: route.primaryHref,
     primaryLabel: route.primaryLabel,
+  });
+}
+
+/** Static shell for a topical SEO landing page (summary + points + body + related). */
+function renderSeoLandingFallback(page) {
+  const points = page.points
+    .map((point) => `<li style="background:#fff;border:1px solid rgba(7,26,61,0.08);border-radius:18px;padding:16px;font-weight:800;line-height:1.9;">${escapeHtml(point)}</li>`)
+    .join('');
+  const bodyParas = (page.body || [])
+    .map((paragraph) => `<p style="max-width:820px;margin:18px 0 0;color:#334155;font-size:1.02rem;line-height:2.05;font-weight:500;">${escapeHtml(paragraph)}</p>`)
+    .join('');
+  const related = (page.related || [])
+    .map((slug) => SEO_LANDING_BY_SLUG[slug])
+    .filter(Boolean)
+    .map((relatedPage) => `<li style="margin:6px 0;"><a href="/${relatedPage.slug}/" style="color:#008767;font-weight:800;text-decoration:none;">${escapeHtml(relatedPage.h1)}</a></li>`)
+    .join('');
+  const relatedBlock = related
+    ? `<div style="margin:34px 0 0;"><p style="font-weight:900;margin:0 0 8px;">صفحات مرتبط</p><ul style="margin:0;padding:0 18px;">${related}</ul></div>`
+    : '';
+  return renderShell({
+    eyebrow: page.eyebrow,
+    h1: page.h1,
+    leadHtml: `<p style="max-width:820px;margin:24px 0 0;color:#334155;font-size:1.05rem;line-height:2.05;font-weight:500;">${escapeHtml(page.summary)}</p>`,
+    bodyHtml: `<ul style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:34px 0 0;padding:0;list-style:none;">${points}</ul>${bodyParas}${relatedBlock}`,
+    primaryHref: page.primaryHref,
+    primaryLabel: page.primaryLabel,
   });
 }
 
@@ -360,6 +387,20 @@ await Promise.all(routes.map(async (route) => {
   addSitemap(pageUrl, { changefreq: route.changefreq || 'weekly', priority: route.priority ?? 0.8 });
 }));
 
+// Topical SEO landing pages (shared with the in-app router via seoLandingPages.js)
+await Promise.all(SEO_LANDING_PAGES.map(async (page) => {
+  const pageUrl = `${SITE_ORIGIN}/${page.slug}/`;
+  const withHead = applyHead(template, {
+    title: page.title,
+    description: page.description,
+    canonicalUrl: pageUrl,
+    keywords: page.keywords,
+    jsonLd: staticRouteJsonLd(page),
+  });
+  await writePage(page.slug, replaceRoot(withHead, renderSeoLandingFallback(page)));
+  addSitemap(pageUrl, { changefreq: 'monthly', priority: page.priority ?? 0.6 });
+}));
+
 // Blog list
 {
   const seo = getKnowledgeRouteSeo({ page: 'blog', params: new URLSearchParams(), isFa: true });
@@ -427,5 +468,5 @@ await Promise.all(glossaryTerms.map(async (term) => {
 // Sitemap (overwrites the copy Vite emitted from public/)
 await writeFile(path.join(DIST_DIR, 'sitemap.xml'), buildSitemap(), 'utf8');
 
-const totalPages = routes.length + 2 + knowledgeBlogPosts.length + glossaryTerms.length;
+const totalPages = routes.length + SEO_LANDING_PAGES.length + 2 + knowledgeBlogPosts.length + glossaryTerms.length;
 console.log(`Prerendered ${totalPages} static SEO pages + sitemap (${sitemapEntries.length} URLs).`);

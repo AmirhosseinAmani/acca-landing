@@ -11,6 +11,7 @@ import {
   COMPANY_WEBSITE_URL,
   COMPANY_WHATSAPP_URL,
 } from '../../constants/contact';
+import { SEO_LANDING_PAGES } from '../../data/seoLandingPages';
 
 export default function ContactSection({ darkMode, isFa, onConsultationClick }) {
   const cardClass = `${darkMode ? 'bg-white/5 border-white/10 text-white hover:bg-white/10' : 'bg-white/88 border-black/10 text-black shadow-[0_14px_44px_rgba(0,0,0,0.08)] hover:bg-white'} rounded-[28px] border p-6 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1`;
@@ -152,10 +153,31 @@ export default function ContactSection({ darkMode, isFa, onConsultationClick }) 
                 </a>
               </div>
 
+              {/* Specialized topic guides — compact internal links (SEO landing pages) */}
+              <nav
+                aria-label={isFa ? 'راهنماهای تخصصی' : 'Specialized guides'}
+                className={`${darkMode ? 'border-white/10' : 'border-black/10'} mt-10 border-t pt-6`}
+              >
+                <div className={`${darkMode ? 'text-white/40' : 'text-black/40'} mb-3 text-[11px] font-black uppercase tracking-[0.2em]`}>
+                  {isFa ? 'راهنماهای تخصصی' : 'Specialized guides'}
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                  {SEO_LANDING_PAGES.map((seoPage) => (
+                    <a
+                      key={seoPage.slug}
+                      href={`/${seoPage.slug}/`}
+                      className={`${darkMode ? 'text-white/55 hover:text-white/85' : 'text-black/55 hover:text-black/85'} text-xs font-bold underline-offset-4 transition hover:underline`}
+                    >
+                      {seoPage.linkLabel}
+                    </a>
+                  ))}
+                </div>
+              </nav>
+
               {/* Minimal legal footer links */}
               <nav
                 aria-label={isFa ? 'پیوندهای حقوقی' : 'Legal links'}
-                className={`${darkMode ? 'text-white/45' : 'text-black/45'} mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold`}
+                className={`${darkMode ? 'text-white/45' : 'text-black/45'} mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold`}
               >
                 <a href="/privacy/" className="underline-offset-4 transition hover:underline hover:opacity-90">
                   {isFa ? 'حریم خصوصی' : 'Privacy Policy'}
