@@ -382,6 +382,7 @@ export default function IstanbulUniversityMapPage({
   const [query, setQuery] = useState('');
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [selectedPlace, setSelectedPlace] = useState(null);
   const [sceneReady, setSceneReady] = useState(false);
   const [mapMode, setMapMode] = useState('loading');
   const [debugSnapshot, setDebugSnapshot] = useState(null);
@@ -477,8 +478,13 @@ export default function IstanbulUniversityMapPage({
             items: mapItems,
             selectedId: selectedIdRef.current,
             onPick: (id) => {
+              setSelectedPlace(null);
               setSelectedId(id);
               setProfileOpen(true);
+            },
+            onPlacePick: (place) => {
+              setSelectedPlace(place);
+              setProfileOpen(false);
             },
             onReady: () => {
               if (!active) return;
@@ -907,7 +913,41 @@ export default function IstanbulUniversityMapPage({
         </section>
 
         <aside className={`pointer-events-auto absolute bottom-3 ${isFa ? 'left-3' : 'right-3'} w-[min(430px,calc(100vw-24px))] sm:bottom-6 ${isFa ? 'sm:left-6' : 'sm:right-6'}`}>
-          {profileOpen ? (
+          {selectedPlace ? (
+            <div className={`${darkMode ? 'border-white/12 bg-[#061018]/82 text-white' : 'border-white/85 bg-white/86 text-[#071A3D]'} rounded-[22px] border px-4 py-3.5 shadow-[0_18px_58px_rgba(7,26,61,0.2)] backdrop-blur-2xl`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className={`${darkMode ? 'text-amber-200' : 'text-amber-700'} text-[10px] font-black uppercase tracking-[0.2em]`}>
+                    {selectedPlace.kind === 'office'
+                      ? (isFa ? 'دفتر مرکزی' : 'Headquarters')
+                      : selectedPlace.kind === 'airport'
+                        ? (isFa ? 'فرودگاه' : 'Airport')
+                        : (isFa ? 'بیمارستان دانشگاهی' : 'University Hospital')}
+                  </div>
+                  <div className="mt-1 truncate text-sm font-black">{selectedPlace.name}</div>
+                  {selectedPlace.district ? (
+                    <div className="mt-0.5 truncate text-[11px] font-bold opacity-65">{selectedPlace.district}</div>
+                  ) : null}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlace(null)}
+                  aria-label={isFa ? 'بستن' : 'Close'}
+                  className={`${darkMode ? 'bg-white/10 hover:bg-white/15' : 'bg-black/5 hover:bg-black/10'} grid h-8 w-8 shrink-0 place-items-center rounded-full text-lg font-black`}
+                >
+                  ×
+                </button>
+              </div>
+              {selectedPlace.href ? (
+                <a
+                  href={selectedPlace.href}
+                  className="mt-3 inline-flex h-9 w-full items-center justify-center rounded-full bg-[#071A3D] px-3 text-xs font-black text-white"
+                >
+                  {isFa ? 'اطلاعات بیشتر و تماس' : 'More info & contact'}
+                </a>
+              ) : null}
+            </div>
+          ) : profileOpen ? (
             <SelectedUniversityCard
               darkMode={darkMode}
               isFa={isFa}
@@ -1099,7 +1139,7 @@ function createMapItems() {
   });
 }
 
-function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId, onPick, onReady, onError, apiRef }) {
+function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId, onPick, onPlacePick, onReady, onError, apiRef }) {
   if (!supportsGeospatialWebGL(maplibregl)) {
     throw new Error('MapLibre WebGL is not supported');
   }
@@ -1189,8 +1229,8 @@ function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId,
     window.__accaMapFallbackReason = '';
     addGeospatialInfrastructure(map, darkMode);
     addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity });
-    addOfficeMarker({ maplibregl, map });
-    addLandmarkMarkers({ maplibregl, map });
+    addOfficeMarker({ maplibregl, map, onPlacePick });
+    addLandmarkMarkers({ maplibregl, map, onPlacePick });
     try { addThreeDLandmarks({ map, items }); } catch { /* 3D layer is additive */ }
     applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
@@ -1336,8 +1376,8 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, ma
     element.innerHTML = `
       <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 5px 12px rgba(7,26,61,0.4));">
         <span class="uni-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:4px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:9px;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
-        <span class="uni-core" style="display:grid;place-items:center;width:22px;height:22px;border-radius:7px 7px 7px 2px;transform:rotate(45deg);background:${fill};border:1.5px solid rgba(255,255,255,0.85);box-shadow:0 6px 14px rgba(7,26,61,0.4);transition:border-color .2s,box-shadow .2s;">
-          <span style="transform:rotate(-45deg);color:#fff;font-weight:900;font-size:8px;line-height:1;">${escapeHtml(getUniversityInitials(item.name))}</span>
+        <span class="uni-core" style="display:grid;place-items:center;width:27px;height:27px;border-radius:9px 9px 9px 3px;transform:rotate(45deg);background:${fill};border:2.5px solid #ffffff;box-shadow:0 0 0 1px rgba(7,26,61,0.25),0 7px 16px rgba(7,26,61,0.5);transition:border-color .2s,box-shadow .2s;">
+          <span style="transform:rotate(-45deg);color:#fff;font-weight:900;font-size:9px;line-height:1;">${escapeHtml(getUniversityInitials(item.name))}</span>
         </span>
       </span>
     `;
@@ -1505,11 +1545,12 @@ function addThreeDLandmarks({ map, items }) {
   });
 }
 
-function addLandmarkMarkers({ maplibregl, map }) {
+function addLandmarkMarkers({ maplibregl, map, onPlacePick }) {
   MAP_LANDMARKS.forEach(([type, name, lon, lat]) => {
     const isAirport = type === 'airport';
-    const element = document.createElement('div');
-    element.className = `acca-geo-landmark is-${type}`;
+    const element = document.createElement('button');
+    element.type = 'button';
+    element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
     element.setAttribute('aria-label', name);
     const accent = isAirport ? '#5d6b80' : '#b6444f';
     element.innerHTML = `
@@ -1518,29 +1559,37 @@ function addLandmarkMarkers({ maplibregl, map }) {
         <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:${accent};border:2px solid rgba(255,255,255,0.9);font-size:13px;line-height:1;">${isAirport ? '✈️' : '🏥'}</span>
       </span>
     `;
+    element.addEventListener('click', (event) => {
+      event.stopPropagation();
+      onPlacePick?.({ kind: type, name, district: isAirport ? 'Istanbul' : '', lon, lat });
+    });
     new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat([lon, lat])
       .addTo(map);
   });
 }
 
-function addOfficeMarker({ maplibregl, map }) {
+function addOfficeMarker({ maplibregl, map, onPlacePick }) {
   if (!Number.isFinite(OFFICE_LOCATION.lon) || !Number.isFinite(OFFICE_LOCATION.lat)) return;
 
-  const element = document.createElement('a');
-  element.href = '/?section=contact';
-  element.className = 'acca-geo-office';
+  // A button (not a link): clicking opens the in-map info panel instead of
+  // navigating away — the panel itself offers a button to the contact page.
+  const element = document.createElement('button');
+  element.type = 'button';
+  element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
   element.setAttribute('aria-label', `${OFFICE_LOCATION.labelEn} — ${OFFICE_LOCATION.district}`);
-  // Inline-styled so it renders as a distinct premium gold HQ tower regardless
-  // of stylesheet load order, and clearly different from the university beacons.
   element.innerHTML = `
-    <span style="display:flex;flex-direction:column;align-items:center;text-decoration:none;filter:drop-shadow(0 8px 18px rgba(7,26,61,0.45));">
+    <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 8px 18px rgba(7,26,61,0.45));">
       <span style="white-space:nowrap;margin-bottom:6px;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#D8B05B,#b9914a);color:#071A3D;font-weight:900;font-size:11px;letter-spacing:.02em;box-shadow:0 6px 16px rgba(7,26,61,0.30);">ACCA EDU</span>
       <span style="display:grid;place-items:center;width:34px;height:34px;border-radius:11px 11px 11px 3px;transform:rotate(45deg);background:linear-gradient(135deg,#0d2a52,#071A3D);border:2px solid #D8B05B;box-shadow:0 10px 24px rgba(7,26,61,0.45);">
         <span style="transform:rotate(-45deg);font-size:16px;line-height:1;">🏛️</span>
       </span>
     </span>
   `;
+  element.addEventListener('click', (event) => {
+    event.stopPropagation();
+    onPlacePick?.({ kind: 'office', name: OFFICE_LOCATION.labelEn, district: OFFICE_LOCATION.district, href: '/?section=contact', lon: OFFICE_LOCATION.lon, lat: OFFICE_LOCATION.lat });
+  });
 
   new maplibregl.Marker({ element, anchor: 'bottom' })
     .setLngLat([OFFICE_LOCATION.lon, OFFICE_LOCATION.lat])
