@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import 'maplibre-gl/dist/maplibre-gl.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import * as THREE from 'three';
 import {
   BookOpen,
@@ -35,9 +35,16 @@ const ISTANBUL_BOUNDS = {
 
 const env = import.meta.env || {};
 
+const MAPBOX_STYLE = 'mapbox://styles/mapbox/standard-satellite';
+
 const MAP_CONFIG = {
-  provider: env.VITE_MAP_PROVIDER || env.NEXT_PUBLIC_MAP_PROVIDER || 'esri-world-imagery',
-  mapboxToken: env.VITE_MAPBOX_TOKEN || env.NEXT_PUBLIC_MAPBOX_TOKEN || '',
+  provider: 'mapbox',
+  mapboxToken:
+    env.VITE_MAPBOX_ACCESS_TOKEN ||
+    env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ||
+    env.VITE_MAPBOX_TOKEN ||
+    env.NEXT_PUBLIC_MAPBOX_TOKEN ||
+    '',
   googleMapsApiKey: env.VITE_GOOGLE_MAPS_API_KEY || env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
   cesiumIonToken: env.VITE_CESIUM_ION_TOKEN || env.NEXT_PUBLIC_CESIUM_ION_TOKEN || '',
   center: [29.015, 41.025],
@@ -73,15 +80,24 @@ const MAP_CONFIG = {
 
 let mapLibreModulePromise;
 
+// Loads Mapbox GL JS v3 and sets the public access token from the environment.
+// (Variable kept named maplibregl across the file since the Marker / addLayer /
+// fill-extrusion / flyTo APIs are call-compatible with the MapLibre original.)
 function loadMapLibre() {
   if (!mapLibreModulePromise) {
-    mapLibreModulePromise = import('maplibre-gl').then((module) => module.default || module);
+    mapLibreModulePromise = import('mapbox-gl').then((module) => {
+      const mapboxgl = module.default || module;
+      if (MAP_CONFIG.mapboxToken) mapboxgl.accessToken = MAP_CONFIG.mapboxToken;
+      return mapboxgl;
+    });
   }
   return mapLibreModulePromise;
 }
 
 function supportsGeospatialWebGL(maplibregl) {
   if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+  // Mapbox GL v3 needs a public token; without one, fall back to the list/scene.
+  if (!MAP_CONFIG.mapboxToken) return false;
   if (typeof maplibregl?.supported === 'function') {
     return maplibregl.supported({ failIfMajorPerformanceCaveat: false });
   }
@@ -1213,7 +1229,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
 
   const map = new maplibregl.Map({
     container,
-    style: createGeospatialStyle(darkMode),
+    style: MAPBOX_STYLE,
     center: MAP_CONFIG.center,
     zoom: compactViewport ? 8.85 : MAP_CONFIG.initial.zoom,
     pitch: compactViewport ? 43 : MAP_CONFIG.initial.pitch,
@@ -1225,12 +1241,37 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     renderWorldCopies: false,
     attributionControl: true,
     cooperativeGestures: false,
+    antialias: true,
+  });
+
+  // Mapbox Standard Satellite — dusk cinematic preset, labels but no road/POI
+  // clutter (we add our own beacons). Set after style load so config applies.
+  map.on('style.load', () => {
+    try {
+      map.setConfigProperty('basemap', 'lightPreset', 'dusk');
+      map.setConfigProperty('basemap', 'showRoadLabels', false);
+      map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
+      map.setConfigProperty('basemap', 'showTransitLabels', false);
+      map.setConfigProperty('basemap', 'showPlaceLabels', true);
+    } catch { /* config props are best-effort across versions */ }
+    // Real elevation from Mapbox Terrain DEM (restrained exaggeration).
+    try {
+      if (!map.getSource('mapbox-dem')) {
+        map.addSource('mapbox-dem', {
+          type: 'raster-dem',
+          url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+          tileSize: 512,
+          maxzoom: 14,
+        });
+      }
+      map.setTerrain({ source: 'mapbox-dem', exaggeration: compactViewport ? 1.05 : 1.2 });
+    } catch { /* terrain is an enhancement */ }
   });
 
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true, showCompass: true }), 'bottom-right');
 
   const syncDebug = () => {
-    window.__accaMapEngine = 'maplibre';
+    window.__accaMapEngine = 'mapbox';
     window.__accaGeospatialMapReady = loaded;
     window.__accaGeospatialMarkerCount = items.length;
     window.__accaMapQualityTier = compactViewport ? 'medium-mobile' : 'high-desktop';
@@ -1474,23 +1515,21 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, ma
 }
 
 function applyCinematicAtmosphere(map, darkMode) {
-  // Native MapLibre sky + atmospheric haze (replaces the clouds that used to
-  // live only in the hidden Three.js fallback). The horizon/fog blend also
-  // dissolves the map edges into atmosphere, so the rectangular tile boundary
-  // is no longer visible when zoomed out. Guarded so it can never break the map.
-  if (typeof map.setSky !== 'function') return;
+  // Mapbox v3 atmospheric fog: adds horizon haze and depth, and dissolves the
+  // far edge of the streamed map into atmosphere so no technical boundary shows
+  // at the minimum zoom. (Mapbox Standard handles the sky itself.) Guarded.
+  if (typeof map.setFog !== 'function') return;
   try {
-    map.setSky({
-      'sky-color': darkMode ? '#0b1f3a' : '#b9d4e6',
-      'sky-horizon-blend': 0.62,
-      'horizon-color': darkMode ? '#21405f' : '#e9efec',
-      'horizon-fog-blend': 0.7,
-      'fog-color': darkMode ? '#0a1626' : '#f4f0e6',
-      'fog-ground-blend': 0.55,
-      'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 8, 0.9, 11, 0.55, 13, 0.25],
+    map.setFog({
+      range: [1.5, 10],
+      color: darkMode ? '#0d2138' : '#e9eef0',
+      'high-color': darkMode ? '#13314f' : '#bcd6e6',
+      'space-color': darkMode ? '#06101f' : '#9fbdd6',
+      'horizon-blend': 0.12,
+      'star-intensity': darkMode ? 0.08 : 0.0,
     });
   } catch {
-    /* sky styling is a visual enhancement only */
+    /* fog is a visual enhancement only */
   }
 }
 
