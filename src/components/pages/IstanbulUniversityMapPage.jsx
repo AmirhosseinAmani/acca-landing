@@ -1139,8 +1139,17 @@ function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId,
 
   const setSelectedMarker = (id) => {
     markersById.forEach((element, markerId) => {
-      element.classList.toggle('is-selected', markerId === id);
-      element.classList.toggle('is-muted', markerId !== id);
+      const selected = markerId === id;
+      const core = element.querySelector('.uni-core');
+      const label = element.querySelector('.uni-label');
+      if (core) {
+        core.style.borderColor = selected ? '#D8B05B' : 'rgba(255,255,255,0.85)';
+        core.style.boxShadow = selected
+          ? '0 0 0 4px rgba(216,176,91,0.4), 0 8px 18px rgba(7,26,61,0.45)'
+          : '0 8px 18px rgba(7,26,61,0.4)';
+      }
+      if (label) label.style.opacity = id && !selected ? '0.45' : '1';
+      element.style.zIndex = selected ? '6' : '1';
     });
   };
 
@@ -1310,13 +1319,23 @@ function addGeospatialInfrastructure(map, darkMode) {
 
 function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity }) {
   items.forEach((item) => {
+    const fill = item.side === 'asia' ? '#15406e' : '#0d2a52';
     const element = document.createElement('button');
     element.type = 'button';
-    element.className = `acca-geo-beacon ${item.side === 'asia' ? 'is-asia' : 'is-europe'}${item.id === selectedId ? ' is-selected' : ' is-muted'}`;
+    element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
     element.setAttribute('aria-label', `${item.name}, ${item.district}`);
+    // Same simple, inline-styled, viewport-anchored pin as the office/landmark
+    // markers (which are rock-solid static). No ground-ring / rotateX / pulse
+    // CSS — that screen-space ring was faked onto the ground and detached on
+    // pitch/rotate, which is what made the university markers look like they
+    // floated and drifted.
     element.innerHTML = `
-      <span class="acca-geo-label"><strong>${escapeHtml(item.name)}</strong><span>${escapeHtml(item.district)} · ${item.side}</span></span>
-      <span class="acca-geo-beacon__core">${escapeHtml(getUniversityInitials(item.name))}</span>
+      <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 14px rgba(7,26,61,0.4));">
+        <span class="uni-label" style="white-space:nowrap;margin-bottom:5px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,0.92);color:#071A3D;font-weight:800;font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
+        <span class="uni-core" style="display:grid;place-items:center;width:30px;height:30px;border-radius:9px 9px 9px 2px;transform:rotate(45deg);background:${fill};border:2px solid rgba(255,255,255,0.85);box-shadow:0 8px 18px rgba(7,26,61,0.4);transition:border-color .2s,box-shadow .2s;">
+          <span style="transform:rotate(-45deg);color:#fff;font-weight:900;font-size:10px;line-height:1;">${escapeHtml(getUniversityInitials(item.name))}</span>
+        </span>
+      </span>
     `;
     element.addEventListener('click', (event) => {
       event.stopPropagation();
@@ -1324,11 +1343,6 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, ma
       focusUniversity(item.id);
     });
 
-    // Viewport-aligned (the MapLibre default): the beacon always faces the
-    // camera and its bottom anchor stays pinned to the exact lng/lat through
-    // pan, zoom, pitch and rotate. The previous pitchAlignment:'map' laid the
-    // beacon flat on the ground plane, which made it slide off its point at
-    // high pitch — that was the "markers drift with camera movement" bug.
     new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat([item.lon, item.lat])
       .addTo(map);
@@ -1413,6 +1427,20 @@ function squareFootprint(lon, lat, meters) {
 // perfectly static and camera-locked (no drift), and tilt/rotate correctly with
 // the camera. Heights are exaggerated so the towers read at the city overview
 // zoom and grow into buildings as you zoom in.
+// A rectangular footprint (half-width / half-length in metres), for terminals
+// and runways that need a non-square shape.
+function rectFootprint(lon, lat, halfLonM, halfLatM) {
+  const dLat = halfLatM / 111320;
+  const dLon = halfLonM / (111320 * Math.cos((lat * Math.PI) / 180));
+  return [[
+    [lon - dLon, lat - dLat],
+    [lon + dLon, lat - dLat],
+    [lon + dLon, lat + dLat],
+    [lon - dLon, lat + dLat],
+    [lon - dLon, lat - dLat],
+  ]];
+}
+
 function addThreeDLandmarks({ map, items }) {
   const feature = (kind, color, height, base, coords) => ({
     type: 'Feature',
@@ -1421,21 +1449,37 @@ function addThreeDLandmarks({ map, items }) {
   });
   const features = [];
 
-  // Universities — primary campus (from the validated coordinates).
+  // A tapered tower: a stack of shrinking, rising tiers so it reads as a real
+  // building/tower silhouette rather than a single flat cube.
+  const pushTower = (lon, lat, kind, color, baseSize, totalHeight, tiers) => {
+    const step = totalHeight / tiers;
+    for (let i = 0; i < tiers; i++) {
+      features.push(feature(kind, color, step * (i + 1), step * i, squareFootprint(lon, lat, baseSize * (1 - i * 0.2))));
+    }
+  };
+
+  // Universities — primary campus: a two-tier navy building.
   items.forEach((item) => {
-    features.push(feature('university', '#11315f', 1500, 0, squareFootprint(item.lon, item.lat, 150)));
+    pushTower(item.lon, item.lat, 'university', '#12345f', 165, 1400, 2);
   });
-  // Universities — additional campuses.
+  // Universities — additional campuses: a slightly shorter two-tier building.
   EXTRA_CAMPUSES.forEach(([, lat, lon]) => {
-    features.push(feature('campus', '#1c4576', 1050, 0, squareFootprint(lon, lat, 130)));
+    pushTower(lon, lat, 'campus', '#1c4576', 140, 1050, 2);
   });
-  // Landmarks.
-  MAP_LANDMARKS.forEach(([type, , lon, lat]) => {
-    if (type === 'airport') features.push(feature('airport', '#5d6b80', 320, 0, squareFootprint(lon, lat, 520)));
-    else features.push(feature('hospital', '#b6444f', 1250, 0, squareFootprint(lon, lat, 170)));
+  // Hospitals — a three-tier red building so it stands out from universities.
+  MAP_LANDMARKS.filter(([type]) => type === 'hospital').forEach(([, , lon, lat]) => {
+    pushTower(lon, lat, 'hospital', '#b6444f', 170, 1250, 3);
   });
-  // Office — the tallest, gold tower at the real HQ.
-  features.push(feature('office', '#D8B05B', 3200, 0, squareFootprint(OFFICE_LOCATION.lon, OFFICE_LOCATION.lat, 110)));
+  // Airports — a composite that actually reads as an airport: a wide low
+  // terminal, a slim tall control tower, and two long thin runway strips.
+  MAP_LANDMARKS.filter(([type]) => type === 'airport').forEach(([, , lon, lat]) => {
+    features.push(feature('airport-terminal', '#6b788c', 300, 0, rectFootprint(lon, lat, 560, 300)));
+    features.push(feature('airport-tower', '#9aa6b8', 1000, 0, squareFootprint(lon + 0.006, lat + 0.0015, 70)));
+    features.push(feature('runway', '#39424f', 60, 0, rectFootprint(lon, lat - 0.0135, 950, 55)));
+    features.push(feature('runway', '#39424f', 60, 0, rectFootprint(lon + 0.004, lat + 0.0135, 950, 55)));
+  });
+  // Office — the tallest, gold, four-tier tower at the real HQ.
+  pushTower(OFFICE_LOCATION.lon, OFFICE_LOCATION.lat, 'office', '#D8B05B', 130, 3400, 4);
 
   map.addSource('acca-3d-landmarks', { type: 'geojson', data: { type: 'FeatureCollection', features } });
   map.addLayer({
