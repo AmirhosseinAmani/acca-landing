@@ -253,43 +253,46 @@ const ISTANBUL_INFRASTRUCTURE = {
 };
 
 const GEO_POINTS = [
-  ['Istanbul Galata University', 41.029, 28.974, 'Beyoglu', 'europe'],
-  ['Bezmialem Vakif University', 41.017, 28.941, 'Fatih', 'europe'],
-  ['Fatih Sultan Mehmet Vakif University', 41.053, 28.944, 'Beyoglu', 'europe'],
-  ['Dogus University', 41.014, 29.133, 'Umraniye', 'asia'],
-  ['Istanbul Ticaret University', 41.056, 28.946, 'Sutluce', 'europe'],
-  ['Koc University', 41.205, 29.074, 'Sariyer', 'europe'],
-  ['Ibn Haldun University', 41.095, 28.786, 'Basaksehir', 'europe'],
-  ['Sabanci University', 40.891, 29.377, 'Tuzla', 'asia'],
-  ['Kadir Has University', 41.025, 28.958, 'Cibali', 'europe'],
-  ['Istanbul Esenyurt University', 41.034, 28.675, 'Esenyurt', 'europe'],
-  ['Fenerbahce University', 40.993, 29.125, 'Atasehir', 'asia'],
-  ['Istanbul Gedik University', 40.898, 29.235, 'Kartal / Pendik', 'asia'],
-  ['Istanbul Topkapi University', 40.994, 28.917, 'Zeytinburnu', 'europe'],
-  ['Yeditepe University', 40.972, 29.152, 'Atasehir', 'asia'],
-  ['Uskudar University', 41.023, 29.043, 'Uskudar', 'asia'],
-  ['Ozyegin University', 41.032, 29.255, 'Cekmekoy', 'asia'],
-  ['Okan University', 40.873, 29.323, 'Tuzla', 'asia'],
-  ['Istanbul Nisantasi University', 41.111, 29.017, 'Maslak', 'europe'],
-  ['Maltepe University', 40.958, 29.19, 'Maltepe', 'asia'],
-  ['Istinye University', 41.112, 28.988, 'Vadi Istanbul', 'europe'],
-  ['Istanbul Yeni Yuzyil University', 41.018, 28.913, 'Zeytinburnu', 'europe'],
-  ['Istanbul Sabahattin Zaim University', 41.034, 28.787, 'Halkali', 'europe'],
-  ['Istanbul Medipol University', 41.094, 29.094, 'Kavacik', 'asia'],
-  ['Istanbul Kultur University', 40.995, 28.84, 'Bakirkoy', 'europe'],
-  ['Istanbul Kent University', 41.034, 28.982, 'Cihangir', 'europe'],
-  ['Istanbul Gelisim University', 41.013, 28.724, 'Avcilar', 'europe'],
-  ['Istanbul Bilgi University', 41.067, 28.946, 'Eyupsultan', 'europe'],
-  ['Istanbul Aydin University', 40.995, 28.797, 'Kucukcekmece', 'europe'],
-  ['Istanbul Atlas University', 41.085, 28.978, 'Kagithane', 'europe'],
-  ['Istanbul Arel University', 41.053, 28.568, 'Tepekent', 'europe'],
-  ['Isik University', 41.176, 29.613, 'Sile', 'asia'],
-  ['Halic University', 41.073, 28.948, 'Eyupsultan', 'europe'],
-  ['Biruni University', 41.019, 28.912, 'Zeytinburnu', 'europe'],
-  ['Beykoz University', 41.091, 29.094, 'Beykoz', 'asia'],
-  ['Beykent University', 41.02, 28.593, 'Buyukcekmece', 'europe'],
-  ['Bahcesehir University', 41.043, 29.009, 'Besiktas', 'europe'],
-  ['Altinbas University', 41.055, 28.824, 'Bagcilar', 'europe'],
+  // Primary campus of each university, geocoded to real on-land positions in the
+  // correct Istanbul district. [name, lat, lon, district, side]. Corrected so no
+  // beacon lands in the Bosphorus, the Golden Horn, Büyükçekmece lake, or the sea.
+  ['Istanbul Galata University', 41.0305, 28.9745, 'Beyoglu', 'europe'],
+  ['Bezmialem Vakif University', 41.0196, 28.9300, 'Fatih', 'europe'],
+  ['Fatih Sultan Mehmet Vakif University', 41.0462, 28.9462, 'Beyoglu', 'europe'],
+  ['Dogus University', 41.0520, 29.0570, 'Uskudar', 'asia'],
+  ['Istanbul Ticaret University', 41.0488, 28.9438, 'Sutluce', 'europe'],
+  ['Koc University', 41.2055, 29.0790, 'Sariyer', 'europe'],
+  ['Ibn Haldun University', 41.0920, 28.8020, 'Basaksehir', 'europe'],
+  ['Sabanci University', 40.8915, 29.3790, 'Tuzla', 'asia'],
+  ['Kadir Has University', 41.0263, 28.9510, 'Cibali', 'europe'],
+  ['Istanbul Esenyurt University', 41.0250, 28.6680, 'Esenyurt', 'europe'],
+  ['Fenerbahce University', 40.9925, 29.1280, 'Atasehir', 'asia'],
+  ['Istanbul Gedik University', 40.8880, 29.1850, 'Kartal', 'asia'],
+  ['Istanbul Topkapi University', 40.9930, 28.9120, 'Zeytinburnu', 'europe'],
+  ['Yeditepe University', 40.9575, 29.1510, 'Atasehir', 'asia'],
+  ['Uskudar University', 41.0230, 29.0420, 'Uskudar', 'asia'],
+  ['Ozyegin University', 41.0260, 29.2390, 'Cekmekoy', 'asia'],
+  ['Okan University', 40.8790, 29.3260, 'Tuzla', 'asia'],
+  ['Istanbul Nisantasi University', 41.1090, 29.0190, 'Maslak', 'europe'],
+  ['Maltepe University', 40.9230, 29.1340, 'Maltepe', 'asia'],
+  ['Istinye University', 41.1090, 29.0080, 'Vadi Istanbul', 'europe'],
+  ['Istanbul Yeni Yuzyil University', 41.0130, 28.9260, 'Zeytinburnu', 'europe'],
+  ['Istanbul Sabahattin Zaim University', 41.0330, 28.7780, 'Halkali', 'europe'],
+  ['Istanbul Medipol University', 41.1010, 29.0930, 'Kavacik', 'asia'],
+  ['Istanbul Kultur University', 40.9875, 28.8555, 'Bakirkoy', 'europe'],
+  ['Istanbul Kent University', 41.0325, 28.9830, 'Cihangir', 'europe'],
+  ['Istanbul Gelisim University', 40.9990, 28.7180, 'Avcilar', 'europe'],
+  ['Istanbul Bilgi University', 41.0570, 28.9460, 'Eyupsultan', 'europe'],
+  ['Istanbul Aydin University', 40.9940, 28.7960, 'Kucukcekmece', 'europe'],
+  ['Istanbul Atlas University', 41.0850, 28.9690, 'Kagithane', 'europe'],
+  ['Istanbul Arel University', 41.0340, 28.5930, 'Tepekent', 'europe'],
+  ['Isik University', 41.1755, 29.6105, 'Sile', 'asia'],
+  ['Halic University', 41.0580, 28.9450, 'Eyupsultan', 'europe'],
+  ['Biruni University', 41.0120, 28.9180, 'Zeytinburnu', 'europe'],
+  ['Beykoz University', 41.1058, 29.0878, 'Beykoz', 'asia'],
+  ['Beykent University', 41.0010, 28.6390, 'Buyukcekmece', 'europe'],
+  ['Bahcesehir University', 41.0420, 29.0065, 'Besiktas', 'europe'],
+  ['Altinbas University', 41.0640, 28.8270, 'Bagcilar', 'europe'],
 ].reduce((map, [name, lat, lon, district, side]) => {
   map.set(normalizeKey(name), { lat, lon, district, side });
   return map;
@@ -1270,40 +1273,15 @@ function createGeospatialStyle(darkMode) {
 }
 
 function addGeospatialInfrastructure(map, darkMode) {
+  // The Esri satellite basemap already shows the real road network, so the
+  // hand-drawn highway corridors (O-7 / E80 / D100) and the translucent airport
+  // fills were redundant overlays that did not align with the imagery. They are
+  // intentionally NOT rendered. Only the Bosphorus bridges are kept as a subtle
+  // gold accent, since they read as a deliberate landmark highlight rather than
+  // a mislabeled road. (Full real-vector infrastructure is a later phase.)
   const infrastructure = createInfrastructureFeatureCollections();
-  map.addSource('acca-roads', { type: 'geojson', data: infrastructure.roads });
   map.addSource('acca-bridges', { type: 'geojson', data: infrastructure.bridges });
-  map.addSource('acca-airports', { type: 'geojson', data: infrastructure.airports });
 
-  map.addLayer({
-    id: 'acca-airport-fill',
-    type: 'fill',
-    source: 'acca-airports',
-    paint: {
-      'fill-color': darkMode ? 'rgba(216,176,91,0.25)' : 'rgba(7,26,61,0.16)',
-      'fill-outline-color': darkMode ? 'rgba(255,255,255,0.48)' : 'rgba(7,26,61,0.42)',
-    },
-  });
-  map.addLayer({
-    id: 'acca-road-glow',
-    type: 'line',
-    source: 'acca-roads',
-    paint: {
-      'line-color': darkMode ? 'rgba(255,255,255,0.44)' : 'rgba(255,255,255,0.66)',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.2, 12, 4.6],
-      'line-blur': 1.4,
-    },
-  });
-  map.addLayer({
-    id: 'acca-road-core',
-    type: 'line',
-    source: 'acca-roads',
-    paint: {
-      'line-color': ['match', ['get', 'kind'], 'highway', '#D8B05B', '#f4f0e6'],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 0.7, 12, 2.4],
-      'line-opacity': darkMode ? 0.78 : 0.68,
-    },
-  });
   map.addLayer({
     id: 'acca-bridge-core',
     type: 'line',
