@@ -1179,6 +1179,8 @@ function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId,
     addGeospatialInfrastructure(map, darkMode);
     addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity });
     addOfficeMarker({ maplibregl, map });
+    addLandmarkMarkers({ maplibregl, map });
+    try { addThreeDLandmarks({ map, items }); } catch { /* 3D layer is additive */ }
     applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
     syncDebug();
@@ -1354,6 +1356,119 @@ function applyCinematicAtmosphere(map, darkMode) {
   } catch {
     /* sky styling is a visual enhancement only */
   }
+}
+
+// Additional (secondary/third) campuses, geocoded on-land in their real
+// districts, so multi-campus universities show every site — not just one.
+const EXTRA_CAMPUSES = [
+  ['Koc University', 41.1850, 29.0400, 'West Campus · Zekeriyaköy'],
+  ['Dogus University', 41.0050, 29.1730, 'Dudullu · Ümraniye'],
+  ['Istanbul Gedik University', 40.8780, 29.2530, 'Pendik'],
+  ['Istanbul Gedik University', 41.0530, 28.9950, 'Nişantaşı · Şişli'],
+  ['Istanbul Topkapi University', 41.0050, 28.6600, 'Bahçeşehir · Esenyurt'],
+  ['Istanbul Topkapi University', 41.0220, 29.0400, 'Altunizade · Üsküdar'],
+  ['Okan University', 40.9930, 29.0360, 'Kadıköy · Hasanpaşa'],
+  ['Okan University', 41.0660, 28.9960, 'Mecidiyeköy · Şişli'],
+  ['Istanbul Nisantasi University', 41.0850, 28.9720, 'Kağıthane'],
+  ['Istinye University', 41.0150, 28.9180, 'Topkapı · Zeytinburnu'],
+  ['Istanbul Medipol University', 41.0250, 28.9540, 'Haliç · Cibali'],
+  ['Istanbul Kultur University', 40.9920, 28.8720, 'İncirli · Bakırköy'],
+  ['Istanbul Kent University', 41.0860, 28.9750, 'Kâğıthane'],
+  ['Uskudar University', 41.0260, 29.0130, 'Çarşı · Üsküdar'],
+  ['Beykoz University', 41.1080, 29.0780, 'Çubuklu'],
+  ['Beykent University', 41.0330, 28.9830, 'Taksim · Beyoğlu'],
+  ['Beykent University', 41.1170, 28.7250, 'Hadımköy · Esenyurt'],
+  ['Bahcesehir University', 40.9780, 29.0620, 'Göztepe · Kadıköy'],
+  ['Altinbas University', 40.9920, 28.8720, 'Bakırköy · İncirli'],
+  ['Istanbul Arel University', 41.0130, 28.9270, 'Cevizlibağ · Zeytinburnu'],
+  ['Isik University', 41.1080, 29.0190, 'Maslak · Levent'],
+  ['Istanbul Yeni Yuzyil University', 41.0450, 28.9480, 'Dentistry · Sütlüce'],
+];
+
+// Key landmarks that help a first-time student orient: the two airports and the
+// main university teaching hospitals. [type, name, lon, lat].
+const MAP_LANDMARKS = [
+  ['airport', 'Istanbul Airport (IST)', 28.7280, 41.2620],
+  ['airport', 'Sabiha Gökçen Airport (SAW)', 29.3092, 40.8986],
+  ['hospital', 'Acıbadem Maslak Hospital', 29.0180, 41.1080],
+  ['hospital', 'Medipol Mega University Hospital', 28.8350, 41.0450],
+  ['hospital', 'Memorial Şişli Hospital', 28.9870, 41.0630],
+  ['hospital', 'Liv Hospital Ulus', 29.0200, 41.0600],
+];
+
+// A small square footprint (metres) around a point, for fill-extrusion volumes.
+function squareFootprint(lon, lat, meters) {
+  const dLat = meters / 111320;
+  const dLon = meters / (111320 * Math.cos((lat * Math.PI) / 180));
+  return [[
+    [lon - dLon, lat - dLat],
+    [lon + dLon, lat - dLat],
+    [lon + dLon, lat + dLat],
+    [lon - dLon, lat + dLat],
+    [lon - dLon, lat - dLat],
+  ]];
+}
+
+// Native MapLibre 3D: extruded volumes are part of the map geometry, so they are
+// perfectly static and camera-locked (no drift), and tilt/rotate correctly with
+// the camera. Heights are exaggerated so the towers read at the city overview
+// zoom and grow into buildings as you zoom in.
+function addThreeDLandmarks({ map, items }) {
+  const feature = (kind, color, height, base, coords) => ({
+    type: 'Feature',
+    properties: { kind, color, height, base },
+    geometry: { type: 'Polygon', coordinates: coords },
+  });
+  const features = [];
+
+  // Universities — primary campus (from the validated coordinates).
+  items.forEach((item) => {
+    features.push(feature('university', '#11315f', 1500, 0, squareFootprint(item.lon, item.lat, 150)));
+  });
+  // Universities — additional campuses.
+  EXTRA_CAMPUSES.forEach(([, lat, lon]) => {
+    features.push(feature('campus', '#1c4576', 1050, 0, squareFootprint(lon, lat, 130)));
+  });
+  // Landmarks.
+  MAP_LANDMARKS.forEach(([type, , lon, lat]) => {
+    if (type === 'airport') features.push(feature('airport', '#5d6b80', 320, 0, squareFootprint(lon, lat, 520)));
+    else features.push(feature('hospital', '#b6444f', 1250, 0, squareFootprint(lon, lat, 170)));
+  });
+  // Office — the tallest, gold tower at the real HQ.
+  features.push(feature('office', '#D8B05B', 3200, 0, squareFootprint(OFFICE_LOCATION.lon, OFFICE_LOCATION.lat, 110)));
+
+  map.addSource('acca-3d-landmarks', { type: 'geojson', data: { type: 'FeatureCollection', features } });
+  map.addLayer({
+    id: 'acca-3d-landmarks',
+    type: 'fill-extrusion',
+    source: 'acca-3d-landmarks',
+    paint: {
+      'fill-extrusion-color': ['get', 'color'],
+      'fill-extrusion-height': ['get', 'height'],
+      'fill-extrusion-base': ['get', 'base'],
+      'fill-extrusion-opacity': 0.9,
+      'fill-extrusion-vertical-gradient': true,
+    },
+  });
+}
+
+function addLandmarkMarkers({ maplibregl, map }) {
+  MAP_LANDMARKS.forEach(([type, name, lon, lat]) => {
+    const isAirport = type === 'airport';
+    const element = document.createElement('div');
+    element.className = `acca-geo-landmark is-${type}`;
+    element.setAttribute('aria-label', name);
+    const accent = isAirport ? '#5d6b80' : '#b6444f';
+    element.innerHTML = `
+      <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 14px rgba(7,26,61,0.40));">
+        <span style="white-space:nowrap;margin-bottom:5px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,0.92);color:#071A3D;font-weight:800;font-size:10px;">${escapeHtml(name)}</span>
+        <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:${accent};border:2px solid rgba(255,255,255,0.9);font-size:13px;line-height:1;">${isAirport ? '✈️' : '🏥'}</span>
+      </span>
+    `;
+    new maplibregl.Marker({ element, anchor: 'bottom' })
+      .setLngLat([lon, lat])
+      .addTo(map);
+  });
 }
 
 function addOfficeMarker({ maplibregl, map }) {
