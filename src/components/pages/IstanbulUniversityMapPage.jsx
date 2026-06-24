@@ -397,6 +397,8 @@ export default function IstanbulUniversityMapPage({
     if (typeof window === 'undefined') return false;
     return new URLSearchParams(window.location.search).get('editMap') === '1';
   }, []);
+  const [editing, setEditing] = useState(false);
+  useEffect(() => { if (editMode) setEditing(true); }, [editMode]);
   const copyEditedCoordinates = () => {
     const data = (typeof window !== 'undefined' && window.__accaEditedCoords) || {};
     const text = JSON.stringify(data, null, 2);
@@ -489,7 +491,7 @@ export default function IstanbulUniversityMapPage({
             maplibregl,
             container,
             darkMode,
-            editable: editMode,
+            editable: editing,
             items: mapItems,
             selectedId: selectedIdRef.current,
             onPick: (id) => {
@@ -521,7 +523,7 @@ export default function IstanbulUniversityMapPage({
       fallbackCleanup?.();
       geospatialApiRef.current = null;
     };
-  }, [darkMode, mapItems, validationReport]);
+  }, [darkMode, mapItems, validationReport, editing]);
 
   useEffect(() => {
     if (!debugMap) return undefined;
@@ -927,65 +929,87 @@ export default function IstanbulUniversityMapPage({
           )}
         </section>
 
-        {editMode ? (
-          <div className="pointer-events-auto fixed left-1/2 top-[88px] z-40 flex -translate-x-1/2 items-center gap-2 rounded-full border-2 border-[#D8B05B] bg-[#071A3D] px-3 py-2 text-xs font-black text-white shadow-[0_18px_50px_rgba(7,26,61,0.4)]">
-            <span>✏️ {isFa ? 'حالت ویرایش — نشانگرها را جابه‌جا کن' : 'Edit mode — drag the pins'}</span>
+        <div className="pointer-events-auto fixed left-1/2 top-[84px] z-40 flex -translate-x-1/2 items-center gap-2">
+          {editing ? (
+            <div className="flex items-center gap-2 rounded-full border-2 border-[#D8B05B] bg-[#071A3D] px-3 py-2 text-xs font-black text-white shadow-[0_18px_50px_rgba(7,26,61,0.4)]">
+              <span>✏️ {isFa ? 'نشانگرها را به محل دقیق بکشید' : 'Drag pins to the exact spot'}</span>
+              <button
+                type="button"
+                onClick={copyEditedCoordinates}
+                className="rounded-full bg-[#D8B05B] px-3 py-1 font-black text-[#071A3D]"
+              >
+                {isFa ? 'کپی مختصات' : 'Copy coords'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="rounded-full bg-white/15 px-3 py-1 font-black hover:bg-white/25"
+              >
+                {isFa ? 'پایان' : 'Done'}
+              </button>
+            </div>
+          ) : (
             <button
               type="button"
-              onClick={copyEditedCoordinates}
-              className="rounded-full bg-[#D8B05B] px-3 py-1 font-black text-[#071A3D]"
+              onClick={() => setEditing(true)}
+              className={`${darkMode ? 'border-white/15 bg-[#071A3D]/85 text-white' : 'border-[#071A3D]/15 bg-white/85 text-[#071A3D]'} flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-black shadow-[0_14px_40px_rgba(7,26,61,0.18)] backdrop-blur-xl`}
             >
-              {isFa ? 'کپی مختصات' : 'Copy coords'}
+              ✏️ {isFa ? 'ویرایش موقعیت‌ها' : 'Edit positions'}
             </button>
-          </div>
-        ) : null}
+          )}
+        </div>
 
         <aside className={`pointer-events-auto absolute bottom-3 ${isFa ? 'left-3' : 'right-3'} w-[min(430px,calc(100vw-24px))] sm:bottom-6 ${isFa ? 'sm:left-6' : 'sm:right-6'}`}>
-          {selectedPlace ? (
-            <div className={`${darkMode ? 'border-white/12 bg-[#061018]/82 text-white' : 'border-white/85 bg-white/86 text-[#071A3D]'} rounded-[22px] border px-4 py-3.5 shadow-[0_18px_58px_rgba(7,26,61,0.2)] backdrop-blur-2xl`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className={`${darkMode ? 'text-amber-200' : 'text-amber-700'} text-[10px] font-black uppercase tracking-[0.2em]`}>
-                    {selectedPlace.kind === 'office'
-                      ? (isFa ? 'دفتر مرکزی' : 'Headquarters')
-                      : selectedPlace.kind === 'airport'
-                        ? (isFa ? 'فرودگاه' : 'Airport')
-                        : (isFa ? 'بیمارستان دانشگاهی' : 'University Hospital')}
-                  </div>
-                  <div className="mt-1 truncate text-sm font-black">{selectedPlace.name}</div>
-                  {selectedPlace.district ? (
-                    <div className="mt-0.5 truncate text-[11px] font-bold opacity-65">{selectedPlace.district}</div>
-                  ) : null}
-                </div>
+          {selectedPlace ? (() => {
+            const meta = PLACE_KIND_META[selectedPlace.kind] || { icon: '📍', color: '#071A3D', fa: 'مکان', en: 'Place' };
+            return (
+            <div className={`${darkMode ? 'border-white/12 bg-[#061018]/86 text-white' : 'border-white/85 bg-white/90 text-[#071A3D]'} overflow-hidden rounded-[22px] border shadow-[0_18px_58px_rgba(7,26,61,0.2)] backdrop-blur-2xl`}>
+              {/* Quick-profile header — real photo if provided, else a category tile */}
+              <div className="relative grid h-20 place-items-center" style={{ background: `linear-gradient(135deg, ${meta.color}, #071A3D)` }}>
+                {selectedPlace.photo ? (
+                  <img src={selectedPlace.photo} alt={selectedPlace.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                ) : (
+                  <span className="text-4xl drop-shadow">{meta.icon}</span>
+                )}
                 <button
                   type="button"
                   onClick={() => setSelectedPlace(null)}
                   aria-label={isFa ? 'بستن' : 'Close'}
-                  className={`${darkMode ? 'bg-white/10 hover:bg-white/15' : 'bg-black/5 hover:bg-black/10'} grid h-8 w-8 shrink-0 place-items-center rounded-full text-lg font-black`}
+                  className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/35 text-lg font-black text-white backdrop-blur hover:bg-black/55"
                 >
                   ×
                 </button>
               </div>
-              <div className="mt-3 flex gap-2">
-                <a
-                  href={`https://www.google.com/maps/search/?api=1&query=${selectedPlace.lat},${selectedPlace.lon}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#071A3D] px-3 text-xs font-black text-white"
-                >
-                  📍 {isFa ? 'باز کردن در نقشه' : 'Open in Maps'}
-                </a>
-                {selectedPlace.href ? (
-                  <a
-                    href={selectedPlace.href}
-                    className={`${darkMode ? 'border-white/15 bg-white/8 text-white' : 'border-black/10 bg-white/70 text-[#071A3D]'} inline-flex h-9 flex-1 items-center justify-center rounded-full border px-3 text-xs font-black`}
-                  >
-                    {isFa ? 'اطلاعات بیشتر' : 'More info'}
-                  </a>
+              <div className="px-4 py-3.5">
+                <div className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: meta.color }}>
+                  {isFa ? meta.fa : meta.en}
+                </div>
+                <div className="mt-1 text-sm font-black leading-snug">{selectedPlace.name}</div>
+                {selectedPlace.district ? (
+                  <div className="mt-0.5 truncate text-[11px] font-bold opacity-65">{selectedPlace.district}</div>
                 ) : null}
+                <div className="mt-3 flex gap-2">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${selectedPlace.lat},${selectedPlace.lon}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full bg-[#071A3D] px-3 text-xs font-black text-white"
+                  >
+                    📍 {isFa ? 'باز کردن در نقشه' : 'Open in Maps'}
+                  </a>
+                  {selectedPlace.href ? (
+                    <a
+                      href={selectedPlace.href}
+                      className={`${darkMode ? 'border-white/15 bg-white/8 text-white' : 'border-black/10 bg-white/70 text-[#071A3D]'} inline-flex h-9 flex-1 items-center justify-center rounded-full border px-3 text-xs font-black`}
+                    >
+                      {isFa ? 'اطلاعات بیشتر' : 'More info'}
+                    </a>
+                  ) : null}
+                </div>
               </div>
             </div>
-          ) : profileOpen ? (
+            );
+          })() : profileOpen ? (
             <SelectedUniversityCard
               darkMode={darkMode}
               isFa={isFa}
@@ -1269,6 +1293,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity, editable });
     addOfficeMarker({ maplibregl, map, onPlacePick, editable });
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
+    addPlaceMarkers({ maplibregl, map, onPlacePick, editable });
     try { addThreeDLandmarks({ map, items }); } catch { /* 3D layer is additive */ }
     applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
@@ -1507,6 +1532,59 @@ const MAP_LANDMARKS = [
   ['hospital', 'Liv Hospital Ulus', 29.0200, 41.0600],
 ];
 
+// Student-relevant categories. Icon/colour per category. Used by markers,
+// 3D volumes and the info panel.
+const PLACE_CATEGORIES = {
+  museum:      { icon: '🏺', color: '#8a5cc4', fa: 'موزه', en: 'Museum' },
+  consulate:   { icon: '🚩', color: '#2a8c8c', fa: 'کنسولگری', en: 'Consulate' },
+  immigration: { icon: '🛂', color: '#2f6b4f', fa: 'اداره مهاجرت', en: 'Migration office' },
+  dorm:        { icon: '🛏️', color: '#d98a3d', fa: 'خوابگاه دانشجویی', en: 'Student dorm' },
+  library:     { icon: '📚', color: '#9a6b3f', fa: 'کتابخانه و فضای مطالعه', en: 'Library & study space' },
+};
+
+// Important Istanbul places per category. Starter coordinates (close to the real
+// spot) — they are fully draggable in edit mode so positions can be made exact
+// and then locked. [category, name, lon, lat].
+const MAP_PLACES = [
+  // Museums
+  ['museum', 'Hagia Sophia', 28.9802, 41.0086],
+  ['museum', 'Topkapı Palace', 28.9834, 41.0115],
+  ['museum', 'Istanbul Archaeology Museums', 28.9814, 41.0117],
+  ['museum', 'Istanbul Modern', 28.9836, 41.0275],
+  ['museum', 'Pera Museum', 28.9745, 41.0316],
+  ['museum', 'Dolmabahçe Palace', 29.0006, 41.0391],
+  // Consulates
+  ['consulate', 'U.S. Consulate General', 29.0560, 41.1098],
+  ['consulate', 'German Consulate General', 28.9805, 41.0345],
+  ['consulate', 'UK Consulate General', 28.9772, 41.0335],
+  ['consulate', 'French Consulate General', 28.9847, 41.0367],
+  ['consulate', 'Italian Consulate General', 28.9785, 41.0322],
+  ['consulate', 'Russian Consulate General', 28.9817, 41.0330],
+  // Migration / Göç İdaresi offices
+  ['immigration', 'İstanbul Provincial Migration Office (Kumkapı)', 28.9685, 41.0040],
+  ['immigration', 'Migration Office — Esenler', 28.8780, 41.0430],
+  ['immigration', 'Migration Office — Pendik (Asian side)', 29.2500, 40.8800],
+  // Student dorms / housing
+  ['dorm', 'KYK Atatürk Student Dorm', 28.9600, 41.0400],
+  ['dorm', 'KYK Çağlayan Student Dorm', 28.9900, 41.0700],
+  ['dorm', 'KYK Avcılar Student Dorm', 28.7200, 40.9900],
+  ['dorm', 'Student Housing — Esenyurt', 28.6700, 41.0250],
+  // Libraries & study spaces
+  ['library', 'Atatürk Library (Taksim)', 28.9890, 41.0375],
+  ['library', 'Beyazıt State Library', 28.9648, 41.0107],
+  ['library', 'Rami Library', 28.9230, 41.0560],
+  ['library', 'Orhan Kemal Public Library', 28.9770, 41.0330],
+  ['library', 'Nuruosmaniye Library', 28.9710, 41.0100],
+];
+
+// Unified metadata for every non-university tag, used by the info panel header.
+const PLACE_KIND_META = {
+  office:   { icon: '🏛️', color: '#D8B05B', fa: 'دفتر مرکزی', en: 'Headquarters' },
+  airport:  { icon: '✈️', color: '#5d6b80', fa: 'فرودگاه', en: 'Airport' },
+  hospital: { icon: '🏥', color: '#b6444f', fa: 'بیمارستان دانشگاهی', en: 'University Hospital' },
+  ...PLACE_CATEGORIES,
+};
+
 // A small square footprint (metres) around a point, for fill-extrusion volumes.
 function squareFootprint(lon, lat, meters) {
   const dLat = meters / 111320;
@@ -1575,6 +1653,12 @@ function addThreeDLandmarks({ map, items }) {
     features.push(feature('runway', '#39424f', 60, 0, rectFootprint(lon, lat - 0.0135, 950, 55)));
     features.push(feature('runway', '#39424f', 60, 0, rectFootprint(lon + 0.004, lat + 0.0135, 950, 55)));
   });
+  // Student-relevant categories (museums, consulates, migration, dorms,
+  // libraries): a two-tier building in each category colour.
+  MAP_PLACES.forEach(([category, , lon, lat]) => {
+    const cfg = PLACE_CATEGORIES[category];
+    if (cfg) pushTower(lon, lat, category, cfg.color, 120, 850, 2);
+  });
   // Office — the tallest, gold, four-tier tower at the real HQ.
   pushTower(OFFICE_LOCATION.lon, OFFICE_LOCATION.lat, 'office', '#D8B05B', 130, 3400, 4);
 
@@ -1615,6 +1699,33 @@ function addLandmarkMarkers({ maplibregl, map, onPlacePick, editable }) {
     element.addEventListener('click', (event) => {
       event.stopPropagation();
       onPlacePick?.({ kind: type, name, district: isAirport ? 'Istanbul' : '', lon, lat });
+    });
+    const marker = new maplibregl.Marker({ element, anchor: 'bottom', draggable: Boolean(editable) })
+      .setLngLat([lon, lat])
+      .addTo(map);
+    if (editable) marker.on('dragend', () => recordEditedCoord(name, marker));
+  });
+}
+
+function addPlaceMarkers({ maplibregl, map, onPlacePick, editable }) {
+  MAP_PLACES.forEach(([category, name, lon, lat]) => {
+    const cfg = PLACE_CATEGORIES[category] || PLACE_CATEGORIES.museum;
+    const element = document.createElement('button');
+    element.type = 'button';
+    element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
+    element.setAttribute('aria-label', name);
+    element.innerHTML = `
+      <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 5px 12px rgba(7,26,61,0.4));">
+        <span class="place-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:4px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:9px;">${escapeHtml(name)}</span>
+        <span style="display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:${cfg.color};border:2px solid rgba(255,255,255,0.92);font-size:12px;line-height:1;">${cfg.icon}</span>
+      </span>
+    `;
+    const labelEl = element.querySelector('.place-label');
+    element.addEventListener('mouseenter', () => { labelEl.style.opacity = '1'; });
+    element.addEventListener('mouseleave', () => { labelEl.style.opacity = '0'; });
+    element.addEventListener('click', (event) => {
+      event.stopPropagation();
+      onPlacePick?.({ kind: category, name, district: '', lon, lat });
     });
     const marker = new maplibregl.Marker({ element, anchor: 'bottom', draggable: Boolean(editable) })
       .setLngLat([lon, lat])
