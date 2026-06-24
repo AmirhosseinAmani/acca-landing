@@ -1142,14 +1142,16 @@ function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId,
       const selected = markerId === id;
       const core = element.querySelector('.uni-core');
       const label = element.querySelector('.uni-label');
+      if (selected) element.dataset.selected = '1';
+      else delete element.dataset.selected;
       if (core) {
         core.style.borderColor = selected ? '#D8B05B' : 'rgba(255,255,255,0.85)';
         core.style.boxShadow = selected
           ? '0 0 0 4px rgba(216,176,91,0.4), 0 8px 18px rgba(7,26,61,0.45)'
-          : '0 8px 18px rgba(7,26,61,0.4)';
+          : '0 6px 14px rgba(7,26,61,0.4)';
       }
-      if (label) label.style.opacity = id && !selected ? '0.45' : '1';
-      element.style.zIndex = selected ? '6' : '1';
+      if (label) label.style.opacity = selected ? '1' : '0';
+      element.style.zIndex = selected ? '7' : '1';
     });
   };
 
@@ -1329,14 +1331,21 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, ma
     // CSS — that screen-space ring was faked onto the ground and detached on
     // pitch/rotate, which is what made the university markers look like they
     // floated and drifted.
+    // Compact pin by default (just the initials), so the map stays clean like a
+    // game world-map. The full name only appears on hover or when selected.
     element.innerHTML = `
-      <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 14px rgba(7,26,61,0.4));">
-        <span class="uni-label" style="white-space:nowrap;margin-bottom:5px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,0.92);color:#071A3D;font-weight:800;font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
-        <span class="uni-core" style="display:grid;place-items:center;width:30px;height:30px;border-radius:9px 9px 9px 2px;transform:rotate(45deg);background:${fill};border:2px solid rgba(255,255,255,0.85);box-shadow:0 8px 18px rgba(7,26,61,0.4);transition:border-color .2s,box-shadow .2s;">
-          <span style="transform:rotate(-45deg);color:#fff;font-weight:900;font-size:10px;line-height:1;">${escapeHtml(getUniversityInitials(item.name))}</span>
+      <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 5px 12px rgba(7,26,61,0.4));">
+        <span class="uni-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:4px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:9px;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
+        <span class="uni-core" style="display:grid;place-items:center;width:22px;height:22px;border-radius:7px 7px 7px 2px;transform:rotate(45deg);background:${fill};border:1.5px solid rgba(255,255,255,0.85);box-shadow:0 6px 14px rgba(7,26,61,0.4);transition:border-color .2s,box-shadow .2s;">
+          <span style="transform:rotate(-45deg);color:#fff;font-weight:900;font-size:8px;line-height:1;">${escapeHtml(getUniversityInitials(item.name))}</span>
         </span>
       </span>
     `;
+    const labelEl = element.querySelector('.uni-label');
+    element.addEventListener('mouseenter', () => { labelEl.style.opacity = '1'; element.style.zIndex = '7'; });
+    element.addEventListener('mouseleave', () => {
+      if (!element.dataset.selected) { labelEl.style.opacity = '0'; element.style.zIndex = '1'; }
+    });
     element.addEventListener('click', (event) => {
       event.stopPropagation();
       onPick(item.id);
