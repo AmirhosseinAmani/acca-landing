@@ -16,6 +16,15 @@ import {
 } from 'lucide-react';
 import { BackButton, MainNav } from '../SiteNav';
 import { istanbulUniversities } from '../../data/istanbulUniversities';
+import { COMPANY_OFFICE_LAT, COMPANY_OFFICE_LNG } from '../../constants/contact';
+
+const OFFICE_LOCATION = {
+  lon: Number(COMPANY_OFFICE_LNG),
+  lat: Number(COMPANY_OFFICE_LAT),
+  labelFa: 'دفتر مرکزی ACCA EDU',
+  labelEn: 'ACCA EDU Headquarters',
+  district: 'Esenyurt',
+};
 
 const ISTANBUL_BOUNDS = {
   latMin: 40.78,
@@ -1169,6 +1178,8 @@ function initGeospatialMap({ maplibregl, container, darkMode, items, selectedId,
     window.__accaMapFallbackReason = '';
     addGeospatialInfrastructure(map, darkMode);
     addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity });
+    addOfficeMarker({ maplibregl, map });
+    applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
     syncDebug();
     onReady?.();
@@ -1311,17 +1322,61 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, ma
       focusUniversity(item.id);
     });
 
-    new maplibregl.Marker({
-      element,
-      anchor: 'bottom',
-      pitchAlignment: 'map',
-      rotationAlignment: 'viewport',
-    })
+    // Viewport-aligned (the MapLibre default): the beacon always faces the
+    // camera and its bottom anchor stays pinned to the exact lng/lat through
+    // pan, zoom, pitch and rotate. The previous pitchAlignment:'map' laid the
+    // beacon flat on the ground plane, which made it slide off its point at
+    // high pitch — that was the "markers drift with camera movement" bug.
+    new maplibregl.Marker({ element, anchor: 'bottom' })
       .setLngLat([item.lon, item.lat])
       .addTo(map);
 
     markersById.set(item.id, element);
   });
+}
+
+function applyCinematicAtmosphere(map, darkMode) {
+  // Native MapLibre sky + atmospheric haze (replaces the clouds that used to
+  // live only in the hidden Three.js fallback). The horizon/fog blend also
+  // dissolves the map edges into atmosphere, so the rectangular tile boundary
+  // is no longer visible when zoomed out. Guarded so it can never break the map.
+  if (typeof map.setSky !== 'function') return;
+  try {
+    map.setSky({
+      'sky-color': darkMode ? '#0b1f3a' : '#b9d4e6',
+      'sky-horizon-blend': 0.62,
+      'horizon-color': darkMode ? '#21405f' : '#e9efec',
+      'horizon-fog-blend': 0.7,
+      'fog-color': darkMode ? '#0a1626' : '#f4f0e6',
+      'fog-ground-blend': 0.55,
+      'atmosphere-blend': ['interpolate', ['linear'], ['zoom'], 8, 0.9, 11, 0.55, 13, 0.25],
+    });
+  } catch {
+    /* sky styling is a visual enhancement only */
+  }
+}
+
+function addOfficeMarker({ maplibregl, map }) {
+  if (!Number.isFinite(OFFICE_LOCATION.lon) || !Number.isFinite(OFFICE_LOCATION.lat)) return;
+
+  const element = document.createElement('a');
+  element.href = '/?section=contact';
+  element.className = 'acca-geo-office';
+  element.setAttribute('aria-label', `${OFFICE_LOCATION.labelEn} — ${OFFICE_LOCATION.district}`);
+  // Inline-styled so it renders as a distinct premium gold HQ tower regardless
+  // of stylesheet load order, and clearly different from the university beacons.
+  element.innerHTML = `
+    <span style="display:flex;flex-direction:column;align-items:center;text-decoration:none;filter:drop-shadow(0 8px 18px rgba(7,26,61,0.45));">
+      <span style="white-space:nowrap;margin-bottom:6px;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#D8B05B,#b9914a);color:#071A3D;font-weight:900;font-size:11px;letter-spacing:.02em;box-shadow:0 6px 16px rgba(7,26,61,0.30);">ACCA EDU</span>
+      <span style="display:grid;place-items:center;width:34px;height:34px;border-radius:11px 11px 11px 3px;transform:rotate(45deg);background:linear-gradient(135deg,#0d2a52,#071A3D);border:2px solid #D8B05B;box-shadow:0 10px 24px rgba(7,26,61,0.45);">
+        <span style="transform:rotate(-45deg);font-size:16px;line-height:1;">🏛️</span>
+      </span>
+    </span>
+  `;
+
+  new maplibregl.Marker({ element, anchor: 'bottom' })
+    .setLngLat([OFFICE_LOCATION.lon, OFFICE_LOCATION.lat])
+    .addTo(map);
 }
 
 function createInfrastructureFeatureCollections() {
