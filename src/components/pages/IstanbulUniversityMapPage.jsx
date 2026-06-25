@@ -1336,7 +1336,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
     addPlaceMarkers({ maplibregl, map, onPlacePick, editable });
     try { addThreeDLandmarks({ map, items }); } catch { /* 3D layer is additive */ }
-    try { map.addLayer(createCinematicThreeLayer(maplibregl)); } catch { /* cinematic 3D layer is additive */ }
+    try { map.addLayer(createCinematicThreeLayer(maplibregl, items)); } catch { /* cinematic 3D layer is additive */ }
     applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
     syncDebug();
@@ -1673,14 +1673,8 @@ function addThreeDLandmarks({ map, items }) {
     }
   };
 
-  // Universities — primary campus: a two-tier navy building.
-  items.forEach((item) => {
-    pushTower(item.lon, item.lat, 'university', '#12345f', 165, 1400, 2);
-  });
-  // Universities — additional campuses: a slightly shorter two-tier building.
-  EXTRA_CAMPUSES.forEach(([, lat, lon]) => {
-    pushTower(lon, lat, 'campus', '#1c4576', 140, 1050, 2);
-  });
+  // Universities + campuses are now real Three.js buildings
+  // (createCinematicThreeLayer), so they are intentionally NOT extruded here.
   // Hospitals — a three-tier red building so it stands out from universities.
   MAP_LANDMARKS.filter(([type]) => type === 'hospital').forEach(([, , lon, lat]) => {
     pushTower(lon, lat, 'hospital', '#b6444f', 170, 1250, 3);
@@ -1723,7 +1717,7 @@ function addThreeDLandmarks({ map, items }) {
 // real geography and tracks pan/zoom/pitch/rotate exactly. This is the proof
 // object — the HQ as an animated gold tower — and the foundation the cloud
 // system and university models will build on.
-function createCinematicThreeLayer(maplibregl) {
+function createCinematicThreeLayer(maplibregl, items) {
   const origin = maplibregl.MercatorCoordinate.fromLngLat([OFFICE_LOCATION.lon, OFFICE_LOCATION.lat], 0);
   const scale = origin.meterInMercatorCoordinateUnits();
 
@@ -1801,6 +1795,32 @@ function createCinematicThreeLayer(maplibregl) {
     const ang = (i / 14) * Math.PI * 2;
     addCloudPuff(28.98 + Math.cos(ang) * 1.0, 41.05 + Math.sin(ang) * 0.66, 2200 + Math.random() * 2200, 9000 + Math.random() * 5000, 0.32);
   }
+
+  // ── Phase 6c: real 3D university buildings ──────────────────────────────
+  // A tapered, multi-tier navy building per university (and a shorter one per
+  // extra campus), placed by real geography via scenePos. Shared materials and
+  // static meshes — the existing render loop draws them locked to the map.
+  const uniMatEurope = new THREE.MeshStandardMaterial({ color: 0x16386a, metalness: 0.4, roughness: 0.5, emissive: 0x0b203a, emissiveIntensity: 0.4 });
+  const uniMatAsia = new THREE.MeshStandardMaterial({ color: 0x1f4f80, metalness: 0.4, roughness: 0.5, emissive: 0x0e2a48, emissiveIntensity: 0.4 });
+  const campusMat = new THREE.MeshStandardMaterial({ color: 0x2a5d92, metalness: 0.35, roughness: 0.55, emissive: 0x12304f, emissiveIntensity: 0.35 });
+  const addBuilding = (lng, lat, mat, hw, tiers, totalH) => {
+    const g = new THREE.Group();
+    const step = totalH / tiers;
+    for (let k = 0; k < tiers; k += 1) {
+      const w = hw * 2 * (1 - k * 0.2);
+      const box = new THREE.Mesh(new THREE.BoxGeometry(w, step, w), mat);
+      box.position.set(0, step * k + step / 2, 0);
+      g.add(box);
+    }
+    g.position.copy(scenePos(lng, lat, 0));
+    scene.add(g);
+  };
+  (items || []).forEach((it) => {
+    addBuilding(it.lon, it.lat, it.side === 'asia' ? uniMatAsia : uniMatEurope, 150, 3, 1050);
+  });
+  EXTRA_CAMPUSES.forEach(([, lat, lon]) => {
+    addBuilding(lon, lat, campusMat, 120, 2, 760);
+  });
 
   let renderer = null;
   const start = typeof performance !== 'undefined' ? performance.now() : 0;
