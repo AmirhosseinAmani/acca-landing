@@ -1711,6 +1711,34 @@ function addThreeDLandmarks({ map, items }) {
   });
 }
 
+// Procedural building facade: a tinted base with a grid of windows, ~half of
+// them lit (warm/cool). Used as both color map and emissive map so the lit
+// windows glow at dusk — turns a plain box into a believable building.
+function makeFacadeTexture(baseHex, litColors) {
+  const c = document.createElement('canvas');
+  c.width = 64;
+  c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = baseHex;
+  ctx.fillRect(0, 0, 64, 128);
+  const cols = 5;
+  const rows = 12;
+  const cw = 64 / cols;
+  const rh = 128 / rows;
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < cols; x += 1) {
+      const lit = Math.random() < 0.5;
+      ctx.fillStyle = lit ? litColors[Math.floor(Math.random() * litColors.length)] : 'rgba(255,255,255,0.04)';
+      ctx.fillRect(x * cw + cw * 0.24, y * rh + rh * 0.22, cw * 0.52, rh * 0.5);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 5);
+  return tex;
+}
+
 // ── Phase 6: synced Three.js custom WebGL layer ─────────────────────────────
 // One Three.js scene shares Mapbox's WebGL context. The Three.js camera is
 // driven each frame by Mapbox's projection matrix, so 3D content is locked to
@@ -1761,48 +1789,51 @@ function createCinematicThreeLayer(maplibregl, items) {
   // Camera-facing sprites at altitude around the Istanbul region: a sparse high
   // deck plus a wider, larger horizon ring that softens the far edge. Subtle and
   // high so they never blanket the university markers.
-  const cloudTex = makeCloudTexture();
+  // Clouds are REAL 3D meshes (clusters of flattened low-poly spheres), not
+  // billboards — so they look volumetric from any angle and are shaded by the
+  // sun (lit tops, soft undersides). This is what fixes "flat / disappears on
+  // rotate": meshes only need the projection matrix, no camera-facing logic.
+  const cloudGeo = new THREE.IcosahedronGeometry(1, 1);
+  const cloudMat = new THREE.MeshStandardMaterial({
+    color: 0xeef3fb, roughness: 1, metalness: 0, transparent: true, opacity: 0.66, depthWrite: false,
+  });
   const clouds = [];
-  // Each "cloud" is a CLUSTER of overlapping camera-facing sprites at slightly
-  // different offsets — that reads as a fluffy volumetric mass instead of one
-  // flat billboard. depthTest:false so they never clip/disappear on rotation.
-  const addCloudPuff = (lng, lat, alt, baseSize, opacity) => {
+  const addCloudPuff = (lng, lat, alt, baseSize) => {
     const center = scenePos(lng, lat, alt);
-    const group = { sprites: [], baseX: center.x, baseZ: center.z, phase: Math.random() * Math.PI * 2, sway: 1400 + Math.random() * 2400 };
-    const puffs = 5 + Math.floor(Math.random() * 3);
-    for (let j = 0; j < puffs; j += 1) {
-      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-        map: cloudTex, transparent: true, opacity: opacity * (0.7 + Math.random() * 0.5), depthWrite: false, depthTest: false,
-      }));
-      const ox = (Math.random() - 0.5) * baseSize * 1.1;
-      const oy = (Math.random() - 0.5) * baseSize * 0.28;
-      const oz = (Math.random() - 0.5) * baseSize * 1.1;
-      sprite.position.set(center.x + ox, center.y + oy, center.z + oz);
-      const s = baseSize * (0.55 + Math.random() * 0.7);
-      sprite.scale.set(s, s * 0.72, 1);
-      sprite.userData = { ox, oz };
-      group.sprites.push(sprite);
-      scene.add(sprite);
+    const group = new THREE.Group();
+    const blobs = 6 + Math.floor(Math.random() * 5);
+    for (let j = 0; j < blobs; j += 1) {
+      const mesh = new THREE.Mesh(cloudGeo, cloudMat);
+      const r = baseSize * (0.35 + Math.random() * 0.55);
+      mesh.scale.set(r, r * (0.45 + Math.random() * 0.28), r);
+      mesh.position.set((Math.random() - 0.5) * baseSize * 1.3, (Math.random() - 0.5) * baseSize * 0.35, (Math.random() - 0.5) * baseSize * 1.3);
+      group.add(mesh);
     }
+    group.position.copy(center);
+    group.userData = { baseX: center.x, baseZ: center.z, phase: Math.random() * Math.PI * 2, sway: 1300 + Math.random() * 2200 };
     clouds.push(group);
+    scene.add(group);
   };
-  // High deck — big fluffy clouds over the city.
-  for (let i = 0; i < 16; i += 1) {
-    addCloudPuff(28.45 + Math.random() * 1.25, 40.82 + Math.random() * 0.72, 2800 + Math.random() * 2800, 4200 + Math.random() * 3600, 0.4);
-  }
-  // Horizon ring — very large, low-contrast clouds that conceal the perimeter.
+  // High deck — fluffy clouds over the city.
   for (let i = 0; i < 14; i += 1) {
-    const ang = (i / 14) * Math.PI * 2;
-    addCloudPuff(28.98 + Math.cos(ang) * 1.0, 41.05 + Math.sin(ang) * 0.66, 2200 + Math.random() * 2200, 9000 + Math.random() * 5000, 0.32);
+    addCloudPuff(28.5 + Math.random() * 1.2, 40.85 + Math.random() * 0.66, 3000 + Math.random() * 2400, 1600 + Math.random() * 1700);
+  }
+  // Horizon ring — larger clouds that conceal the perimeter.
+  for (let i = 0; i < 12; i += 1) {
+    const ang = (i / 12) * Math.PI * 2;
+    addCloudPuff(28.98 + Math.cos(ang) * 1.0, 41.05 + Math.sin(ang) * 0.66, 2500 + Math.random() * 1800, 3000 + Math.random() * 2400);
   }
 
   // ── Phase 6c: real 3D university buildings ──────────────────────────────
   // A tapered, multi-tier navy building per university (and a shorter one per
   // extra campus), placed by real geography via scenePos. Shared materials and
   // static meshes — the existing render loop draws them locked to the map.
-  const uniMatEurope = new THREE.MeshStandardMaterial({ color: 0x16386a, metalness: 0.4, roughness: 0.5, emissive: 0x0b203a, emissiveIntensity: 0.4 });
-  const uniMatAsia = new THREE.MeshStandardMaterial({ color: 0x1f4f80, metalness: 0.4, roughness: 0.5, emissive: 0x0e2a48, emissiveIntensity: 0.4 });
-  const campusMat = new THREE.MeshStandardMaterial({ color: 0x2a5d92, metalness: 0.35, roughness: 0.55, emissive: 0x12304f, emissiveIntensity: 0.35 });
+  const facadeEurope = makeFacadeTexture('#16386a', ['#ffe6a8', '#cfe2ff', '#ffd27a']);
+  const facadeAsia = makeFacadeTexture('#1f4f80', ['#ffe6a8', '#bfe0ff']);
+  const facadeCampus = makeFacadeTexture('#2a5d92', ['#ffe2a0', '#d6e8ff']);
+  const uniMatEurope = new THREE.MeshStandardMaterial({ map: facadeEurope, emissiveMap: facadeEurope, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.62, metalness: 0.2 });
+  const uniMatAsia = new THREE.MeshStandardMaterial({ map: facadeAsia, emissiveMap: facadeAsia, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.62, metalness: 0.2 });
+  const campusMat = new THREE.MeshStandardMaterial({ map: facadeCampus, emissiveMap: facadeCampus, emissive: 0xffffff, emissiveIntensity: 0.45, roughness: 0.64, metalness: 0.18 });
   const addBuilding = (lng, lat, mat, hw, tiers, totalH) => {
     const g = new THREE.Group();
     const step = totalH / tiers;
@@ -1837,7 +1868,11 @@ function createCinematicThreeLayer(maplibregl, items) {
     },
     onRemove() {
       scene.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
-      cloudTex.dispose?.();
+      cloudGeo.dispose?.();
+      cloudMat.dispose?.();
+      facadeEurope.dispose?.();
+      facadeAsia.dispose?.();
+      facadeCampus.dispose?.();
       renderer?.dispose?.();
       renderer = null;
     },
@@ -1849,13 +1884,8 @@ function createCinematicThreeLayer(maplibregl, items) {
       ringMat.opacity = 0.5 + Math.sin(t * 2) * 0.22;
       for (let i = 0; i < clouds.length; i += 1) {
         const group = clouds[i];
-        const dx = group.baseX + Math.sin(t * 0.04 + group.phase) * group.sway;
-        const dz = group.baseZ + Math.cos(t * 0.03 + group.phase) * group.sway * 0.7;
-        for (let j = 0; j < group.sprites.length; j += 1) {
-          const sp = group.sprites[j];
-          sp.position.x = dx + sp.userData.ox;
-          sp.position.z = dz + sp.userData.oz;
-        }
+        group.position.x = group.userData.baseX + Math.sin(t * 0.04 + group.userData.phase) * group.userData.sway;
+        group.position.z = group.userData.baseZ + Math.cos(t * 0.03 + group.userData.phase) * group.userData.sway * 0.7;
       }
 
       const m = new THREE.Matrix4().fromArray(matrix);
