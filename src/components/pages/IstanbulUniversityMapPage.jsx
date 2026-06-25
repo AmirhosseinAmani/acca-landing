@@ -1243,6 +1243,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     cooperativeGestures: false,
     antialias: true,
   });
+  if (typeof window !== 'undefined' && import.meta.env.DEV) window.__accaMap = map;
 
   // Mapbox Standard Satellite — dusk cinematic preset, labels but no road/POI
   // clutter (we add our own beacons). Set after style load so config applies.
@@ -1656,60 +1657,11 @@ function rectFootprint(lon, lat, halfLonM, halfLatM) {
   ]];
 }
 
-function addThreeDLandmarks({ map, items }) {
-  const feature = (kind, color, height, base, coords) => ({
-    type: 'Feature',
-    properties: { kind, color, height, base },
-    geometry: { type: 'Polygon', coordinates: coords },
-  });
-  const features = [];
-
-  // A tapered tower: a stack of shrinking, rising tiers so it reads as a real
-  // building/tower silhouette rather than a single flat cube.
-  const pushTower = (lon, lat, kind, color, baseSize, totalHeight, tiers) => {
-    const step = totalHeight / tiers;
-    for (let i = 0; i < tiers; i++) {
-      features.push(feature(kind, color, step * (i + 1), step * i, squareFootprint(lon, lat, baseSize * (1 - i * 0.2))));
-    }
-  };
-
-  // Universities + campuses are now real Three.js buildings
-  // (createCinematicThreeLayer), so they are intentionally NOT extruded here.
-  // Hospitals — a three-tier red building so it stands out from universities.
-  MAP_LANDMARKS.filter(([type]) => type === 'hospital').forEach(([, , lon, lat]) => {
-    pushTower(lon, lat, 'hospital', '#b6444f', 170, 1250, 3);
-  });
-  // Airports — a composite that actually reads as an airport: a wide low
-  // terminal, a slim tall control tower, and two long thin runway strips.
-  MAP_LANDMARKS.filter(([type]) => type === 'airport').forEach(([, , lon, lat]) => {
-    features.push(feature('airport-terminal', '#6b788c', 300, 0, rectFootprint(lon, lat, 560, 300)));
-    features.push(feature('airport-tower', '#9aa6b8', 1000, 0, squareFootprint(lon + 0.006, lat + 0.0015, 70)));
-    features.push(feature('runway', '#39424f', 60, 0, rectFootprint(lon, lat - 0.0135, 950, 55)));
-    features.push(feature('runway', '#39424f', 60, 0, rectFootprint(lon + 0.004, lat + 0.0135, 950, 55)));
-  });
-  // Student-relevant categories (museums, consulates, migration, dorms,
-  // libraries): a two-tier building in each category colour.
-  MAP_PLACES.forEach(([category, , lon, lat]) => {
-    const cfg = PLACE_CATEGORIES[category];
-    if (cfg) pushTower(lon, lat, category, cfg.color, 120, 850, 2);
-  });
-  // NOTE: the office is now a real animated Three.js tower (createCinematicThreeLayer),
-  // so it is intentionally NOT extruded here to avoid a duplicate.
-
-  map.addSource('acca-3d-landmarks', { type: 'geojson', data: { type: 'FeatureCollection', features } });
-  map.addLayer({
-    id: 'acca-3d-landmarks',
-    type: 'fill-extrusion',
-    source: 'acca-3d-landmarks',
-    paint: {
-      'fill-extrusion-color': ['get', 'color'],
-      'fill-extrusion-height': ['get', 'height'],
-      'fill-extrusion-base': ['get', 'base'],
-      'fill-extrusion-opacity': 0.9,
-      'fill-extrusion-vertical-gradient': true,
-    },
-  });
-}
+// Every landmark (universities, hospitals, airports, category places, office)
+// is now a typed Three.js archetype in createCinematicThreeLayer, so there are
+// no flat fill-extrusion volumes any more. Kept as a no-op so the call site and
+// any future map-native overlays have a home.
+function addThreeDLandmarks() {}
 
 // Procedural building facade: a tinted base with a grid of windows, ~half of
 // them lit (warm/cool). Used as both color map and emissive map so the lit
@@ -1739,6 +1691,60 @@ function makeFacadeTexture(baseHex, litColors) {
   return tex;
 }
 
+// A row of classical columns (light shafts with capitals/bases on a shadowed
+// wall) — the signature of a university entrance, civic portico, museum or
+// library colonnade.
+function makeColonnadeTexture(baseHex, columnHex) {
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = baseHex;
+  ctx.fillRect(0, 0, 128, 128);
+  const cols = 6;
+  const cw = 128 / cols;
+  for (let i = 0; i < cols; i += 1) {
+    const x = i * cw + cw * 0.5;
+    const grad = ctx.createLinearGradient(x - cw * 0.3, 0, x + cw * 0.3, 0);
+    grad.addColorStop(0, 'rgba(0,0,0,0.30)');
+    grad.addColorStop(0.5, columnHex);
+    grad.addColorStop(1, 'rgba(0,0,0,0.30)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - cw * 0.28, 14, cw * 0.56, 100);
+    ctx.fillStyle = columnHex;
+    ctx.fillRect(x - cw * 0.36, 6, cw * 0.72, 10);
+    ctx.fillRect(x - cw * 0.36, 112, cw * 0.72, 10);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  return tex;
+}
+
+// Dense residential window grid (small, many, ~half lit) for dormitory slabs.
+function makeDenseWindows(baseHex, litColors) {
+  const c = document.createElement('canvas');
+  c.width = 64;
+  c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = baseHex;
+  ctx.fillRect(0, 0, 64, 128);
+  const cols = 7;
+  const rows = 18;
+  const cw = 64 / cols;
+  const rh = 128 / rows;
+  for (let y = 0; y < rows; y += 1) {
+    for (let x = 0; x < cols; x += 1) {
+      const lit = Math.random() < 0.45;
+      ctx.fillStyle = lit ? litColors[Math.floor(Math.random() * litColors.length)] : 'rgba(255,255,255,0.05)';
+      ctx.fillRect(x * cw + cw * 0.2, y * rh + rh * 0.25, cw * 0.6, rh * 0.45);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 6);
+  return tex;
+}
+
 // ── Phase 6: synced Three.js custom WebGL layer ─────────────────────────────
 // One Three.js scene shares Mapbox's WebGL context. The Three.js camera is
 // driven each frame by Mapbox's projection matrix, so 3D content is locked to
@@ -1753,28 +1759,32 @@ function createCinematicThreeLayer(maplibregl, items) {
   const camera = new THREE.Camera();
 
   // Dusk lighting to match the Mapbox preset.
-  scene.add(new THREE.AmbientLight(0xb8cee6, 0.85));
-  const sun = new THREE.DirectionalLight(0xffe4bd, 1.5);
+  scene.add(new THREE.AmbientLight(0x8aa0bd, 0.45));
+  const sun = new THREE.DirectionalLight(0xffe4bd, 1.7);
   sun.position.set(-0.5, 0.35, 1).normalize();
   scene.add(sun);
 
   // HQ tower — a tapered, multi-tier gold building (heights/sizes in metres;
   // the whole scene is scaled to metres by the model matrix below).
   const tower = new THREE.Group();
+  const texOffice = makeFacadeTexture('#5a4316', ['#fff0c0', '#ffe09a', '#ffd27a']);
   const goldMat = new THREE.MeshStandardMaterial({
-    color: 0xd8b05b, metalness: 0.65, roughness: 0.32, emissive: 0x4a3413, emissiveIntensity: 0.45,
+    color: 0xd8b05b, metalness: 0.62, roughness: 0.33,
+    emissiveMap: texOffice, emissive: 0xffe0a0, emissiveIntensity: 0.7,
   });
-  // [halfWidth(m), baseHeight(m), tierHeight(m)]
-  [[140, 0, 700], [110, 700, 650], [80, 1350, 600], [50, 1950, 900]].forEach(([hw, base, h]) => {
+  // [halfWidth(m), baseHeight(m), tierHeight(m)] — the tallest landmark on the
+  // map (the HQ really is in a tower), but kept proportionate to the typed
+  // archetypes around it instead of dwarfing the whole city.
+  [[130, 0, 260], [102, 260, 240], [76, 500, 220], [50, 720, 200]].forEach(([hw, base, h]) => {
     const box = new THREE.Mesh(new THREE.BoxGeometry(hw * 2, h, hw * 2), goldMat);
     box.position.set(0, base + h / 2, 0);
     tower.add(box);
   });
   // Animated glowing objective ring above the tower.
   const ringMat = new THREE.MeshBasicMaterial({ color: 0xffd87a, transparent: true, opacity: 0.7, side: THREE.DoubleSide });
-  const ring = new THREE.Mesh(new THREE.RingGeometry(220, 320, 56), ringMat);
+  const ring = new THREE.Mesh(new THREE.RingGeometry(170, 250, 56), ringMat);
   ring.rotation.x = -Math.PI / 2;
-  ring.position.set(0, 3050, 0);
+  ring.position.set(0, 1010, 0);
   tower.add(ring);
   scene.add(tower);
 
@@ -1814,44 +1824,176 @@ function createCinematicThreeLayer(maplibregl, items) {
     clouds.push(group);
     scene.add(group);
   };
-  // High deck — fluffy clouds over the city.
+  // High deck — clouds well ABOVE the city (so they don't sit at camera level
+  // when zoomed in) and a touch smaller.
   for (let i = 0; i < 14; i += 1) {
-    addCloudPuff(28.5 + Math.random() * 1.2, 40.85 + Math.random() * 0.66, 3000 + Math.random() * 2400, 1600 + Math.random() * 1700);
+    addCloudPuff(28.5 + Math.random() * 1.2, 40.85 + Math.random() * 0.66, 6000 + Math.random() * 3000, 1300 + Math.random() * 1400);
   }
-  // Horizon ring — larger clouds that conceal the perimeter.
+  // Horizon ring — high, larger clouds that conceal the perimeter.
   for (let i = 0; i < 12; i += 1) {
     const ang = (i / 12) * Math.PI * 2;
-    addCloudPuff(28.98 + Math.cos(ang) * 1.0, 41.05 + Math.sin(ang) * 0.66, 2500 + Math.random() * 1800, 3000 + Math.random() * 2400);
+    addCloudPuff(28.98 + Math.cos(ang) * 1.0, 41.05 + Math.sin(ang) * 0.66, 5000 + Math.random() * 2500, 2600 + Math.random() * 2200);
   }
 
-  // ── Phase 6c: real 3D university buildings ──────────────────────────────
-  // A tapered, multi-tier navy building per university (and a shorter one per
-  // extra campus), placed by real geography via scenePos. Shared materials and
-  // static meshes — the existing render loop draws them locked to the map.
-  const facadeEurope = makeFacadeTexture('#16386a', ['#ffe6a8', '#cfe2ff', '#ffd27a']);
-  const facadeAsia = makeFacadeTexture('#1f4f80', ['#ffe6a8', '#bfe0ff']);
-  const facadeCampus = makeFacadeTexture('#2a5d92', ['#ffe2a0', '#d6e8ff']);
-  const uniMatEurope = new THREE.MeshStandardMaterial({ map: facadeEurope, emissiveMap: facadeEurope, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.62, metalness: 0.2 });
-  const uniMatAsia = new THREE.MeshStandardMaterial({ map: facadeAsia, emissiveMap: facadeAsia, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.62, metalness: 0.2 });
-  const campusMat = new THREE.MeshStandardMaterial({ map: facadeCampus, emissiveMap: facadeCampus, emissive: 0xffffff, emissiveIntensity: 0.45, roughness: 0.64, metalness: 0.18 });
-  const addBuilding = (lng, lat, mat, hw, tiers, totalH) => {
+  // ── Phase 7: typed 3D archetypes ────────────────────────────────────────
+  // Not everything is a tower. Each place gets a procedural model shaped after
+  // what it really is, so it's recognisable from the city overview:
+  //   • university  → wide columned campus with a central clock-dome
+  //   • hospital    → clinical block crowned by a glowing red cross
+  //   • migration / consulate → civic building with a colonnade + flag
+  //   • museum      → neoclassical colonnade + triangular pediment + steps
+  //   • library     → colonnaded block under a study dome
+  //   • dormitory   → twin residential slabs with dense lit windows
+  //   • airport     → long terminal, curved roof, control tower + runways
+  //   • office (HQ) → the gold tower above (it really is in one)
+  // Shared geometries/materials/textures keep the draw cost reasonable.
+
+  // Window / facade textures (built once, reused by every instance).
+  const texWinWarm = makeFacadeTexture('#13243d', ['#ffd98c', '#bcd8ff', '#ffc66a']);
+  const texWinCool = makeFacadeTexture('#0f2a3a', ['#9ff0e6', '#bcd8ff']);
+  const texDorm = makeDenseWindows('#3a2616', ['#ffd28a', '#ffe6b8', '#ffcf7a']);
+  const texColWarm = makeColonnadeTexture('#2a2418', '#ecdfc2');
+  const texColStone = makeColonnadeTexture('#3a3528', '#efe7d4');
+
+  // Shared unit geometries — every mesh reuses these and is sized via mesh.scale.
+  const gBox = new THREE.BoxGeometry(1, 1, 1);
+  const gCyl = new THREE.CylinderGeometry(1, 1, 1, 20);
+  const gDome = new THREE.SphereGeometry(1, 22, 12, 0, Math.PI * 2, 0, Math.PI * 0.5);
+  const gPlane = new THREE.PlaneGeometry(1, 1);
+  const triShape = new THREE.Shape();
+  triShape.moveTo(-1, 0); triShape.lineTo(1, 0); triShape.lineTo(0, 1); triShape.closePath();
+  const gPediment = new THREE.ExtrudeGeometry(triShape, { depth: 1, bevelEnabled: false });
+  gPediment.translate(0, 0, -0.5);
+  const archGeos = [gBox, gCyl, gDome, gPlane, gPediment];
+
+  // Shared materials.
+  const matStoneLite = new THREE.MeshStandardMaterial({ color: 0xe2d8bd, roughness: 0.8, metalness: 0.04, emissive: 0x2a2418, emissiveIntensity: 0.2 });
+  const matMuseum = new THREE.MeshStandardMaterial({ color: 0xd8cdaa, roughness: 0.82, metalness: 0.05, emissive: 0x2c2616, emissiveIntensity: 0.22 });
+  const matLibrary = new THREE.MeshStandardMaterial({ color: 0xc6a877, roughness: 0.8, metalness: 0.05, emissive: 0x33240f, emissiveIntensity: 0.25 });
+  const matCivic = new THREE.MeshStandardMaterial({ color: 0xd2c8ac, roughness: 0.82, metalness: 0.05, emissive: 0x252a20, emissiveIntensity: 0.2 });
+  const matCampusWarm = new THREE.MeshStandardMaterial({ color: 0xb6a079, map: texWinWarm, emissiveMap: texWinWarm, emissive: 0xffe1a6, emissiveIntensity: 1.15, roughness: 0.7, metalness: 0.12 });
+  const matCampusCool = new THREE.MeshStandardMaterial({ color: 0x9fb1a6, map: texWinCool, emissiveMap: texWinCool, emissive: 0xbfeede, emissiveIntensity: 1.05, roughness: 0.7, metalness: 0.12 });
+  const matColWarm = new THREE.MeshStandardMaterial({ color: 0xece2cc, map: texColWarm, emissiveMap: texColWarm, emissive: 0xfff0d0, emissiveIntensity: 0.3, roughness: 0.72 });
+  const matColStone = new THREE.MeshStandardMaterial({ color: 0xefe7d4, map: texColStone, emissiveMap: texColStone, emissive: 0xfff0d8, emissiveIntensity: 0.28, roughness: 0.72 });
+  const matRoofNavy = new THREE.MeshStandardMaterial({ color: 0x223a5e, roughness: 0.6, metalness: 0.2 });
+  const matHospital = new THREE.MeshStandardMaterial({ color: 0xeef2f6, roughness: 0.5, metalness: 0.1, emissive: 0x5a6470, emissiveIntensity: 0.2 });
+  const matRedGlow = new THREE.MeshStandardMaterial({ color: 0xff3b46, emissive: 0xff2230, emissiveIntensity: 1.7, roughness: 0.4 });
+  const matDorm = new THREE.MeshStandardMaterial({ color: 0xc98a4a, map: texDorm, emissiveMap: texDorm, emissive: 0xffd9a0, emissiveIntensity: 1.0, roughness: 0.8 });
+  const matGoldDome = new THREE.MeshStandardMaterial({ color: 0xe8c067, metalness: 0.7, roughness: 0.3, emissive: 0xffcf6e, emissiveIntensity: 0.55 });
+  const matDome = new THREE.MeshStandardMaterial({ color: 0x9fd8d2, metalness: 0.45, roughness: 0.35, emissive: 0x2a6b66, emissiveIntensity: 0.45 });
+  const matPole = new THREE.MeshStandardMaterial({ color: 0x59626f, metalness: 0.6, roughness: 0.4 });
+  const matFlagTR = new THREE.MeshStandardMaterial({ color: 0xe1322d, emissive: 0xe1322d, emissiveIntensity: 0.5, roughness: 0.6, side: THREE.DoubleSide });
+  const matFlagCons = new THREE.MeshStandardMaterial({ color: 0x2a8c8c, emissive: 0x2a8c8c, emissiveIntensity: 0.5, roughness: 0.6, side: THREE.DoubleSide });
+  const matTerminal = new THREE.MeshStandardMaterial({ color: 0xb9c4d2, metalness: 0.3, roughness: 0.4, emissive: 0x33425a, emissiveIntensity: 0.25 });
+  const matRunway = new THREE.MeshStandardMaterial({ color: 0x2a323d, roughness: 0.95 });
+  const matCtrlGlass = new THREE.MeshStandardMaterial({ color: 0x8fd0ff, emissive: 0x3a6a9a, emissiveIntensity: 0.7, metalness: 0.5, roughness: 0.3 });
+  const archMats = [matStoneLite, matMuseum, matLibrary, matCivic, matCampusWarm, matCampusCool, matColWarm, matColStone, matRoofNavy, matHospital, matRedGlow, matDorm, matGoldDome, matDome, matPole, matFlagTR, matFlagCons, matTerminal, matRunway, matCtrlGlass];
+
+  // Mesh helpers (unit geometry + scale → no per-instance geometry allocation).
+  const mkBox = (mat, w, h, d, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(gBox, mat); m.scale.set(w, h, d); m.position.set(x, y, z); return m; };
+  const mkCyl = (mat, r, h, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(gCyl, mat); m.scale.set(r, h, r); m.position.set(x, y, z); return m; };
+  const mkDome = (mat, r, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(gDome, mat); m.scale.set(r, r * 0.72, r); m.position.set(x, y, z); return m; };
+
+  // ── Archetype builders (base at y=0, front faces +Z) ──
+  const makeUniversity = (side) => {
     const g = new THREE.Group();
-    const step = totalH / tiers;
-    for (let k = 0; k < tiers; k += 1) {
-      const w = hw * 2 * (1 - k * 0.2);
-      const box = new THREE.Mesh(new THREE.BoxGeometry(w, step, w), mat);
-      box.position.set(0, step * k + step / 2, 0);
-      g.add(box);
-    }
-    g.position.copy(scenePos(lng, lat, 0));
-    scene.add(g);
+    const body = side === 'asia' ? matCampusCool : matCampusWarm;
+    g.add(mkBox(body, 640, 240, 360, 0, 120, 0));        // main hall
+    g.add(mkBox(body, 210, 180, 300, -300, 90, -20));    // left wing
+    g.add(mkBox(body, 210, 180, 300, 300, 90, -20));     // right wing
+    g.add(mkBox(matColWarm, 360, 230, 60, 0, 115, 192)); // entrance colonnade
+    g.add(mkBox(matRoofNavy, 392, 30, 96, 0, 244, 192)); // entablature over columns
+    g.add(mkBox(body, 130, 380, 130, 0, 190, -30));      // central clock tower
+    g.add(mkDome(matGoldDome, 95, 0, 380, -30));         // gold dome
+    const emblem = mkCyl(matGoldDome, 46, 16, 0, 150, 224); emblem.rotation.x = Math.PI / 2; g.add(emblem);
+    return g;
   };
-  (items || []).forEach((it) => {
-    addBuilding(it.lon, it.lat, it.side === 'asia' ? uniMatAsia : uniMatEurope, 150, 3, 1050);
+  const makeHospital = () => {
+    const g = new THREE.Group();
+    g.add(mkBox(matHospital, 480, 360, 320, 0, 180, 0));   // main block
+    g.add(mkBox(matHospital, 240, 200, 220, -300, 100, 40)); // emergency wing
+    g.add(mkBox(matRedGlow, 150, 38, 38, 0, 392, 0));      // roof cross — horizontal
+    g.add(mkBox(matRedGlow, 38, 150, 38, 0, 392, 0));      // roof cross — vertical
+    g.add(mkBox(matRedGlow, 96, 26, 10, 0, 250, 161));     // facade cross — horizontal
+    g.add(mkBox(matRedGlow, 26, 96, 10, 0, 250, 161));     // facade cross — vertical
+    return g;
+  };
+  const makeCivic = (consulate) => {
+    const g = new THREE.Group();
+    g.add(mkBox(matCivic, 400, 280, 280, 0, 140, 0));       // main block
+    g.add(mkBox(matColStone, 380, 240, 64, 0, 120, 146));   // colonnade
+    g.add(mkBox(matStoneLite, 416, 34, 110, 0, 258, 146));  // entablature
+    g.add(mkBox(matStoneLite, 430, 28, 80, 0, 14, 206));    // steps
+    g.add(mkCyl(matPole, 7, 260, -150, 410, 2));            // flagpole on roof
+    g.add(mkBox(consulate ? matFlagCons : matFlagTR, 130, 78, 6, -86, 500, 2)); // flag
+    return g;
+  };
+  const makeMuseum = () => {
+    const g = new THREE.Group();
+    g.add(mkBox(matMuseum, 460, 220, 300, 0, 110, 0));      // cella
+    g.add(mkBox(matColStone, 440, 200, 64, 0, 100, 162));   // colonnade
+    g.add(mkBox(matStoneLite, 472, 30, 90, 0, 215, 162));   // entablature
+    const ped = new THREE.Mesh(gPediment, matMuseum); ped.scale.set(236, 92, 92); ped.position.set(0, 230, 162); g.add(ped);
+    g.add(mkBox(matStoneLite, 480, 30, 96, 0, 16, 226));    // grand steps
+    g.add(mkDome(matDome, 130, 0, 220, -40));               // dome behind
+    return g;
+  };
+  const makeLibrary = () => {
+    const g = new THREE.Group();
+    g.add(mkBox(matLibrary, 360, 270, 280, 0, 135, 0));     // block
+    g.add(mkBox(matColStone, 340, 230, 56, 0, 115, 142));   // colonnade
+    g.add(mkBox(matRoofNavy, 372, 28, 86, 0, 268, 142));    // cornice
+    g.add(mkDome(matDome, 150, 0, 270, -10));               // study dome
+    g.add(mkCyl(matGoldDome, 9, 70, 0, 372, -10));          // finial
+    return g;
+  };
+  const makeDorm = () => {
+    const g = new THREE.Group();
+    g.add(mkBox(matDorm, 180, 460, 72, -110, 230, 0));      // slab A
+    g.add(mkBox(matDorm, 180, 460, 72, 110, 230, 0));       // slab B
+    g.add(mkBox(matDorm, 120, 120, 96, 0, 60, 36));         // entrance link
+    g.add(mkBox(matRoofNavy, 70, 30, 54, -110, 475, 0));    // rooftop plant
+    g.add(mkBox(matRoofNavy, 70, 30, 54, 110, 475, 0));
+    return g;
+  };
+  const makeAirport = () => {
+    const g = new THREE.Group();
+    g.add(mkBox(matTerminal, 1100, 110, 520, 0, 55, 0));    // terminal body
+    const roof = mkCyl(matTerminal, 175, 1120, 0, 110, 0); roof.rotation.z = Math.PI / 2; roof.scale.set(175, 1120, 290); g.add(roof); // curved roof
+    g.add(mkCyl(matTerminal, 34, 720, 520, 360, -120));     // control-tower shaft
+    g.add(mkCyl(matCtrlGlass, 66, 96, 520, 740, -120));     // glass cabin
+    g.add(mkBox(matRunway, 1900, 6, 110, 0, 3, -760));      // runway
+    g.add(mkBox(matRunway, 1900, 6, 110, 220, 3, 820));     // runway
+    return g;
+  };
+
+  const buildings = [];
+  const place = (group, lng, lat) => {
+    group.position.copy(scenePos(lng, lat, 0));
+    scene.add(group);
+    buildings.push(group);
+  };
+
+  // Universities + extra campuses → campus archetype.
+  (items || []).forEach((it) => place(makeUniversity(it.side), it.lon, it.lat));
+  EXTRA_CAMPUSES.forEach(([, lat, lon]) => place(makeUniversity('europe'), lon, lat));
+  // Hospitals & airports.
+  MAP_LANDMARKS.forEach(([type, , lon, lat]) => {
+    if (type === 'hospital') place(makeHospital(), lon, lat);
+    else if (type === 'airport') place(makeAirport(), lon, lat);
   });
-  EXTRA_CAMPUSES.forEach(([, lat, lon]) => {
-    addBuilding(lon, lat, campusMat, 120, 2, 760);
+  // Category places → matching archetype.
+  MAP_PLACES.forEach(([category, , lon, lat]) => {
+    let group;
+    if (category === 'museum') group = makeMuseum();
+    else if (category === 'library') group = makeLibrary();
+    else if (category === 'dorm') group = makeDorm();
+    else if (category === 'consulate') group = makeCivic(true);
+    else group = makeCivic(false); // immigration
+    place(group, lon, lat);
   });
+
+  if (typeof window !== 'undefined' && import.meta.env.DEV) window.__accaThree = { scene, scenePos, origin, scale, buildings };
 
   let renderer = null;
   const start = typeof performance !== 'undefined' ? performance.now() : 0;
@@ -1870,15 +2012,20 @@ function createCinematicThreeLayer(maplibregl, items) {
       scene.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
       cloudGeo.dispose?.();
       cloudMat.dispose?.();
-      facadeEurope.dispose?.();
-      facadeAsia.dispose?.();
-      facadeCampus.dispose?.();
+      [texOffice, texWinWarm, texWinCool, texDorm, texColWarm, texColStone].forEach((t) => t?.dispose?.());
+      archGeos.forEach((g) => g?.dispose?.());
+      archMats.forEach((m) => m?.dispose?.());
       renderer?.dispose?.();
       renderer = null;
     },
     render(gl, matrix) {
       if (!renderer) return;
       const t = ((typeof performance !== 'undefined' ? performance.now() : 0) - start) / 1000;
+      // Fade clouds out as the camera zooms in, so they're atmospheric at the
+      // overview but cleared the moment you focus a university. Full at
+      // zoom <=10, essentially gone by ~11.5.
+      const z = this.map?.getZoom ? this.map.getZoom() : 9.5;
+      cloudMat.opacity = Math.max(0.04, Math.min(0.6, 0.6 - (z - 10) * 0.37));
       ring.rotation.z = t * 0.7;
       ring.scale.setScalar(1 + Math.sin(t * 2) * 0.07);
       ringMat.opacity = 0.5 + Math.sin(t * 2) * 0.22;
