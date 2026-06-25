@@ -1769,25 +1769,37 @@ function createCinematicThreeLayer(maplibregl) {
   // high so they never blanket the university markers.
   const cloudTex = makeCloudTexture();
   const clouds = [];
-  const addCloud = (lng, lat, alt, size, opacity) => {
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: cloudTex, transparent: true, opacity, depthWrite: false, depthTest: true,
-    }));
-    const p = scenePos(lng, lat, alt);
-    sprite.position.copy(p);
-    sprite.scale.set(size, size * 0.62, 1);
-    sprite.userData = { baseX: p.x, baseZ: p.z, phase: Math.random() * Math.PI * 2, sway: 1600 + Math.random() * 2600 };
-    clouds.push(sprite);
-    scene.add(sprite);
+  // Each "cloud" is a CLUSTER of overlapping camera-facing sprites at slightly
+  // different offsets — that reads as a fluffy volumetric mass instead of one
+  // flat billboard. depthTest:false so they never clip/disappear on rotation.
+  const addCloudPuff = (lng, lat, alt, baseSize, opacity) => {
+    const center = scenePos(lng, lat, alt);
+    const group = { sprites: [], baseX: center.x, baseZ: center.z, phase: Math.random() * Math.PI * 2, sway: 1400 + Math.random() * 2400 };
+    const puffs = 5 + Math.floor(Math.random() * 3);
+    for (let j = 0; j < puffs; j += 1) {
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: cloudTex, transparent: true, opacity: opacity * (0.7 + Math.random() * 0.5), depthWrite: false, depthTest: false,
+      }));
+      const ox = (Math.random() - 0.5) * baseSize * 1.1;
+      const oy = (Math.random() - 0.5) * baseSize * 0.28;
+      const oz = (Math.random() - 0.5) * baseSize * 1.1;
+      sprite.position.set(center.x + ox, center.y + oy, center.z + oz);
+      const s = baseSize * (0.55 + Math.random() * 0.7);
+      sprite.scale.set(s, s * 0.72, 1);
+      sprite.userData = { ox, oz };
+      group.sprites.push(sprite);
+      scene.add(sprite);
+    }
+    clouds.push(group);
   };
-  // High deck — moderate, over the city.
-  for (let i = 0; i < 30; i += 1) {
-    addCloud(28.45 + Math.random() * 1.25, 40.82 + Math.random() * 0.7, 2600 + Math.random() * 2600, 1500 + Math.random() * 2600, 0.22 + Math.random() * 0.26);
+  // High deck — big fluffy clouds over the city.
+  for (let i = 0; i < 16; i += 1) {
+    addCloudPuff(28.45 + Math.random() * 1.25, 40.82 + Math.random() * 0.72, 2800 + Math.random() * 2800, 4200 + Math.random() * 3600, 0.4);
   }
-  // Horizon ring — large, low-contrast, far out, to conceal the perimeter.
-  for (let i = 0; i < 22; i += 1) {
-    const ang = (i / 22) * Math.PI * 2;
-    addCloud(28.98 + Math.cos(ang) * 0.95, 41.05 + Math.sin(ang) * 0.62, 1800 + Math.random() * 1800, 4200 + Math.random() * 3200, 0.16 + Math.random() * 0.16);
+  // Horizon ring — very large, low-contrast clouds that conceal the perimeter.
+  for (let i = 0; i < 14; i += 1) {
+    const ang = (i / 14) * Math.PI * 2;
+    addCloudPuff(28.98 + Math.cos(ang) * 1.0, 41.05 + Math.sin(ang) * 0.66, 2200 + Math.random() * 2200, 9000 + Math.random() * 5000, 0.32);
   }
 
   let renderer = null;
@@ -1816,9 +1828,14 @@ function createCinematicThreeLayer(maplibregl) {
       ring.scale.setScalar(1 + Math.sin(t * 2) * 0.07);
       ringMat.opacity = 0.5 + Math.sin(t * 2) * 0.22;
       for (let i = 0; i < clouds.length; i += 1) {
-        const cl = clouds[i];
-        cl.position.x = cl.userData.baseX + Math.sin(t * 0.05 + cl.userData.phase) * cl.userData.sway;
-        cl.position.z = cl.userData.baseZ + Math.cos(t * 0.04 + cl.userData.phase) * cl.userData.sway * 0.7;
+        const group = clouds[i];
+        const dx = group.baseX + Math.sin(t * 0.04 + group.phase) * group.sway;
+        const dz = group.baseZ + Math.cos(t * 0.03 + group.phase) * group.sway * 0.7;
+        for (let j = 0; j < group.sprites.length; j += 1) {
+          const sp = group.sprites[j];
+          sp.position.x = dx + sp.userData.ox;
+          sp.position.z = dz + sp.userData.oz;
+        }
       }
 
       const m = new THREE.Matrix4().fromArray(matrix);
