@@ -1336,6 +1336,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
     addPlaceMarkers({ maplibregl, map, onPlacePick, editable });
     try { addThreeDLandmarks({ map, items }); } catch { /* 3D layer is additive */ }
+    try { map.addLayer(createCinematicThreeLayer(maplibregl)); } catch { /* cinematic 3D layer is additive */ }
     applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
     syncDebug();
@@ -1698,8 +1699,8 @@ function addThreeDLandmarks({ map, items }) {
     const cfg = PLACE_CATEGORIES[category];
     if (cfg) pushTower(lon, lat, category, cfg.color, 120, 850, 2);
   });
-  // Office — the tallest, gold, four-tier tower at the real HQ.
-  pushTower(OFFICE_LOCATION.lon, OFFICE_LOCATION.lat, 'office', '#D8B05B', 130, 3400, 4);
+  // NOTE: the office is now a real animated Three.js tower (createCinematicThreeLayer),
+  // so it is intentionally NOT extruded here to avoid a duplicate.
 
   map.addSource('acca-3d-landmarks', { type: 'geojson', data: { type: 'FeatureCollection', features } });
   map.addLayer({
@@ -1714,6 +1715,83 @@ function addThreeDLandmarks({ map, items }) {
       'fill-extrusion-vertical-gradient': true,
     },
   });
+}
+
+// ── Phase 6: synced Three.js custom WebGL layer ─────────────────────────────
+// One Three.js scene shares Mapbox's WebGL context. The Three.js camera is
+// driven each frame by Mapbox's projection matrix, so 3D content is locked to
+// real geography and tracks pan/zoom/pitch/rotate exactly. This is the proof
+// object — the HQ as an animated gold tower — and the foundation the cloud
+// system and university models will build on.
+function createCinematicThreeLayer(maplibregl) {
+  const origin = maplibregl.MercatorCoordinate.fromLngLat([OFFICE_LOCATION.lon, OFFICE_LOCATION.lat], 0);
+  const scale = origin.meterInMercatorCoordinateUnits();
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.Camera();
+
+  // Dusk lighting to match the Mapbox preset.
+  scene.add(new THREE.AmbientLight(0xb8cee6, 0.85));
+  const sun = new THREE.DirectionalLight(0xffe4bd, 1.5);
+  sun.position.set(-0.5, 0.35, 1).normalize();
+  scene.add(sun);
+
+  // HQ tower — a tapered, multi-tier gold building (heights/sizes in metres;
+  // the whole scene is scaled to metres by the model matrix below).
+  const tower = new THREE.Group();
+  const goldMat = new THREE.MeshStandardMaterial({
+    color: 0xd8b05b, metalness: 0.65, roughness: 0.32, emissive: 0x4a3413, emissiveIntensity: 0.45,
+  });
+  // [halfWidth(m), baseHeight(m), tierHeight(m)]
+  [[140, 0, 700], [110, 700, 650], [80, 1350, 600], [50, 1950, 900]].forEach(([hw, base, h]) => {
+    const box = new THREE.Mesh(new THREE.BoxGeometry(hw * 2, h, hw * 2), goldMat);
+    box.position.set(0, base + h / 2, 0);
+    tower.add(box);
+  });
+  // Animated glowing objective ring above the tower.
+  const ringMat = new THREE.MeshBasicMaterial({ color: 0xffd87a, transparent: true, opacity: 0.7, side: THREE.DoubleSide });
+  const ring = new THREE.Mesh(new THREE.RingGeometry(220, 320, 56), ringMat);
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(0, 3050, 0);
+  tower.add(ring);
+  scene.add(tower);
+
+  let renderer = null;
+  const start = typeof performance !== 'undefined' ? performance.now() : 0;
+  const rotationX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
+
+  return {
+    id: 'acca-cinematic-three',
+    type: 'custom',
+    renderingMode: '3d',
+    onAdd(map, gl) {
+      this.map = map;
+      renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
+      renderer.autoClear = false;
+    },
+    onRemove() {
+      scene.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
+      renderer?.dispose?.();
+      renderer = null;
+    },
+    render(gl, matrix) {
+      if (!renderer) return;
+      const t = ((typeof performance !== 'undefined' ? performance.now() : 0) - start) / 1000;
+      ring.rotation.z = t * 0.7;
+      ring.scale.setScalar(1 + Math.sin(t * 2) * 0.07);
+      ringMat.opacity = 0.5 + Math.sin(t * 2) * 0.22;
+
+      const m = new THREE.Matrix4().fromArray(matrix);
+      const l = new THREE.Matrix4()
+        .makeTranslation(origin.x, origin.y, origin.z)
+        .scale(new THREE.Vector3(scale, -scale, scale))
+        .multiply(rotationX);
+      camera.projectionMatrix = m.multiply(l);
+      renderer.resetState();
+      renderer.render(scene, camera);
+      this.map.triggerRepaint();
+    },
+  };
 }
 
 function addLandmarkMarkers({ maplibregl, map, onPlacePick, editable }) {
