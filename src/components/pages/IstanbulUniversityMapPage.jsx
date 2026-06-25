@@ -1756,6 +1756,40 @@ function createCinematicThreeLayer(maplibregl) {
   tower.add(ring);
   scene.add(tower);
 
+  // Scene placement helper: converts a lng/lat/altitude into scene coordinates
+  // (metres) relative to the model origin. X=east, Y=up, Z=south.
+  const scenePos = (lng, lat, altMeters) => {
+    const m = maplibregl.MercatorCoordinate.fromLngLat([lng, lat], 0);
+    return new THREE.Vector3((m.x - origin.x) / scale, altMeters, (m.y - origin.y) / scale);
+  };
+
+  // ── Phase 6b: layered cloud system ──────────────────────────────────────
+  // Camera-facing sprites at altitude around the Istanbul region: a sparse high
+  // deck plus a wider, larger horizon ring that softens the far edge. Subtle and
+  // high so they never blanket the university markers.
+  const cloudTex = makeCloudTexture();
+  const clouds = [];
+  const addCloud = (lng, lat, alt, size, opacity) => {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: cloudTex, transparent: true, opacity, depthWrite: false, depthTest: true,
+    }));
+    const p = scenePos(lng, lat, alt);
+    sprite.position.copy(p);
+    sprite.scale.set(size, size * 0.62, 1);
+    sprite.userData = { baseX: p.x, baseZ: p.z, phase: Math.random() * Math.PI * 2, sway: 1600 + Math.random() * 2600 };
+    clouds.push(sprite);
+    scene.add(sprite);
+  };
+  // High deck — moderate, over the city.
+  for (let i = 0; i < 30; i += 1) {
+    addCloud(28.45 + Math.random() * 1.25, 40.82 + Math.random() * 0.7, 2600 + Math.random() * 2600, 1500 + Math.random() * 2600, 0.22 + Math.random() * 0.26);
+  }
+  // Horizon ring — large, low-contrast, far out, to conceal the perimeter.
+  for (let i = 0; i < 22; i += 1) {
+    const ang = (i / 22) * Math.PI * 2;
+    addCloud(28.98 + Math.cos(ang) * 0.95, 41.05 + Math.sin(ang) * 0.62, 1800 + Math.random() * 1800, 4200 + Math.random() * 3200, 0.16 + Math.random() * 0.16);
+  }
+
   let renderer = null;
   const start = typeof performance !== 'undefined' ? performance.now() : 0;
   const rotationX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
@@ -1771,6 +1805,7 @@ function createCinematicThreeLayer(maplibregl) {
     },
     onRemove() {
       scene.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
+      cloudTex.dispose?.();
       renderer?.dispose?.();
       renderer = null;
     },
@@ -1780,6 +1815,11 @@ function createCinematicThreeLayer(maplibregl) {
       ring.rotation.z = t * 0.7;
       ring.scale.setScalar(1 + Math.sin(t * 2) * 0.07);
       ringMat.opacity = 0.5 + Math.sin(t * 2) * 0.22;
+      for (let i = 0; i < clouds.length; i += 1) {
+        const cl = clouds[i];
+        cl.position.x = cl.userData.baseX + Math.sin(t * 0.05 + cl.userData.phase) * cl.userData.sway;
+        cl.position.z = cl.userData.baseZ + Math.cos(t * 0.04 + cl.userData.phase) * cl.userData.sway * 0.7;
+      }
 
       const m = new THREE.Matrix4().fromArray(matrix);
       const l = new THREE.Matrix4()
