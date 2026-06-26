@@ -559,11 +559,14 @@ function Select({ darkMode, isFa, children, value, onChange, loading, loadingLab
     return () => document.removeEventListener('mousedown', handleOutside);
   }, [open]);
 
-  // Focus the search field only when the dropdown opens — and with
-  // preventScroll so the browser never auto-scrolls the page to this section
-  // on mount (the panel is always in the DOM, just hidden when closed).
+  // Focus the search field when the dropdown opens — but ONLY on devices with a
+  // fine pointer (mouse). On touch devices auto-focusing pops up the on-screen
+  // keyboard, which covers the options list and makes the programs impossible to
+  // scroll/drag. preventScroll stops the browser auto-scrolling to this section.
   useEffect(() => {
-    if (open) searchInputRef.current?.focus({ preventScroll: true });
+    if (!open) return;
+    const finePointer = typeof window !== 'undefined' && window.matchMedia?.('(pointer: fine)').matches;
+    if (finePointer) searchInputRef.current?.focus({ preventScroll: true });
   }, [open]);
 
   return (
@@ -617,7 +620,7 @@ function Select({ darkMode, isFa, children, value, onChange, loading, loadingLab
               />
             </label>
           </div>
-          <div className="max-h-[240px] space-y-1 overflow-y-auto p-2">
+          <div className="max-h-[min(56vh,300px)] space-y-1 overflow-y-auto overscroll-contain p-2 [-webkit-overflow-scrolling:touch] [touch-action:pan-y]">
             {filteredOptions.length ? filteredOptions.map((option) => {
               const isSelected = option.props.value === value;
 
