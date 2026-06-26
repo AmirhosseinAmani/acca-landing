@@ -51,6 +51,20 @@ textarea {
 }
 
 /*
+ * Persian/Arabic script is CURSIVE — letters join to their neighbours. The
+ * browser applies `letter-spacing` AFTER shaping, so ANY tracking (positive or
+ * negative, e.g. Tailwind's `tracking-tight` / `tracking-wide`) pulls the joined
+ * glyphs apart and leaves a thin line/gap inside words. On RTL (Persian) pages we
+ * therefore force normal spacing on every element. The only place tracking is
+ * wanted is the Latin uppercase labels (eyebrows), which keep theirs via
+ * `.uppercase`. (English LTR pages are unaffected, so Latin headings keep their
+ * tight tracking.)
+ */
+[dir='rtl'] :not(.uppercase) {
+  letter-spacing: normal;
+}
+
+/*
  * Suppress the blue/grey tap-highlight flash that iOS Safari shows on every
  * tapped link, button, or interactive element.  This is purely cosmetic and
  * has no effect on accessibility or focus outlines.
