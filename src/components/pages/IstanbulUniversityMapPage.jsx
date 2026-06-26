@@ -1264,7 +1264,9 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
   // clutter (we add our own beacons). Set after style load so config applies.
   map.on('style.load', () => {
     try {
-      map.setConfigProperty('basemap', 'lightPreset', 'dusk');
+      // Day vs night driven by the theme toggle — bright daylight basemap in
+      // light mode, the lit night basemap (glowing city) in dark mode.
+      map.setConfigProperty('basemap', 'lightPreset', darkMode ? 'night' : 'day');
       map.setConfigProperty('basemap', 'showRoadLabels', false);
       map.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
       map.setConfigProperty('basemap', 'showTransitLabels', false);
@@ -1369,7 +1371,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
     addPlaceMarkers({ maplibregl, map, onPlacePick, editable });
     try { addThreeDLandmarks({ map, items }); } catch { /* 3D layer is additive */ }
-    try { map.addLayer(createCinematicThreeLayer(maplibregl, items)); } catch { /* cinematic 3D layer is additive */ }
+    try { map.addLayer(createCinematicThreeLayer(maplibregl, items, darkMode)); } catch { /* cinematic 3D layer is additive */ }
     applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
     syncDebug();
@@ -1866,17 +1868,31 @@ function makeDenseWindows(baseHex, litColors) {
 // real geography and tracks pan/zoom/pitch/rotate exactly. This is the proof
 // object — the HQ as an animated gold tower — and the foundation the cloud
 // system and university models will build on.
-function createCinematicThreeLayer(maplibregl, items) {
+function createCinematicThreeLayer(maplibregl, items, darkMode) {
   const origin = maplibregl.MercatorCoordinate.fromLngLat([OFFICE_LOCATION.lon, OFFICE_LOCATION.lat], 0);
   const scale = origin.meterInMercatorCoordinateUnits();
+  const night = darkMode === true;
+  // Emissive factors driven by time of day: windows glow at night, are nearly
+  // off in daylight; stone bodies pick up a faint warmth at night.
+  const winGlow = night ? 1.45 : 0.16;
+  const accentGlow = night ? 1.05 : 0.55;
+  const stoneEm = night ? 0.14 : 0.02;
 
   const scene = new THREE.Scene();
   const camera = new THREE.Camera();
 
-  // Dusk lighting to match the Mapbox preset.
-  scene.add(new THREE.AmbientLight(0x8aa0bd, 0.45));
-  const sun = new THREE.DirectionalLight(0xffe4bd, 1.7);
-  sun.position.set(-0.5, 0.35, 1).normalize();
+  // Time-of-day lighting. By day: a bright warm sun + blue-sky hemisphere fill,
+  // so buildings read as sunlit solids. At night: dim cool moonlight + a deep
+  // sky/ground hemisphere, letting the emissive windows carry the scene.
+  const hemi = new THREE.HemisphereLight(
+    night ? 0x2a3f63 : 0xc3e2ff, // sky
+    night ? 0x0f151f : 0x6e5b3c, // ground
+    night ? 0.6 : 1.1,
+  );
+  scene.add(hemi);
+  scene.add(new THREE.AmbientLight(night ? 0x18253c : 0x9fb6d6, night ? 0.32 : 0.38));
+  const sun = new THREE.DirectionalLight(night ? 0xaecbff : 0xfff2da, night ? 0.6 : 2.45);
+  sun.position.set(night ? 0.4 : -0.5, night ? 0.7 : 0.45, 1).normalize();
   scene.add(sun);
 
   // HQ tower — a tapered, multi-tier gold building (heights/sizes in metres;
@@ -1885,7 +1901,7 @@ function createCinematicThreeLayer(maplibregl, items) {
   const texOffice = makeFacadeTexture('#5a4316', ['#fff0c0', '#ffe09a', '#ffd27a']);
   const goldMat = new THREE.MeshStandardMaterial({
     color: 0xd8b05b, metalness: 0.62, roughness: 0.33,
-    emissiveMap: texOffice, emissive: 0xffe0a0, emissiveIntensity: 0.7,
+    emissiveMap: texOffice, emissive: 0xffe0a0, emissiveIntensity: night ? 0.95 : 0.3,
   });
   // [halfWidth(m), baseHeight(m), tierHeight(m)] — the tallest landmark on the
   // map (the HQ really is in a tower), but kept proportionate to the typed
@@ -1918,9 +1934,13 @@ function createCinematicThreeLayer(maplibregl, items) {
   // billboards — so they look volumetric from any angle and are shaded by the
   // sun (lit tops, soft undersides). This is what fixes "flat / disappears on
   // rotate": meshes only need the projection matrix, no camera-facing logic.
-  const cloudGeo = new THREE.IcosahedronGeometry(1, 1);
+  const cloudGeo = new THREE.IcosahedronGeometry(1, 2);
   const cloudMat = new THREE.MeshStandardMaterial({
-    color: 0xeef3fb, roughness: 1, metalness: 0, transparent: true, opacity: 0.66, depthWrite: false,
+    color: night ? 0x9fb0cc : 0xf3f7fd,
+    emissive: night ? 0x223349 : 0x000000,
+    emissiveIntensity: night ? 0.5 : 0,
+    roughness: 1, metalness: 0, transparent: true, opacity: night ? 0.5 : 0.7,
+    depthWrite: false, flatShading: false,
   });
   const clouds = [];
   const addCloudPuff = (lng, lat, alt, baseSize) => {
@@ -1982,26 +2002,26 @@ function createCinematicThreeLayer(maplibregl, items) {
   const archGeos = [gBox, gCyl, gDome, gPlane, gPediment];
 
   // Shared materials.
-  const matStoneLite = new THREE.MeshStandardMaterial({ color: 0xe2d8bd, roughness: 0.8, metalness: 0.04, emissive: 0x2a2418, emissiveIntensity: 0.2 });
-  const matMuseum = new THREE.MeshStandardMaterial({ color: 0xd8cdaa, roughness: 0.82, metalness: 0.05, emissive: 0x2c2616, emissiveIntensity: 0.22 });
-  const matLibrary = new THREE.MeshStandardMaterial({ color: 0xc6a877, roughness: 0.8, metalness: 0.05, emissive: 0x33240f, emissiveIntensity: 0.25 });
-  const matCivic = new THREE.MeshStandardMaterial({ color: 0xd2c8ac, roughness: 0.82, metalness: 0.05, emissive: 0x252a20, emissiveIntensity: 0.2 });
-  const matCampusWarm = new THREE.MeshStandardMaterial({ color: 0xb6a079, map: texWinWarm, emissiveMap: texWinWarm, emissive: 0xffe1a6, emissiveIntensity: 1.15, roughness: 0.7, metalness: 0.12 });
-  const matCampusCool = new THREE.MeshStandardMaterial({ color: 0x9fb1a6, map: texWinCool, emissiveMap: texWinCool, emissive: 0xbfeede, emissiveIntensity: 1.05, roughness: 0.7, metalness: 0.12 });
-  const matColWarm = new THREE.MeshStandardMaterial({ color: 0xece2cc, map: texColWarm, emissiveMap: texColWarm, emissive: 0xfff0d0, emissiveIntensity: 0.3, roughness: 0.72 });
-  const matColStone = new THREE.MeshStandardMaterial({ color: 0xefe7d4, map: texColStone, emissiveMap: texColStone, emissive: 0xfff0d8, emissiveIntensity: 0.28, roughness: 0.72 });
-  const matRoofNavy = new THREE.MeshStandardMaterial({ color: 0x223a5e, roughness: 0.6, metalness: 0.2 });
-  const matHospital = new THREE.MeshStandardMaterial({ color: 0xeef2f6, roughness: 0.5, metalness: 0.1, emissive: 0x5a6470, emissiveIntensity: 0.2 });
-  const matRedGlow = new THREE.MeshStandardMaterial({ color: 0xff3b46, emissive: 0xff2230, emissiveIntensity: 1.7, roughness: 0.4 });
-  const matDorm = new THREE.MeshStandardMaterial({ color: 0xc98a4a, map: texDorm, emissiveMap: texDorm, emissive: 0xffd9a0, emissiveIntensity: 1.0, roughness: 0.8 });
-  const matGoldDome = new THREE.MeshStandardMaterial({ color: 0xe8c067, metalness: 0.7, roughness: 0.3, emissive: 0xffcf6e, emissiveIntensity: 0.55 });
-  const matDome = new THREE.MeshStandardMaterial({ color: 0x9fd8d2, metalness: 0.45, roughness: 0.35, emissive: 0x2a6b66, emissiveIntensity: 0.45 });
+  const matStoneLite = new THREE.MeshStandardMaterial({ color: 0xe2d8bd, roughness: 0.8, metalness: 0.04, emissive: 0x2a2418, emissiveIntensity: stoneEm });
+  const matMuseum = new THREE.MeshStandardMaterial({ color: 0xd8cdaa, roughness: 0.82, metalness: 0.05, emissive: 0x2c2616, emissiveIntensity: stoneEm });
+  const matLibrary = new THREE.MeshStandardMaterial({ color: 0xc6a877, roughness: 0.8, metalness: 0.05, emissive: 0x33240f, emissiveIntensity: stoneEm });
+  const matCivic = new THREE.MeshStandardMaterial({ color: 0xd2c8ac, roughness: 0.82, metalness: 0.05, emissive: 0x252a20, emissiveIntensity: stoneEm });
+  const matCampusWarm = new THREE.MeshStandardMaterial({ color: 0xb6a079, map: texWinWarm, emissiveMap: texWinWarm, emissive: 0xffe1a6, emissiveIntensity: winGlow, roughness: 0.68, metalness: 0.1 });
+  const matCampusCool = new THREE.MeshStandardMaterial({ color: 0x9fb1a6, map: texWinCool, emissiveMap: texWinCool, emissive: 0xbfeede, emissiveIntensity: winGlow * 0.92, roughness: 0.68, metalness: 0.1 });
+  const matColWarm = new THREE.MeshStandardMaterial({ color: 0xece2cc, map: texColWarm, emissiveMap: texColWarm, emissive: 0xfff0d0, emissiveIntensity: night ? 0.32 : 0.06, roughness: 0.72 });
+  const matColStone = new THREE.MeshStandardMaterial({ color: 0xefe7d4, map: texColStone, emissiveMap: texColStone, emissive: 0xfff0d8, emissiveIntensity: night ? 0.3 : 0.06, roughness: 0.72 });
+  const matRoofNavy = new THREE.MeshStandardMaterial({ color: 0x223a5e, roughness: 0.62, metalness: 0.15 });
+  const matHospital = new THREE.MeshStandardMaterial({ color: 0xeef2f6, roughness: 0.5, metalness: 0.08, emissive: 0x5a6470, emissiveIntensity: night ? 0.28 : 0.05 });
+  const matRedGlow = new THREE.MeshStandardMaterial({ color: 0xff3b46, emissive: 0xff2230, emissiveIntensity: night ? 1.8 : 1.15, roughness: 0.4 });
+  const matDorm = new THREE.MeshStandardMaterial({ color: 0xc98a4a, map: texDorm, emissiveMap: texDorm, emissive: 0xffd9a0, emissiveIntensity: winGlow * 0.85, roughness: 0.76, metalness: 0.06 });
+  const matGoldDome = new THREE.MeshStandardMaterial({ color: 0xe8c067, metalness: 0.55, roughness: 0.3, emissive: 0xffcf6e, emissiveIntensity: accentGlow });
+  const matDome = new THREE.MeshStandardMaterial({ color: 0x9fd8d2, metalness: 0.35, roughness: 0.34, emissive: 0x2a6b66, emissiveIntensity: night ? 0.5 : 0.18 });
   const matPole = new THREE.MeshStandardMaterial({ color: 0x59626f, metalness: 0.6, roughness: 0.4 });
   const matFlagTR = new THREE.MeshStandardMaterial({ color: 0xe1322d, emissive: 0xe1322d, emissiveIntensity: 0.5, roughness: 0.6, side: THREE.DoubleSide });
   const matFlagCons = new THREE.MeshStandardMaterial({ color: 0x2a8c8c, emissive: 0x2a8c8c, emissiveIntensity: 0.5, roughness: 0.6, side: THREE.DoubleSide });
   const matTerminal = new THREE.MeshStandardMaterial({ color: 0xb9c4d2, metalness: 0.3, roughness: 0.4, emissive: 0x33425a, emissiveIntensity: 0.25 });
   const matRunway = new THREE.MeshStandardMaterial({ color: 0x2a323d, roughness: 0.95 });
-  const matCtrlGlass = new THREE.MeshStandardMaterial({ color: 0x8fd0ff, emissive: 0x3a6a9a, emissiveIntensity: 0.7, metalness: 0.5, roughness: 0.3 });
+  const matCtrlGlass = new THREE.MeshStandardMaterial({ color: 0x8fd0ff, emissive: 0x3a6a9a, emissiveIntensity: night ? 0.8 : 0.35, metalness: 0.4, roughness: 0.28 });
   const archMats = [matStoneLite, matMuseum, matLibrary, matCivic, matCampusWarm, matCampusCool, matColWarm, matColStone, matRoofNavy, matHospital, matRedGlow, matDorm, matGoldDome, matDome, matPole, matFlagTR, matFlagCons, matTerminal, matRunway, matCtrlGlass];
 
   // Mesh helpers (unit geometry + scale → no per-instance geometry allocation).
@@ -2122,8 +2142,15 @@ function createCinematicThreeLayer(maplibregl, items) {
       this.map = map;
       renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
       renderer.autoClear = false;
+      // Filmic tone mapping so emissive windows/domes roll off smoothly instead
+      // of clipping to white — the polished look from the reference scene. (No
+      // PMREM environment here: generating one on Mapbox's SHARED WebGL context
+      // loses the context. Reflections come from lights + emissive instead.)
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = night ? 1.18 : 1.0;
     },
     onRemove() {
+      scene.environment?.dispose?.();
       scene.traverse((o) => { o.geometry?.dispose?.(); o.material?.dispose?.(); });
       cloudGeo.dispose?.();
       cloudMat.dispose?.();
@@ -2140,7 +2167,8 @@ function createCinematicThreeLayer(maplibregl, items) {
       // overview but cleared the moment you focus a university. Full at
       // zoom <=10, essentially gone by ~11.5.
       const z = this.map?.getZoom ? this.map.getZoom() : 9.5;
-      cloudMat.opacity = Math.max(0.04, Math.min(0.6, 0.6 - (z - 10) * 0.37));
+      const cloudCap = night ? 0.5 : 0.7;
+      cloudMat.opacity = Math.max(0.04, Math.min(cloudCap, cloudCap - (z - 10) * 0.37));
       ring.rotation.z = t * 0.7;
       ring.scale.setScalar(1 + Math.sin(t * 2) * 0.07);
       ringMat.opacity = 0.5 + Math.sin(t * 2) * 0.22;
