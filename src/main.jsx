@@ -8,11 +8,48 @@ import { initScrollRestoration } from './lib/scrollRestoration'
 
 initScrollRestoration()
 
+// Auto-recover from stale-deploy chunk failures. When a new build ships, an old
+// cached index.html / service worker can point at a chunk hash that no longer
+// exists, so a dynamic import fails ("Failed to fetch dynamically imported
+// module"). Clear the service worker + caches and reload ONCE (guarded against
+// loops) so the user lands on the fresh build instead of an error screen.
+function isChunkLoadError(message) {
+  return /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed|ChunkLoadError|Loading chunk \d+ failed/i.test(String(message || ''));
+}
+let recovering = false;
+async function recoverFromStaleDeploy() {
+  if (recovering) return;
+  try {
+    if (sessionStorage.getItem('acca-chunk-recovered')) return;
+    sessionStorage.setItem('acca-chunk-recovered', '1');
+  } catch { /* private mode */ }
+  recovering = true;
+  try {
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    }
+    if (typeof caches !== 'undefined') {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    }
+  } catch { /* best effort */ }
+  window.location.reload();
+}
+if (typeof window !== 'undefined') {
+  window.addEventListener('vite:preloadError', (event) => { event.preventDefault?.(); recoverFromStaleDeploy(); });
+  window.addEventListener('error', (event) => { if (isChunkLoadError(event?.message)) recoverFromStaleDeploy(); });
+  window.addEventListener('unhandledrejection', (event) => { if (isChunkLoadError(event?.reason?.message || event?.reason)) recoverFromStaleDeploy(); });
+}
+
 /** Catches unexpected component errors so the whole page never goes blank. */
 class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
   static getDerivedStateFromError(error) { return { error }; }
-  componentDidCatch(error, info) { console.error('[ACCA EDU] Uncaught error:', error, info); }
+  componentDidCatch(error, info) {
+    console.error('[ACCA EDU] Uncaught error:', error, info);
+    if (isChunkLoadError(error?.message)) recoverFromStaleDeploy();
+  }
   render() {
     if (this.state.error) {
       return (
