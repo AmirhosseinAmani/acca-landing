@@ -9,7 +9,7 @@
 // build is always used; the cache is only a best-effort offline fallback.
 //
 // Bump APP_VERSION on any strategy change so activate() purges old caches.
-const APP_VERSION = 'acca-edu-pwa-v1.2.0';
+const APP_VERSION = 'acca-edu-pwa-v1.2.1';
 const SHELL_CACHE = `${APP_VERSION}-shell`;
 const RUNTIME_CACHE = `${APP_VERSION}-runtime`;
 
