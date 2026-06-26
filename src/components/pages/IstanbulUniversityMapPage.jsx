@@ -1304,10 +1304,11 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
       if (selected) element.dataset.selected = '1';
       else delete element.dataset.selected;
       if (core) {
-        core.style.borderColor = selected ? '#D8B05B' : 'rgba(255,255,255,0.85)';
+        core.style.borderColor = selected ? '#F4E9CE' : '#C6A768';
         core.style.boxShadow = selected
-          ? '0 0 0 4px rgba(216,176,91,0.4), 0 8px 18px rgba(7,26,61,0.45)'
-          : '0 6px 14px rgba(7,26,61,0.4)';
+          ? '0 0 0 4px rgba(198,167,104,0.5), 0 8px 20px rgba(7,26,61,0.5)'
+          : '0 0 0 1px rgba(7,26,61,0.3), 0 7px 16px rgba(7,26,61,0.5)';
+        core.style.transform = selected ? 'rotate(45deg) scale(1.12)' : 'rotate(45deg) scale(1)';
       }
       if (label) label.style.opacity = selected ? '1' : '0';
       element.style.zIndex = selected ? '7' : '1';
@@ -1491,7 +1492,9 @@ function recordEditedCoord(key, marker) {
 
 function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity, editable }) {
   items.forEach((item) => {
-    const fill = item.side === 'asia' ? '#15406e' : '#0d2a52';
+    const fill = item.side === 'asia'
+      ? 'linear-gradient(135deg,#1a4574 0%,#0c2a52 100%)'
+      : 'linear-gradient(135deg,#0f2f59 0%,#071a3d 100%)';
     const element = document.createElement('button');
     element.type = 'button';
     element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
@@ -1506,8 +1509,8 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, ma
     element.innerHTML = `
       <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 5px 12px rgba(7,26,61,0.4));">
         <span class="uni-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:4px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:9px;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(item.name)}</span>
-        <span class="uni-core" style="display:grid;place-items:center;width:27px;height:27px;border-radius:9px 9px 9px 3px;transform:rotate(45deg);background:${fill};border:2.5px solid #ffffff;box-shadow:0 0 0 1px rgba(7,26,61,0.25),0 7px 16px rgba(7,26,61,0.5);transition:border-color .2s,box-shadow .2s;">
-          <span style="transform:rotate(-45deg);color:#fff;font-weight:900;font-size:9px;line-height:1;">${escapeHtml(getUniversityInitials(item.name))}</span>
+        <span class="uni-core" style="display:grid;place-items:center;width:28px;height:28px;border-radius:9px 9px 9px 3px;transform:rotate(45deg);background:${fill};border:2px solid #C6A768;box-shadow:0 0 0 1px rgba(7,26,61,0.3),0 7px 16px rgba(7,26,61,0.5);transition:transform .15s,border-color .2s,box-shadow .2s;">
+          <span style="transform:rotate(-45deg);color:#F4E9CE;font-weight:900;font-size:9px;line-height:1;letter-spacing:.02em;">${escapeHtml(getUniversityInitials(item.name))}</span>
         </span>
       </span>
     `;
@@ -2063,6 +2066,53 @@ function createCinematicThreeLayer(maplibregl, items) {
   };
 }
 
+// ── ACCA brand icon system ──────────────────────────────────────────────────
+// Custom line/solid glyphs (24×24) in the ACCA palette (navy #071A3D, gold
+// #C6A768, cream). One distinct silhouette per place type so the map reads at a
+// glance without emoji. Colour is driven by `currentColor`.
+const ACCA_GLYPHS = {
+  university:
+    '<path fill="currentColor" d="M12 3 1.5 7.8 12 12.6l7.8-3.57V14h1.7V7.8z"/>'
+    + '<path fill="currentColor" d="M5.4 11.9v3.05c0 .98 2.95 2.55 6.6 2.55s6.6-1.57 6.6-2.55V11.9L12 14.9z"/>',
+  office:
+    '<path fill="currentColor" d="M5 21V6.4L12 2.6l7 3.8V21h-4.4v-4.3h-3.2V21z"/>',
+  hospital:
+    '<path fill="currentColor" d="M10 3.4h4v6.2h6.2v4H14v6.2h-4v-6.2H3.8v-4H10z"/>',
+  airport:
+    '<path fill="currentColor" d="M2.4 14.4 10.9 12V5.3a1.1 1.1 0 0 1 2.2 0V12l8.5 2.4v1.85L13.1 14.4v4.7l2.15 1.45v1.5L12 21l-3.25 1.05v-1.5L10.9 19.1v-4.7L2.4 16.25z"/>',
+  museum:
+    '<path fill="currentColor" d="M12 2.4 2.7 7v1.7h18.6V7z"/>'
+    + '<path fill="currentColor" d="M4.6 9.7h2.2v7.1H4.6zm6.3 0h2.2v7.1h-2.2zm6.3 0h2.2v7.1h-2.2z"/>'
+    + '<path fill="currentColor" d="M3 17.4h18v2.6H3z"/>',
+  consulate:
+    '<path fill="currentColor" d="M5 3.4a.95.95 0 0 1 1.9 0V21H5z"/>'
+    + '<path fill="currentColor" d="M7.4 4h10.4l-2.4 3.5 2.4 3.5H7.4z"/>',
+  immigration:
+    '<g fill="none" stroke="currentColor" stroke-width="1.7">'
+    + '<circle cx="12" cy="12" r="8.4"/><ellipse cx="12" cy="12" rx="3.6" ry="8.4"/>'
+    + '<path d="M3.7 9.6h16.6M3.7 14.4h16.6"/></g>',
+  dorm:
+    '<path fill="currentColor" d="M3 8.6c0-.9.7-1.6 1.6-1.6H11v4.4h7.4c1.4 0 2.6 1.2 2.6 2.6V17h-2v-2H5v2H3z"/>'
+    + '<circle cx="6.9" cy="9.9" r="1.9" fill="currentColor"/>',
+  library:
+    '<path fill="currentColor" d="M12 5.7C10.4 4.5 8.3 3.8 6 3.8c-1.3 0-2.6.25-3.7.7v13.4c1.1-.45 2.4-.7 3.7-.7 2.3 0 4.4.7 6 1.9z"/>'
+    + '<path fill="currentColor" opacity="0.74" d="M12 5.7c1.6-1.2 3.7-1.9 6-1.9 1.3 0 2.6.25 3.7.7v13.4c-1.1-.45-2.4-.7-3.7-.7-2.3 0-4.4.7-6 1.9z"/>',
+};
+
+function accaGlyph(key, color, px) {
+  const inner = ACCA_GLYPHS[key] || ACCA_GLYPHS.museum;
+  return `<svg viewBox="0 0 24 24" width="${px}" height="${px}" style="color:${color};display:block" aria-hidden="true">${inner}</svg>`;
+}
+
+// A navy circular badge with a gold ring + gold glyph — the shared shape for
+// every non-university place (landmarks + categories).
+function accaCircleBadge(glyphKey, { size = 26, glyphPx = 14, ring = '#C6A768', glyphColor = '#E8CF8E' } = {}) {
+  return `<span style="display:grid;place-items:center;width:${size}px;height:${size}px;border-radius:50%;`
+    + `background:radial-gradient(125% 125% at 30% 22%, #173a63 0%, #0a1f3f 55%, #071A3D 100%);`
+    + `border:1.6px solid ${ring};box-shadow:0 0 0 1px rgba(7,26,61,0.35),0 7px 16px rgba(7,26,61,0.5),inset 0 1px 1.5px rgba(255,255,255,0.14);">`
+    + `${accaGlyph(glyphKey, glyphColor, glyphPx)}</span>`;
+}
+
 function addLandmarkMarkers({ maplibregl, map, onPlacePick, editable }) {
   MAP_LANDMARKS.forEach(([type, name, lon, lat]) => {
     const isAirport = type === 'airport';
@@ -2070,13 +2120,16 @@ function addLandmarkMarkers({ maplibregl, map, onPlacePick, editable }) {
     element.type = 'button';
     element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
     element.setAttribute('aria-label', name);
-    const accent = isAirport ? '#5d6b80' : '#b6444f';
+    // Hospitals keep a warm-red ring (universal medical signal); airports use the
+    // brand gold ring. Both sit on the shared navy ACCA badge.
+    const ring = isAirport ? '#C6A768' : '#d98a86';
+    const glyphColor = isAirport ? '#E8CF8E' : '#ffd9d4';
     // Label hidden by default (revealed on hover) so the map stays clean, like
     // the university pins.
     element.innerHTML = `
       <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 14px rgba(7,26,61,0.40));">
         <span class="place-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:5px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:10px;">${escapeHtml(name)}</span>
-        <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:${accent};border:2px solid rgba(255,255,255,0.9);font-size:13px;line-height:1;">${isAirport ? '✈️' : '🏥'}</span>
+        ${accaCircleBadge(type, { size: 29, glyphPx: 15, ring, glyphColor })}
       </span>
     `;
     const labelEl = element.querySelector('.place-label');
@@ -2095,7 +2148,6 @@ function addLandmarkMarkers({ maplibregl, map, onPlacePick, editable }) {
 
 function addPlaceMarkers({ maplibregl, map, onPlacePick, editable }) {
   MAP_PLACES.forEach(([category, name, lon, lat]) => {
-    const cfg = PLACE_CATEGORIES[category] || PLACE_CATEGORIES.museum;
     const element = document.createElement('button');
     element.type = 'button';
     element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
@@ -2103,7 +2155,7 @@ function addPlaceMarkers({ maplibregl, map, onPlacePick, editable }) {
     element.innerHTML = `
       <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 5px 12px rgba(7,26,61,0.4));">
         <span class="place-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:4px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:9px;">${escapeHtml(name)}</span>
-        <span style="display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:${cfg.color};border:2px solid rgba(255,255,255,0.92);font-size:12px;line-height:1;">${cfg.icon}</span>
+        ${accaCircleBadge(category, { size: 25, glyphPx: 13 })}
       </span>
     `;
     const labelEl = element.querySelector('.place-label');
@@ -2131,9 +2183,9 @@ function addOfficeMarker({ maplibregl, map, onPlacePick, editable }) {
   element.setAttribute('aria-label', `${OFFICE_LOCATION.labelEn} — ${OFFICE_LOCATION.district}`);
   element.innerHTML = `
     <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 8px 18px rgba(7,26,61,0.45));">
-      <span class="place-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:6px;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#D8B05B,#b9914a);color:#071A3D;font-weight:900;font-size:11px;letter-spacing:.02em;box-shadow:0 6px 16px rgba(7,26,61,0.30);">ACCA EDU</span>
-      <span style="display:grid;place-items:center;width:34px;height:34px;border-radius:11px 11px 11px 3px;transform:rotate(45deg);background:linear-gradient(135deg,#0d2a52,#071A3D);border:2px solid #D8B05B;box-shadow:0 10px 24px rgba(7,26,61,0.45);">
-        <span style="transform:rotate(-45deg);font-size:16px;line-height:1;">🏛️</span>
+      <span class="place-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:6px;padding:4px 10px;border-radius:999px;background:linear-gradient(135deg,#E3C277,#b9914a);color:#071A3D;font-weight:900;font-size:11px;letter-spacing:.02em;box-shadow:0 6px 16px rgba(7,26,61,0.30);">ACCA EDU</span>
+      <span style="display:grid;place-items:center;width:34px;height:34px;border-radius:11px 11px 11px 3px;transform:rotate(45deg);background:linear-gradient(135deg,#E7C97E 0%,#C6A768 52%,#a9863f 100%);border:2px solid #fffaf0;box-shadow:0 10px 24px rgba(7,26,61,0.45),inset 0 1px 2px rgba(255,255,255,0.45);">
+        <span style="transform:rotate(-45deg);display:grid;place-items:center;">${accaGlyph('office', '#071A3D', 18)}</span>
       </span>
     </span>
   `;
