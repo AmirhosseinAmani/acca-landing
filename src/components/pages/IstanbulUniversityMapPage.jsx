@@ -410,6 +410,7 @@ export default function IstanbulUniversityMapPage({
   const sceneApiRef = useRef(null);
   const selectedIdRef = useRef('');
   const [sideFilter, setSideFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('university');
   const [query, setQuery] = useState('');
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -471,6 +472,32 @@ export default function IstanbulUniversityMapPage({
     const programs = mapItems.reduce((total, item) => total + Number(item.programsCount || 0), 0);
     return { europe, asia, programs };
   }, [mapItems]);
+
+  // Every non-university place (hospitals, airports, dorms, libraries, museums,
+  // consulates, migration offices, HQ) so the Map Control panel can browse them
+  // all, not only universities.
+  const mapPlaces = useMemo(() => {
+    const list = [];
+    MAP_LANDMARKS.forEach(([kind, name, lon, lat]) => list.push({ kind, name, lon, lat }));
+    MAP_PLACES.forEach(([kind, name, lon, lat]) => list.push({ kind, name, lon, lat }));
+    if (Number.isFinite(OFFICE_LOCATION.lon)) {
+      list.push({ kind: 'office', name: OFFICE_LOCATION.labelEn, district: OFFICE_LOCATION.district, lon: OFFICE_LOCATION.lon, lat: OFFICE_LOCATION.lat, href: '/?section=contact' });
+    }
+    return list;
+  }, []);
+  const visiblePlaces = useMemo(() => {
+    const nq = normalizeKey(query);
+    return mapPlaces.filter((p) => p.kind === typeFilter && (!nq || normalizeKey(p.name).includes(nq)));
+  }, [mapPlaces, typeFilter, query]);
+  // Tabs across the top of the list: universities + every place category.
+  const CATEGORY_TABS = ['university', 'hospital', 'dorm', 'library', 'museum', 'consulate', 'immigration', 'airport', 'office'];
+  const categoryCount = (key) => (key === 'university' ? mapItems.length : mapPlaces.filter((p) => p.kind === key).length);
+
+  const handlePlaceSelect = (place) => {
+    setSelectedPlace(place);
+    setProfileOpen(false);
+    geospatialApiRef.current?.focusPlace?.(place.lon, place.lat);
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -575,6 +602,15 @@ export default function IstanbulUniversityMapPage({
     const interval = window.setInterval(update, 900);
     return () => window.clearInterval(interval);
   }, [debugMap, mapItems.length, mapMode, validationReport]);
+
+  // "Lights on": tell the 3D layer which building to illuminate whenever the
+  // active selection (a university profile, or a picked place) changes.
+  useEffect(() => {
+    let key = null;
+    if (selectedPlace) key = `place:${selectedPlace.kind}|${selectedPlace.name}`;
+    else if (profileOpen && selectedId) key = `uni:${selectedId}`;
+    geospatialApiRef.current?.setSelectedBuilding?.(key);
+  }, [selectedId, selectedPlace, profileOpen, mapMode]);
 
   const handleSelect = (id) => {
     setSelectedId(id);
@@ -887,24 +923,54 @@ export default function IstanbulUniversityMapPage({
                   ) : null}
                 </div>
 
-                <div className="mt-2 grid grid-cols-3 gap-1.5">
-                  {['all', 'europe', 'asia'].map((side) => (
+                {typeFilter === 'university' ? (
+                  <div className="mt-2 grid grid-cols-3 gap-1.5">
+                    {['all', 'europe', 'asia'].map((side) => (
+                      <button
+                        key={side}
+                        type="button"
+                        onClick={() => setSideFilter(side)}
+                        className={`min-h-9 rounded-[13px] px-2 text-xs font-black transition ${
+                          sideFilter === side
+                            ? 'bg-[#071A3D] text-white'
+                            : darkMode
+                              ? 'bg-white/8 text-white/72 hover:bg-white/12'
+                              : 'bg-white/84 text-[#071A3D]/72 hover:bg-white'
+                        }`}
+                      >
+                        {ui[side]}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+
+              {/* Category tabs — browse universities + every place type */}
+              <div className="-mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                {CATEGORY_TABS.map((key) => {
+                  const meta = key === 'university'
+                    ? { icon: '🎓', fa: ui.universities, en: ui.universities }
+                    : (PLACE_KIND_META[key] || { icon: '📍', fa: key, en: key });
+                  const active = typeFilter === key;
+                  return (
                     <button
-                      key={side}
+                      key={key}
                       type="button"
-                      onClick={() => setSideFilter(side)}
-                      className={`min-h-9 rounded-[13px] px-2 text-xs font-black transition ${
-                        sideFilter === side
+                      onClick={() => setTypeFilter(key)}
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black transition ${
+                        active
                           ? 'bg-[#071A3D] text-white'
                           : darkMode
                             ? 'bg-white/8 text-white/72 hover:bg-white/12'
                             : 'bg-white/84 text-[#071A3D]/72 hover:bg-white'
                       }`}
                     >
-                      {ui[side]}
+                      <span>{meta.icon}</span>
+                      <span>{isFa ? meta.fa : meta.en}</span>
+                      <span className="opacity-55">{categoryCount(key)}</span>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
 
               <div className="mt-3 flex items-center justify-between gap-2">
@@ -921,25 +987,49 @@ export default function IstanbulUniversityMapPage({
                 </button>
               </div>
 
-              <div className="mt-2 hidden max-h-[22vh] overflow-y-auto rounded-[18px] md:block">
-                {visibleItems.length ? visibleItems.slice(0, 12).map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleSelect(item.id)}
-                    className={`mt-1 flex w-full items-center justify-between gap-3 rounded-[15px] px-3 py-2 text-start transition ${
-                      selected?.id === item.id
-                        ? 'bg-[#071A3D] text-white'
-                        : darkMode
-                          ? 'text-white/72 hover:bg-white/10'
-                          : 'text-[#071A3D]/74 hover:bg-[#071A3D]/[0.05]'
-                    }`}
-                  >
-                    <span className="min-w-0 truncate text-xs font-black">{item.name}</span>
-                    <span className="shrink-0 text-[10px] font-bold opacity-70">{item.district}</span>
-                  </button>
-                )) : (
-                  <div className="px-3 py-4 text-sm font-bold opacity-60">{ui.empty}</div>
+              {/* List — universities OR the selected place category. Shown on
+                  every screen size (was desktop-only, which hid it on mobile). */}
+              <div className="mt-2 max-h-[26vh] overflow-y-auto rounded-[18px] sm:max-h-[24vh]">
+                {typeFilter === 'university' ? (
+                  visibleItems.length ? visibleItems.slice(0, 16).map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleSelect(item.id)}
+                      className={`mt-1 flex w-full items-center justify-between gap-3 rounded-[15px] px-3 py-2 text-start transition ${
+                        selected?.id === item.id
+                          ? 'bg-[#071A3D] text-white'
+                          : darkMode
+                            ? 'text-white/72 hover:bg-white/10'
+                            : 'text-[#071A3D]/74 hover:bg-[#071A3D]/[0.05]'
+                      }`}
+                    >
+                      <span className="min-w-0 truncate text-xs font-black">{item.name}</span>
+                      <span className="shrink-0 text-[10px] font-bold opacity-70">{item.district}</span>
+                    </button>
+                  )) : (
+                    <div className="px-3 py-4 text-sm font-bold opacity-60">{ui.empty}</div>
+                  )
+                ) : (
+                  visiblePlaces.length ? visiblePlaces.map((p) => (
+                    <button
+                      key={`${p.kind}|${p.name}`}
+                      type="button"
+                      onClick={() => handlePlaceSelect(p)}
+                      className={`mt-1 flex w-full items-center justify-between gap-3 rounded-[15px] px-3 py-2 text-start transition ${
+                        selectedPlace?.name === p.name
+                          ? 'bg-[#071A3D] text-white'
+                          : darkMode
+                            ? 'text-white/72 hover:bg-white/10'
+                            : 'text-[#071A3D]/74 hover:bg-[#071A3D]/[0.05]'
+                      }`}
+                    >
+                      <span className="min-w-0 truncate text-xs font-black">{p.name}</span>
+                      <span className="shrink-0 text-[11px]">{(PLACE_KIND_META[p.kind] || {}).icon || '📍'}</span>
+                    </button>
+                  )) : (
+                    <div className="px-3 py-4 text-sm font-bold opacity-60">{ui.empty}</div>
+                  )
                 )}
               </div>
             </div>
@@ -1359,7 +1449,20 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     });
   };
 
-  apiRef.current = { focusUniversity, resetView };
+  const focusPlace = (lng, lat) => {
+    map.flyTo({
+      center: [lng, lat],
+      zoom: compactViewport ? 12.6 : 13.8,
+      pitch: compactViewport ? 50 : 58,
+      bearing: -16,
+      speed: 0.74,
+      curve: 1.4,
+      essential: false,
+    });
+  };
+
+  let cinematicLayer = null;
+  apiRef.current = { focusUniversity, resetView, focusPlace, setSelectedBuilding: (key) => cinematicLayer?.setSelected?.(key) };
 
   map.on('load', () => {
     loaded = true;
@@ -1371,7 +1474,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
     addPlaceMarkers({ maplibregl, map, onPlacePick, editable });
     try { addThreeDLandmarks({ map, items }); } catch { /* 3D layer is additive */ }
-    try { map.addLayer(createCinematicThreeLayer(maplibregl, items, darkMode)); } catch { /* cinematic 3D layer is additive */ }
+    try { cinematicLayer = createCinematicThreeLayer(maplibregl, items, darkMode); map.addLayer(cinematicLayer); } catch { /* cinematic 3D layer is additive */ }
     applyCinematicAtmosphere(map, darkMode);
     setSelectedMarker(selectedId);
     syncDebug();
@@ -2103,30 +2206,46 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
   };
 
   const buildings = [];
-  const place = (group, lng, lat) => {
+  // Map a parent university name → id so each campus building can light up with
+  // its parent on selection.
+  const nameToId = new Map();
+  (items || []).forEach((it) => nameToId.set(normalizeKey(it.name), it.id));
+  // BUILDING_SCALE shrinks every structure 20% so they overlap less and are
+  // easier to click.
+  const BUILDING_SCALE = 0.8;
+  const place = (group, lng, lat, key) => {
     group.position.copy(scenePos(lng, lat, 0));
+    group.scale.setScalar(BUILDING_SCALE);
+    if (key) group.userData.key = key;
     scene.add(group);
     buildings.push(group);
   };
 
   // Universities + extra campuses → campus archetype.
-  (items || []).forEach((it) => place(makeUniversity(it.side), it.lon, it.lat));
-  SECONDARY_CAMPUSES.forEach(([, lat, lon, , side]) => place(makeUniversity(side), lon, lat));
+  (items || []).forEach((it) => place(makeUniversity(it.side), it.lon, it.lat, `uni:${it.id}`));
+  SECONDARY_CAMPUSES.forEach(([parent, lat, lon, , side]) => {
+    const pid = nameToId.get(normalizeKey(parent));
+    place(makeUniversity(side), lon, lat, pid ? `uni:${pid}` : null);
+  });
   // Hospitals & airports.
-  MAP_LANDMARKS.forEach(([type, , lon, lat]) => {
-    if (type === 'hospital') place(makeHospital(), lon, lat);
-    else if (type === 'airport') place(makeAirport(), lon, lat);
+  MAP_LANDMARKS.forEach(([type, name, lon, lat]) => {
+    if (type === 'hospital') place(makeHospital(), lon, lat, `place:hospital|${name}`);
+    else if (type === 'airport') place(makeAirport(), lon, lat, `place:airport|${name}`);
   });
   // Category places → matching archetype.
-  MAP_PLACES.forEach(([category, , lon, lat]) => {
+  MAP_PLACES.forEach(([category, name, lon, lat]) => {
     let group;
     if (category === 'museum') group = makeMuseum();
     else if (category === 'library') group = makeLibrary();
     else if (category === 'dorm') group = makeDorm();
     else if (category === 'consulate') group = makeCivic(true);
     else group = makeCivic(false); // immigration
-    place(group, lon, lat);
+    place(group, lon, lat, `place:${category}|${name}`);
   });
+  // Office HQ tower (built above) — also shrink + make it selectable.
+  tower.scale.setScalar(BUILDING_SCALE);
+  tower.userData.key = `place:office|${OFFICE_LOCATION.labelEn}`;
+  buildings.push(tower);
 
   if (typeof window !== 'undefined' && import.meta.env.DEV) window.__accaThree = { scene, scenePos, origin, scale, buildings };
 
@@ -2134,10 +2253,35 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
   const start = typeof performance !== 'undefined' ? performance.now() : 0;
   const rotationX = new THREE.Matrix4().makeRotationAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
 
+  // "Lights on": when a place is selected its building's materials are cloned
+  // with a warm emissive boost (windows/surfaces glow), restored on deselect.
+  let litRestore = [];
+  const clearLit = () => {
+    litRestore.forEach(({ mesh, base, clone }) => { mesh.material = base; clone.dispose?.(); });
+    litRestore = [];
+  };
+  const setSelected = (key) => {
+    clearLit();
+    if (!key) return;
+    buildings
+      .filter((g) => g.userData && g.userData.key === key)
+      .forEach((g) => g.traverse((o) => {
+        if (o.isMesh && o.material) {
+          const base = o.material;
+          const clone = base.clone();
+          clone.emissive = new THREE.Color(0xffe7b8);
+          clone.emissiveIntensity = (base.emissiveIntensity || 0) + 1.7;
+          o.material = clone;
+          litRestore.push({ mesh: o, base, clone });
+        }
+      }));
+  };
+
   return {
     id: 'acca-cinematic-three',
     type: 'custom',
     renderingMode: '3d',
+    setSelected,
     onAdd(map, gl) {
       this.map = map;
       renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
