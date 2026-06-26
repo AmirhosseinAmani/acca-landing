@@ -1330,6 +1330,21 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     });
   };
 
+  // Fly to a specific secondary campus (the parent profile is opened separately
+  // by the marker's onPick). Tighter zoom than a main campus since it marks one
+  // building.
+  const focusCampus = (lng, lat, side) => {
+    map.flyTo({
+      center: [lng, lat],
+      zoom: compactViewport ? 11.8 : 13.4,
+      pitch: compactViewport ? 50 : 60,
+      bearing: side === 'asia' ? -26 : 16,
+      speed: 0.74,
+      curve: 1.4,
+      essential: false,
+    });
+  };
+
   const resetView = () => {
     map.flyTo({
       center: MAP_CONFIG.center,
@@ -1349,6 +1364,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
     window.__accaMapFallbackReason = '';
     addGeospatialInfrastructure(map, darkMode);
     addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity, editable });
+    addGeospatialCampusMarkers({ maplibregl, map, items, campuses: SECONDARY_CAMPUSES, onPick, focusCampus, editable });
     addOfficeMarker({ maplibregl, map, onPlacePick, editable });
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
     addPlaceMarkers({ maplibregl, map, onPlacePick, editable });
@@ -1534,6 +1550,46 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, ma
   });
 }
 
+// Secondary-campus markers. Each resolves its parent university by name and,
+// when clicked, opens the SAME profile as the main campus (onPick(parent.id))
+// while flying to this specific campus. Styled as a smaller sibling of the
+// university diamond (navy + gold) so it reads as "another site of X".
+function addGeospatialCampusMarkers({ maplibregl, map, items, campuses, onPick, focusCampus, editable }) {
+  const byName = new Map();
+  items.forEach((it) => byName.set(normalizeKey(it.name), it));
+  campuses.forEach(([parent, lat, lon, label, side]) => {
+    const parentItem = byName.get(normalizeKey(parent));
+    if (!parentItem) return;
+    const fill = side === 'asia'
+      ? 'linear-gradient(135deg,#1a4574 0%,#0c2a52 100%)'
+      : 'linear-gradient(135deg,#0f2f59 0%,#071a3d 100%)';
+    const element = document.createElement('button');
+    element.type = 'button';
+    element.style.cssText = 'background:none;border:none;padding:0;cursor:pointer;';
+    element.setAttribute('aria-label', `${parentItem.name} — ${label}`);
+    element.innerHTML = `
+      <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 4px 10px rgba(7,26,61,0.4));">
+        <span class="campus-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:3px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:8.5px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(parentItem.name)} · ${escapeHtml(label)}</span>
+        <span style="display:grid;place-items:center;width:21px;height:21px;border-radius:7px 7px 7px 2px;transform:rotate(45deg);background:${fill};border:1.5px solid #C6A768;box-shadow:0 0 0 1px rgba(7,26,61,0.3),0 5px 12px rgba(7,26,61,0.45);">
+          <span style="transform:rotate(-45deg);color:#E7D3A0;font-weight:900;font-size:7.5px;line-height:1;">${escapeHtml(getUniversityInitials(parentItem.name))}</span>
+        </span>
+      </span>
+    `;
+    const labelEl = element.querySelector('.campus-label');
+    element.addEventListener('mouseenter', () => { labelEl.style.opacity = '1'; element.style.zIndex = '6'; });
+    element.addEventListener('mouseleave', () => { labelEl.style.opacity = '0'; element.style.zIndex = '1'; });
+    element.addEventListener('click', (event) => {
+      event.stopPropagation();
+      onPick(parentItem.id);
+      focusCampus(lon, lat, side);
+    });
+    const marker = new maplibregl.Marker({ element, anchor: 'bottom', draggable: Boolean(editable) })
+      .setLngLat([lon, lat])
+      .addTo(map);
+    if (editable) marker.on('dragend', () => recordEditedCoord(`${parent} — ${label}`, marker));
+  });
+}
+
 function applyCinematicAtmosphere(map, darkMode) {
   // Mapbox v3 atmospheric fog: adds horizon haze and depth, and dissolves the
   // far edge of the streamed map into atmosphere so no technical boundary shows
@@ -1553,31 +1609,39 @@ function applyCinematicAtmosphere(map, darkMode) {
   }
 }
 
-// Additional (secondary/third) campuses, geocoded on-land in their real
-// districts, so multi-campus universities show every site — not just one.
-const EXTRA_CAMPUSES = [
-  ['Koc University', 41.1850, 29.0400, 'West Campus · Zekeriyaköy'],
-  ['Dogus University', 41.0050, 29.1730, 'Dudullu · Ümraniye'],
-  ['Istanbul Gedik University', 40.8780, 29.2530, 'Pendik'],
-  ['Istanbul Gedik University', 41.0530, 28.9950, 'Nişantaşı · Şişli'],
-  ['Istanbul Topkapi University', 41.0050, 28.6600, 'Bahçeşehir · Esenyurt'],
-  ['Istanbul Topkapi University', 41.0220, 29.0400, 'Altunizade · Üsküdar'],
-  ['Okan University', 40.9930, 29.0360, 'Kadıköy · Hasanpaşa'],
-  ['Okan University', 41.0660, 28.9960, 'Mecidiyeköy · Şişli'],
-  ['Istanbul Nisantasi University', 41.0850, 28.9720, 'Kağıthane'],
-  ['Istinye University', 41.0150, 28.9180, 'Topkapı · Zeytinburnu'],
-  ['Istanbul Medipol University', 41.0250, 28.9540, 'Haliç · Cibali'],
-  ['Istanbul Kultur University', 40.9920, 28.8720, 'İncirli · Bakırköy'],
-  ['Istanbul Kent University', 41.0860, 28.9750, 'Kâğıthane'],
-  ['Uskudar University', 41.0260, 29.0130, 'Çarşı · Üsküdar'],
-  ['Beykoz University', 41.1080, 29.0780, 'Çubuklu'],
-  ['Beykent University', 41.0330, 28.9830, 'Taksim · Beyoğlu'],
-  ['Beykent University', 41.1170, 28.7250, 'Hadımköy · Esenyurt'],
-  ['Bahcesehir University', 40.9780, 29.0620, 'Göztepe · Kadıköy'],
-  ['Altinbas University', 40.9920, 28.8720, 'Bakırköy · İncirli'],
-  ['Istanbul Arel University', 41.0130, 28.9270, 'Cevizlibağ · Zeytinburnu'],
-  ['Isik University', 41.1080, 29.0190, 'Maslak · Levent'],
-  ['Istanbul Yeni Yuzyil University', 41.0450, 28.9480, 'Dentistry · Sütlüce'],
+// Every SECONDARY campus of each multi-campus university (the main campus is in
+// GEO_POINTS). Derived from the official campus addresses in istanbulUniversities,
+// geocoded on-land in their real neighbourhoods (8 web-verified, the rest from
+// the known addresses; all draggable in edit mode to lock exact spots). Each row
+// links back to its parent university by name, so clicking the campus opens the
+// SAME profile. [parentName, lat, lon, campusLabel, side].
+const SECONDARY_CAMPUSES = [
+  ['DOGUS UNIVERSITY', 41.0118, 29.1635, 'Dudullu Campus', 'asia'],
+  ['KOC UNIVERSITY', 41.1928, 29.0455, 'West Campus', 'europe'],
+  ['ISTANBUL GEDIK UNIVERSITY', 40.9060, 29.2545, 'Pendik Campus', 'asia'],
+  ['ISTANBUL GEDIK UNIVERSITY', 40.9095, 29.3060, 'Çamlık Campus (Kurtköy)', 'asia'],
+  ['ISTANBUL TOPKAPI UNIVERSITY', 41.0735, 28.6655, 'Bahçeşehir Campus', 'europe'],
+  ['ISTANBUL TOPKAPI UNIVERSITY', 41.0220, 29.0455, 'Altunizade Campus', 'asia'],
+  ['USKUDAR UNIVERSITY', 41.0258, 29.0145, 'Çarşı Campus', 'asia'],
+  ['USKUDAR UNIVERSITY', 41.0123, 29.0978, 'NP Health Campus', 'asia'],
+  ['OKAN UNIVERSITY', 41.0668, 28.9968, 'Mecidiyeköy Campus', 'europe'],
+  ['ISTANBUL NISANTASI UNIVERSITY', 41.1118, 29.0195, 'NeoTech Campus (Maslak)', 'europe'],
+  ['ISTINYE UNIVERSITY', 41.1070, 28.9980, 'Vadi Campus (Ayazağa)', 'europe'],
+  ['ISTANBUL YENI YUZYIL UNIVERSITY', 41.0480, 28.9450, 'Dentistry Hospital (Sütlüce)', 'europe'],
+  ['ISTANBUL MEDIPOL UNIVERSITY', 41.0914, 29.0915, 'Kavacık North Campus', 'asia'],
+  ['ISTANBUL MEDIPOL UNIVERSITY', 41.0902, 29.0908, 'Kavacık South Campus', 'asia'],
+  ['ISTANBUL KULTUR UNIVERSITY', 40.9915, 28.8724, 'İncirli Campus', 'europe'],
+  ['ISTANBUL KENT UNIVERSITY', 41.0855, 28.9755, 'Kâğıthane Campus', 'europe'],
+  ['ISTANBUL ATLAS UNIVERSITY', 41.0950, 28.9760, 'Atlas Valley Campus', 'europe'],
+  ['ISTANBUL AREL UNIVERSITY', 41.0125, 28.9250, 'Cevizlibağ Campus', 'europe'],
+  ['ISIK UNIVERSITY', 41.1635, 29.6075, 'Şile Campus', 'asia'],
+  ['BEYKOZ UNIVERSITY', 41.1080, 29.0780, 'Çubuklu Campus', 'asia'],
+  ['BEYKOZ UNIVERSITY', 41.1030, 29.0950, 'Kavacık Campus', 'asia'],
+  ['BEYKENT UNIVERSITY', 41.1165, 28.7245, 'Hadımköy Campus', 'europe'],
+  ['BEYKENT UNIVERSITY', 41.0040, 28.6400, 'Beylikdüzü Campus', 'europe'],
+  ['BAHCESEHIR UNIVERSITY', 41.0425, 29.0095, 'Beşiktaş South Campus', 'europe'],
+  ['ALTINBAS UNIVERSITY', 41.0654, 28.8339, 'Mahmutbey Campus', 'europe'],
+  ['ALTINBAS UNIVERSITY', 40.9945, 28.8714, 'Bakırköy Campus', 'europe'],
 ];
 
 // Key landmarks that help a first-time student orient: the two airports and the
@@ -1621,6 +1685,8 @@ const MAP_PLACES = [
   ['consulate', 'Russian Consulate General', 28.9817, 41.0330],
   // Migration / Göç İdaresi offices
   ['immigration', 'İstanbul Provincial Migration Office (Kumkapı)', 28.9685, 41.0040],
+  ['immigration', 'İl Göç İdaresi — Vatan, Fatih', 28.9388, 41.0165],
+  ['immigration', 'Migration Office — Esenyurt', 28.6750, 41.0285],
   ['immigration', 'Migration Office — Esenler', 28.8780, 41.0430],
   ['immigration', 'Migration Office — Pendik (Asian side)', 29.2500, 40.8800],
   // Student dorms / housing
@@ -1628,12 +1694,18 @@ const MAP_PLACES = [
   ['dorm', 'KYK Çağlayan Student Dorm', 28.9900, 41.0700],
   ['dorm', 'KYK Avcılar Student Dorm', 28.7200, 40.9900],
   ['dorm', 'Student Housing — Esenyurt', 28.6700, 41.0250],
-  // Libraries & study spaces
+  // Libraries & study spaces (central)
   ['library', 'Atatürk Library (Taksim)', 28.9890, 41.0375],
   ['library', 'Beyazıt State Library', 28.9648, 41.0107],
   ['library', 'Rami Library', 28.9230, 41.0560],
   ['library', 'Orhan Kemal Public Library', 28.97722, 41.03442],
   ['library', 'Nuruosmaniye Library', 28.9710, 41.0100],
+  // Libraries & study spaces (west side — closer to Esenyurt/Beylikdüzü unis)
+  ['library', 'Başakşehir Millet Library', 28.8020, 41.0935],
+  ['library', 'Beylikdüzü Public Library', 28.6415, 41.0040],
+  ['library', 'Esenyurt Public Library', 28.6720, 41.0310],
+  ['library', 'Avcılar Public Library', 28.7210, 40.9805],
+  ['library', 'Büyükçekmece Public Library', 28.5870, 41.0205],
 ];
 
 // Unified metadata for every non-university tag, used by the info panel header.
@@ -1994,7 +2066,7 @@ function createCinematicThreeLayer(maplibregl, items) {
 
   // Universities + extra campuses → campus archetype.
   (items || []).forEach((it) => place(makeUniversity(it.side), it.lon, it.lat));
-  EXTRA_CAMPUSES.forEach(([, lat, lon]) => place(makeUniversity('europe'), lon, lat));
+  SECONDARY_CAMPUSES.forEach(([, lat, lon, , side]) => place(makeUniversity(side), lon, lat));
   // Hospitals & airports.
   MAP_LANDMARKS.forEach(([type, , lon, lat]) => {
     if (type === 'hospital') place(makeHospital(), lon, lat);
