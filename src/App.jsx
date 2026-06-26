@@ -2311,7 +2311,7 @@ export default function ACCALandingPage() {
             >
               <span className="inline-flex items-center gap-2">
                 <MapPin size={17} strokeWidth={2.4} />
-                {isFa ? 'نقشه 3D' : '3D Map'}
+                {isFa ? 'نقشه سه بعدی استانبول' : '3D Istanbul Map'}
               </span>
             </a>
 
@@ -2412,7 +2412,7 @@ export default function ACCALandingPage() {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`${darkMode ? 'hover:bg-white/10' : 'hover:bg-black/5'} flex items-center justify-between rounded-[22px] px-5 py-4 text-base font-black transition`}
               >
-                <span>{isFa ? 'نقشه 3D' : '3D Map'}</span>
+                <span>{isFa ? 'نقشه سه بعدی استانبول' : '3D Istanbul Map'}</span>
                 <MapPin size={19} />
               </a>
 

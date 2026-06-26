@@ -13,7 +13,7 @@ export const MAIN_NAV = [
   { key: 'blog', href: '/blog/', fa: 'بلاگ', en: 'Blog' },
   { key: 'universities', href: '/universities/', fa: 'دانشگاه‌ها', en: 'Universities' },
   { key: 'programs', href: '/programs/', fa: 'رشته‌ها و شهریه‌ها', en: 'Programs & Tuition' },
-  { key: 'istanbul-map', href: '/istanbul-university-map/', fa: 'نقشه 3D', en: '3D Map' },
+  { key: 'istanbul-map', href: '/istanbul-university-map/', fa: 'نقشه سه بعدی استانبول', en: '3D Istanbul Map' },
 ];
 
 /** Go back to the exact previous in-site page, or `fallback` on a cold entry. */

@@ -340,7 +340,7 @@ const GEO_POINTS = [
 
 const copy = {
   fa: {
-    navLabel: 'نقشه 3D',
+    navLabel: 'نقشه سه بعدی استانبول',
     eyebrow: 'Istanbul University Atlas',
     title: 'نقشه سه بعدی دانشگاه های استانبول',
     subtitle:
@@ -365,7 +365,7 @@ const copy = {
     sourceNote: 'موقعیت ها برای نمایش بصری تقریبی هستند؛ اطلاعات پروفایل از دیتابیس داخلی سایت خوانده می شود.',
   },
   en: {
-    navLabel: '3D Map',
+    navLabel: '3D Istanbul Map',
     eyebrow: 'Istanbul University Atlas',
     title: '3D Istanbul University Map',
     subtitle:
@@ -442,7 +442,11 @@ export default function IstanbulUniversityMapPage({
 
   const mapItems = useMemo(() => createMapItems(), []);
   const validationReport = useMemo(() => validateUniversityCoordinates(mapItems), [mapItems]);
-  const [selectedId, setSelectedId] = useState(() => mapItems[0]?.id || '');
+  const [selectedId, setSelectedId] = useState(() => {
+    // Default the 3D map to Biruni University (falls back to the first item).
+    const biruni = mapItems.find((it) => normalizeKey(it.name) === normalizeKey('Biruni University'));
+    return biruni?.id || mapItems[0]?.id || '';
+  });
   const selected = useMemo(
     () => mapItems.find((item) => item.id === selectedId) || mapItems[0],
     [mapItems, selectedId]
