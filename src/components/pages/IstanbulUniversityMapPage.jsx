@@ -47,7 +47,8 @@ function decodePublishableMapboxToken() {
   const b64 = 'cGsuZXlKMUlqb2lZV05qWVMxbFpIVWlMQ0poSWpvaVkyMXhjMnc1Ym1OaE1EbG9Nakp4Y1hscmFHWmhNWFI1T1NKOS5odE5qNHF5ekpueFBfcXF4d05XRVR3';
   try {
     if (typeof atob === 'function') return atob(b64);
-    if (typeof Buffer !== 'undefined') return Buffer.from(b64, 'base64').toString('utf8');
+    const nodeBuffer = globalThis.Buffer;
+    if (nodeBuffer?.from) return nodeBuffer.from(b64, 'base64').toString('utf8');
   } catch { /* fall through to empty -> low-poly fallback */ }
   return '';
 }
@@ -194,104 +195,6 @@ const ISTANBUL_LAKES = [
   { center: [41.065, 29.345], rx: 2.7, rz: 2.0, rotation: 0.28 },
 ];
 
-const BOSPHORUS_BRIDGES = [
-  {
-    id: 'bosphorus-bridge',
-    start: [41.047, 29.025],
-    end: [41.043, 29.053],
-    towerStart: [41.047, 29.030],
-    towerEnd: [41.044, 29.048],
-  },
-  {
-    id: 'fsm-bridge',
-    start: [41.092, 29.055],
-    end: [41.088, 29.078],
-    towerStart: [41.092, 29.060],
-    towerEnd: [41.089, 29.073],
-  },
-  {
-    id: 'yss-bridge',
-    start: [41.205, 29.106],
-    end: [41.206, 29.145],
-    towerStart: [41.205, 29.114],
-    towerEnd: [41.206, 29.137],
-  },
-];
-
-const ISTANBUL_INFRASTRUCTURE = {
-  roads: [
-    {
-      id: 'o7-europe-black-sea-corridor',
-      name: 'O-7 European corridor',
-      kind: 'highway',
-      coordinates: [
-        [28.50, 41.00],
-        [28.64, 41.05],
-        [28.80, 41.10],
-        [28.98, 41.12],
-        [29.10, 41.15],
-        [29.24, 41.16],
-        [29.42, 41.16],
-        [29.62, 41.14],
-      ],
-    },
-    {
-      id: 'e80-trans-istanbul',
-      name: 'E80 / TEM corridor',
-      kind: 'highway',
-      coordinates: [
-        [28.55, 41.02],
-        [28.73, 41.04],
-        [28.90, 41.05],
-        [29.03, 41.07],
-        [29.16, 41.05],
-        [29.35, 40.99],
-        [29.58, 40.92],
-      ],
-    },
-    {
-      id: 'd100-marmara-corridor',
-      name: 'D100 coastal corridor',
-      kind: 'arterial',
-      coordinates: [
-        [28.54, 40.96],
-        [28.72, 40.97],
-        [28.90, 40.99],
-        [29.01, 41.00],
-        [29.12, 40.99],
-        [29.28, 40.92],
-        [29.48, 40.85],
-      ],
-    },
-  ],
-  bridges: BOSPHORUS_BRIDGES.map((bridge) => ({
-    id: bridge.id,
-    kind: 'bridge',
-    coordinates: [
-      [bridge.start[1], bridge.start[0]],
-      [bridge.end[1], bridge.end[0]],
-    ],
-  })),
-  airports: [
-    {
-      id: 'istanbul-airport',
-      name: 'Istanbul Airport',
-      center: [28.7519, 41.2608],
-      runwayBearing: -8,
-      runwayLength: 0.075,
-      runwayWidth: 0.012,
-    },
-    {
-      id: 'sabiha-gokcen-airport',
-      name: 'Sabiha Gokcen International Airport',
-      center: [29.3092, 40.8986],
-      runwayBearing: 64,
-      runwayLength: 0.052,
-      runwayWidth: 0.010,
-    },
-  ],
-};
-
 const GEO_POINTS = [
   // Primary campus of each university, geocoded to real on-land positions in the
   // correct Istanbul district. [name, lat, lon, district, side]. Corrected so no
@@ -429,8 +332,7 @@ export default function IstanbulUniversityMapPage({
     if (typeof window === 'undefined') return false;
     return new URLSearchParams(window.location.search).get('editMap') === '1';
   }, []);
-  const [editing, setEditing] = useState(false);
-  useEffect(() => { if (editMode) setEditing(true); }, [editMode]);
+  const [editing, setEditing] = useState(() => editMode);
   const copyEditedCoordinates = () => {
     const data = (typeof window !== 'undefined' && window.__accaEditedCoords) || {};
     const text = JSON.stringify(data, null, 2);
@@ -670,6 +572,23 @@ export default function IstanbulUniversityMapPage({
             color: rgba(7,26,61,.68) !important;
             font: 700 10px/1.4 ui-sans-serif, system-ui, sans-serif;
             backdrop-filter: blur(16px);
+          }
+          .mapboxgl-ctrl-attrib,
+          .maplibregl-ctrl-attrib {
+            max-width: 54vw;
+          }
+          @media (max-width: 640px) {
+            .mapboxgl-ctrl-attrib,
+            .maplibregl-ctrl-attrib {
+              max-width: 42vw;
+              font-size: 9px !important;
+              line-height: 1.2 !important;
+            }
+            .mapboxgl-ctrl-logo,
+            .maplibregl-ctrl-logo {
+              transform: scale(.82);
+              transform-origin: left bottom;
+            }
           }
           .acca-geo-beacon {
             width: 34px;
@@ -949,8 +868,8 @@ export default function IstanbulUniversityMapPage({
                 ) : null}
               </div>
 
-              {/* Category tabs — browse universities + every place type */}
-              <div className="-mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {/* Category tabs — all categories stay visible on desktop; no hidden horizontal scroll. */}
+              <div className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-3">
                 {CATEGORY_TABS.map((key) => {
                   const meta = key === 'university'
                     ? { icon: '🎓', fa: ui.universities, en: ui.universities }
@@ -961,7 +880,7 @@ export default function IstanbulUniversityMapPage({
                       key={key}
                       type="button"
                       onClick={() => setTypeFilter(key)}
-                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-black transition ${
+                      className={`inline-flex min-h-8 min-w-0 items-center justify-center gap-1 rounded-full px-2 py-1.5 text-center text-[10px] font-black transition sm:text-[11px] ${
                         active
                           ? 'bg-[#071A3D] text-white'
                           : darkMode
@@ -969,8 +888,8 @@ export default function IstanbulUniversityMapPage({
                             : 'bg-white/84 text-[#071A3D]/72 hover:bg-white'
                       }`}
                     >
-                      <span>{meta.icon}</span>
-                      <span>{isFa ? meta.fa : meta.en}</span>
+                      <span className="shrink-0">{meta.icon}</span>
+                      <span className="min-w-0 truncate">{isFa ? meta.fa : meta.en}</span>
                       <span className="opacity-55">{categoryCount(key)}</span>
                     </button>
                   );
@@ -993,7 +912,7 @@ export default function IstanbulUniversityMapPage({
 
               {/* List — universities OR the selected place category. Shown on
                   every screen size (was desktop-only, which hid it on mobile). */}
-              <div className="mt-2 max-h-[26vh] overflow-y-auto rounded-[18px] sm:max-h-[24vh]">
+              <div className="mt-2 max-h-[23vh] overflow-y-auto rounded-[18px] sm:max-h-[24vh]">
                 {typeFilter === 'university' ? (
                   visibleItems.length ? visibleItems.slice(0, 16).map((item) => (
                     <button
@@ -1054,7 +973,8 @@ export default function IstanbulUniversityMapPage({
           )}
         </section>
 
-        <div className="pointer-events-auto fixed left-1/2 top-[84px] z-40 flex -translate-x-1/2 items-center gap-2">
+        {(editMode || debugMap) ? (
+        <div className="pointer-events-auto fixed left-1/2 top-[84px] z-40 flex max-w-[calc(100vw-24px)] -translate-x-1/2 items-center gap-2 sm:top-[92px]">
           {editing ? (
             <div className="flex items-center gap-2 rounded-full border-2 border-[#D8B05B] bg-[#071A3D] px-3 py-2 text-xs font-black text-white shadow-[0_18px_50px_rgba(7,26,61,0.4)]">
               <span>✏️ {isFa ? 'نشانگرها را به محل دقیق بکشید' : 'Drag pins to the exact spot'}</span>
@@ -1083,8 +1003,9 @@ export default function IstanbulUniversityMapPage({
             </button>
           )}
         </div>
+        ) : null}
 
-        <aside className={`pointer-events-auto absolute bottom-3 ${isFa ? 'left-3' : 'right-3'} w-[min(430px,calc(100vw-24px))] sm:bottom-6 ${isFa ? 'sm:left-6' : 'sm:right-6'}`}>
+        <aside className={`pointer-events-auto absolute bottom-[calc(env(safe-area-inset-bottom)+3.75rem)] ${isFa ? 'left-3 sm:left-6' : 'right-3 sm:right-6'} w-[min(360px,calc(100vw-88px))] min-w-[270px] sm:bottom-6 sm:w-[min(430px,calc(100vw-24px))] sm:min-w-0`}>
           {selectedPlace ? (() => {
             const meta = PLACE_KIND_META[selectedPlace.kind] || { icon: '📍', color: '#071A3D', fa: 'مکان', en: 'Place' };
             return (
@@ -1471,8 +1392,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
   map.on('load', () => {
     loaded = true;
     window.__accaMapFallbackReason = '';
-    addGeospatialInfrastructure(map, darkMode);
-    addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity, editable });
+    addGeospatialUniversityMarkers({ maplibregl, map, items, markersById, onPick, focusUniversity, editable });
     addGeospatialCampusMarkers({ maplibregl, map, items, campuses: SECONDARY_CAMPUSES, onPick, focusCampus, editable });
     addOfficeMarker({ maplibregl, map, onPlacePick, editable });
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
@@ -1500,112 +1420,6 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
   };
 }
 
-function createGeospatialStyle(darkMode) {
-  const terrainDemSource = {
-    type: 'raster-dem',
-    tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
-    encoding: 'terrarium',
-    tileSize: 256,
-    maxzoom: 13,
-    attribution: 'Terrain tiles © AWS Open Data / Mapzen',
-  };
-  const mapboxSatellite = MAP_CONFIG.mapboxToken
-    ? {
-        type: 'raster',
-        tiles: [
-          `https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/512/{z}/{x}/{y}@2x?access_token=${MAP_CONFIG.mapboxToken}`,
-        ],
-        tileSize: 512,
-        attribution: '© Mapbox © OpenStreetMap',
-      }
-    : null;
-
-  const satelliteSource = MAP_CONFIG.provider === 'mapbox' && mapboxSatellite
-    ? mapboxSatellite
-    : {
-        type: 'raster',
-        tiles: [
-          'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        ],
-        tileSize: 256,
-        attribution: 'Tiles © Esri, Maxar, Earthstar Geographics, and the GIS User Community',
-      };
-
-  return {
-    version: 8,
-    sources: {
-      satellite: satelliteSource,
-      'terrain-dem': {
-        ...terrainDemSource,
-      },
-      'terrain-hillshade-dem': {
-        ...terrainDemSource,
-      },
-    },
-    layers: [
-      {
-        id: 'satellite',
-        type: 'raster',
-        source: 'satellite',
-        paint: {
-          'raster-saturation': darkMode ? -0.46 : -0.22,
-          'raster-contrast': darkMode ? 0.18 : 0.08,
-          'raster-brightness-min': darkMode ? 0.08 : 0.02,
-          'raster-brightness-max': darkMode ? 0.82 : 0.94,
-        },
-      },
-      {
-        id: 'terrain-hillshade',
-        type: 'hillshade',
-        source: 'terrain-hillshade-dem',
-        paint: {
-          'hillshade-shadow-color': darkMode ? '#071A3D' : '#34475f',
-          'hillshade-highlight-color': darkMode ? '#d8b05b' : '#fff3d2',
-          'hillshade-accent-color': darkMode ? '#102944' : '#5d7c89',
-          'hillshade-exaggeration': darkMode ? 0.23 : 0.16,
-        },
-      },
-    ],
-    terrain: {
-      source: 'terrain-dem',
-      exaggeration: window.innerWidth < 760
-        ? MAP_CONFIG.terrain.exaggerationMobile
-        : MAP_CONFIG.terrain.exaggerationDesktop,
-    },
-    sky: {
-      'sky-color': darkMode ? '#07111d' : '#c8eef8',
-      'sky-horizon-blend': 0.08,
-      'horizon-color': darkMode ? '#0d2a3d' : '#eaf6f8',
-      'fog-color': darkMode ? '#07111d' : '#dff4f6',
-      'fog-ground-blend': MAP_CONFIG.lighting.atmosphere,
-    },
-    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
-  };
-}
-
-function addGeospatialInfrastructure(map, darkMode) {
-  // The Esri satellite basemap already shows the real road network, so the
-  // hand-drawn highway corridors (O-7 / E80 / D100) and the translucent airport
-  // fills were redundant overlays that did not align with the imagery. They are
-  // intentionally NOT rendered. Only the Bosphorus bridges are kept as a subtle
-  // gold accent, since they read as a deliberate landmark highlight rather than
-  // a mislabeled road. (Full real-vector infrastructure is a later phase.)
-  const infrastructure = createInfrastructureFeatureCollections();
-  map.addSource('acca-bridges', { type: 'geojson', data: infrastructure.bridges });
-
-  map.addLayer({
-    id: 'acca-bridge-core',
-    type: 'line',
-    source: 'acca-bridges',
-    paint: {
-      'line-color': '#D8B05B',
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 2.2, 12, 5.6],
-      'line-blur': 0.25,
-      'line-opacity': 0.96,
-    },
-  });
-}
-
 // In edit mode, every drag writes the marker's new position into a global the
 // "Copy coordinates" button reads, so positions can be captured and then locked.
 function recordEditedCoord(key, marker) {
@@ -1615,7 +1429,7 @@ function recordEditedCoord(key, marker) {
   window.__accaEditedCoords[key] = [Number(ll.lat.toFixed(5)), Number(ll.lng.toFixed(5))];
 }
 
-function addGeospatialUniversityMarkers({ maplibregl, map, items, selectedId, markersById, onPick, focusUniversity, editable }) {
+function addGeospatialUniversityMarkers({ maplibregl, map, items, markersById, onPick, focusUniversity, editable }) {
   items.forEach((item) => {
     const fill = item.side === 'asia'
       ? 'linear-gradient(135deg,#1a4574 0%,#0c2a52 100%)'
@@ -1850,37 +1664,6 @@ const PLACE_KIND_META = {
   ...PLACE_CATEGORIES,
 };
 
-// A small square footprint (metres) around a point, for fill-extrusion volumes.
-function squareFootprint(lon, lat, meters) {
-  const dLat = meters / 111320;
-  const dLon = meters / (111320 * Math.cos((lat * Math.PI) / 180));
-  return [[
-    [lon - dLon, lat - dLat],
-    [lon + dLon, lat - dLat],
-    [lon + dLon, lat + dLat],
-    [lon - dLon, lat + dLat],
-    [lon - dLon, lat - dLat],
-  ]];
-}
-
-// Native MapLibre 3D: extruded volumes are part of the map geometry, so they are
-// perfectly static and camera-locked (no drift), and tilt/rotate correctly with
-// the camera. Heights are exaggerated so the towers read at the city overview
-// zoom and grow into buildings as you zoom in.
-// A rectangular footprint (half-width / half-length in metres), for terminals
-// and runways that need a non-square shape.
-function rectFootprint(lon, lat, halfLonM, halfLatM) {
-  const dLat = halfLatM / 111320;
-  const dLon = halfLonM / (111320 * Math.cos((lat * Math.PI) / 180));
-  return [[
-    [lon - dLon, lat - dLat],
-    [lon + dLon, lat - dLat],
-    [lon + dLon, lat + dLat],
-    [lon - dLon, lat + dLat],
-    [lon - dLon, lat - dLat],
-  ]];
-}
-
 // Every landmark (universities, hospitals, airports, category places, office)
 // is now a typed Three.js archetype in createCinematicThreeLayer, so there are
 // no flat fill-extrusion volumes any more. Kept as a no-op so the call site and
@@ -1979,6 +1762,7 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
   const origin = maplibregl.MercatorCoordinate.fromLngLat([OFFICE_LOCATION.lon, OFFICE_LOCATION.lat], 0);
   const scale = origin.meterInMercatorCoordinateUnits();
   const night = darkMode === true;
+  const compactViewport = typeof window !== 'undefined' && (window.innerWidth < 760 || window.devicePixelRatio > 2);
   // Emissive factors driven by time of day: windows glow at night, are nearly
   // off in daylight; stone bodies pick up a faint warmth at night.
   const winGlow = night ? 1.45 : 0.16;
@@ -1994,11 +1778,11 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
   const hemi = new THREE.HemisphereLight(
     night ? 0x2a3f63 : 0xc3e2ff, // sky
     night ? 0x0f151f : 0x6e5b3c, // ground
-    night ? 0.6 : 1.1,
+    night ? 0.64 : 1.18,
   );
   scene.add(hemi);
-  scene.add(new THREE.AmbientLight(night ? 0x18253c : 0x9fb6d6, night ? 0.32 : 0.38));
-  const sun = new THREE.DirectionalLight(night ? 0xaecbff : 0xfff2da, night ? 0.6 : 2.45);
+  scene.add(new THREE.AmbientLight(night ? 0x18253c : 0xa9bddb, night ? 0.30 : 0.34));
+  const sun = new THREE.DirectionalLight(night ? 0xaecbff : 0xfff2da, night ? 0.68 : 2.65);
   sun.position.set(night ? 0.4 : -0.5, night ? 0.7 : 0.45, 1).normalize();
   scene.add(sun);
 
@@ -2046,7 +1830,7 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
     color: night ? 0x9fb0cc : 0xf3f7fd,
     emissive: night ? 0x223349 : 0x000000,
     emissiveIntensity: night ? 0.5 : 0,
-    roughness: 1, metalness: 0, transparent: true, opacity: night ? 0.5 : 0.7,
+    roughness: 1, metalness: 0, transparent: true, opacity: night ? (compactViewport ? 0.34 : 0.5) : (compactViewport ? 0.42 : 0.7),
     depthWrite: false, flatShading: false,
   });
   const clouds = [];
@@ -2068,12 +1852,14 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
   };
   // High deck — clouds well ABOVE the city (so they don't sit at camera level
   // when zoomed in) and a touch smaller.
-  for (let i = 0; i < 14; i += 1) {
+  const highCloudCount = compactViewport ? 8 : 14;
+  const horizonCloudCount = compactViewport ? 7 : 12;
+  for (let i = 0; i < highCloudCount; i += 1) {
     addCloudPuff(28.5 + Math.random() * 1.2, 40.85 + Math.random() * 0.66, 6000 + Math.random() * 3000, 1300 + Math.random() * 1400);
   }
   // Horizon ring — high, larger clouds that conceal the perimeter.
-  for (let i = 0; i < 12; i += 1) {
-    const ang = (i / 12) * Math.PI * 2;
+  for (let i = 0; i < horizonCloudCount; i += 1) {
+    const ang = (i / horizonCloudCount) * Math.PI * 2;
     addCloudPuff(28.98 + Math.cos(ang) * 1.0, 41.05 + Math.sin(ang) * 0.66, 5000 + Math.random() * 2500, 2600 + Math.random() * 2200);
   }
 
@@ -2214,9 +2000,9 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
   // its parent on selection.
   const nameToId = new Map();
   (items || []).forEach((it) => nameToId.set(normalizeKey(it.name), it.id));
-  // BUILDING_SCALE shrinks every structure 20% so they overlap less and are
-  // easier to click.
-  const BUILDING_SCALE = 0.8;
+  // Smaller procedural structures keep the map readable on dense mobile views
+  // while still giving the GTA/tactical-city feeling when zoomed in.
+  const BUILDING_SCALE = compactViewport ? 0.62 : 0.76;
   const place = (group, lng, lat, key) => {
     group.position.copy(scenePos(lng, lat, 0));
     group.scale.setScalar(BUILDING_SCALE);
@@ -2315,8 +2101,8 @@ function createCinematicThreeLayer(maplibregl, items, darkMode) {
       // overview but cleared the moment you focus a university. Full at
       // zoom <=10, essentially gone by ~11.5.
       const z = this.map?.getZoom ? this.map.getZoom() : 9.5;
-      const cloudCap = night ? 0.5 : 0.7;
-      cloudMat.opacity = Math.max(0.04, Math.min(cloudCap, cloudCap - (z - 10) * 0.37));
+      const cloudCap = compactViewport ? (night ? 0.34 : 0.42) : (night ? 0.5 : 0.7);
+      cloudMat.opacity = Math.max(0.025, Math.min(cloudCap, cloudCap - (z - 9.8) * 0.42));
       ring.rotation.z = t * 0.7;
       ring.scale.setScalar(1 + Math.sin(t * 2) * 0.07);
       ringMat.opacity = 0.5 + Math.sin(t * 2) * 0.22;
@@ -2474,52 +2260,6 @@ function addOfficeMarker({ maplibregl, map, onPlacePick, editable }) {
     .setLngLat([OFFICE_LOCATION.lon, OFFICE_LOCATION.lat])
     .addTo(map);
   if (editable) marker.on('dragend', () => recordEditedCoord('ACCA EDU Office', marker));
-}
-
-function createInfrastructureFeatureCollections() {
-  return {
-    roads: {
-      type: 'FeatureCollection',
-      features: ISTANBUL_INFRASTRUCTURE.roads.map((road) => ({
-        type: 'Feature',
-        properties: { id: road.id, name: road.name, kind: road.kind },
-        geometry: { type: 'LineString', coordinates: road.coordinates },
-      })),
-    },
-    bridges: {
-      type: 'FeatureCollection',
-      features: ISTANBUL_INFRASTRUCTURE.bridges.map((bridge) => ({
-        type: 'Feature',
-        properties: { id: bridge.id, kind: bridge.kind },
-        geometry: { type: 'LineString', coordinates: bridge.coordinates },
-      })),
-    },
-    airports: {
-      type: 'FeatureCollection',
-      features: ISTANBUL_INFRASTRUCTURE.airports.map((airport) => ({
-        type: 'Feature',
-        properties: { id: airport.id, name: airport.name },
-        geometry: { type: 'Polygon', coordinates: [makeRunwayPolygon(airport)] },
-      })),
-    },
-  };
-}
-
-function makeRunwayPolygon({ center, runwayBearing, runwayLength, runwayWidth }) {
-  const angle = (runwayBearing * Math.PI) / 180;
-  const ux = Math.cos(angle);
-  const uy = Math.sin(angle);
-  const px = -uy;
-  const py = ux;
-  const halfL = runwayLength / 2;
-  const halfW = runwayWidth / 2;
-  return [
-    [center[0] - ux * halfL - px * halfW, center[1] - uy * halfL - py * halfW],
-    [center[0] + ux * halfL - px * halfW, center[1] + uy * halfL - py * halfW],
-    [center[0] + ux * halfL + px * halfW, center[1] + uy * halfL + py * halfW],
-    [center[0] - ux * halfL + px * halfW, center[1] - uy * halfL + py * halfW],
-    [center[0] - ux * halfL - px * halfW, center[1] - uy * halfL - py * halfW],
-  ];
 }
 
 function initIstanbulScene({ canvas, darkMode, items, onPick, onReady, apiRef }) {
@@ -3062,13 +2802,6 @@ function createRoadsAndBridges(scene, darkMode) {
     transparent: true,
     opacity: darkMode ? 0.58 : 0.76,
   });
-  const goldMaterial = new THREE.MeshStandardMaterial({
-    color: darkMode ? 0xf7c86d : 0xd7a84c,
-    roughness: 0.38,
-    metalness: 0.16,
-    emissive: darkMode ? 0x5c3900 : 0x000000,
-    emissiveIntensity: darkMode ? 0.32 : 0,
-  });
 
   [
     [projectGeo(41.03, 28.56), projectGeo(41.02, 28.78), projectGeo(41.04, 28.96)],
@@ -3078,11 +2811,6 @@ function createRoadsAndBridges(scene, darkMode) {
     [projectGeo(41.11, 29.03), projectGeo(41.1, 29.2), projectGeo(41.16, 29.55)],
     [projectGeo(40.88, 29.12), projectGeo(40.9, 29.28), projectGeo(40.91, 29.5)],
   ].forEach((points) => addTube(scene, points, roadMaterial, 0.035));
-
-  BOSPHORUS_BRIDGES.forEach((bridge, index) => {
-    addTube(scene, [projectGeo(...bridge.start), projectGeo(...bridge.end)], goldMaterial, index === 2 ? 0.07 : 0.085);
-    addBridgeTowers(scene, projectGeo(...bridge.towerStart), projectGeo(...bridge.towerEnd), goldMaterial);
-  });
 
   const tunnelMaterial = new THREE.LineDashedMaterial({
     color: darkMode ? 0x9fd7ff : 0x071a3d,
@@ -3470,15 +3198,6 @@ function addTube(scene, projectedPoints, material, radius) {
   tube.castShadow = true;
   tube.receiveShadow = true;
   scene.add(tube);
-}
-
-function addBridgeTowers(scene, start, end, material) {
-  [start, end].forEach((point) => {
-    const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 2.6, 10), material);
-    tower.position.set(point.x, 1.45, point.z);
-    tower.castShadow = true;
-    scene.add(tower);
-  });
 }
 
 function disposeScene(scene) {
