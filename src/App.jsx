@@ -443,7 +443,7 @@ function DeferredSectionFallback({ minHeight }) {
   );
 }
 
-function DeferredHomeSection({ children, eager = false, minHeight = 560, rootMargin = '1400px 0px' }) {
+function DeferredHomeSection({ children, eager = false, minHeight = 560, rootMargin = '520px 0px' }) {
   const containerRef = useRef(null);
   const [shouldRender, setShouldRender] = useState(eager);
   const renderNow = eager || shouldRender;
@@ -507,14 +507,10 @@ export default function ACCALandingPage() {
       return false;
     }
   });
-  // mouseOffset is intentionally static (parallax handled via refs in HeroSection)
-  const mouseOffset = useMemo(() => ({ x: 0, y: 0 }), []);
   const [isDesktopViewport, setIsDesktopViewport] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia(DESKTOP_MEDIA_QUERY).matches;
   });
-  const MODEL_SRC =
-    'https://modelviewer.dev/shared-assets/models/Astronaut.glb';
   const cursorDotRef = useRef(null);
   const cursorRingRef = useRef(null);
   const cursorTargetRef = useRef({ x: 0, y: 0 });
@@ -590,41 +586,6 @@ export default function ACCALandingPage() {
     mediaQuery.addListener(updateViewport);
     return () => mediaQuery.removeListener(updateViewport);
   }, []);
-
-  useEffect(() => {
-    if (!isDesktopViewport) return undefined;
-    const isHomeShell =
-      window.location.pathname === '/' &&
-      !new URLSearchParams(window.location.search).get('page') &&
-      !new URLSearchParams(window.location.search).get('section');
-    if (!isHomeShell) return undefined;
-    if (window.customElements?.get('model-viewer')) return undefined;
-
-    ['https://unpkg.com', 'https://modelviewer.dev'].forEach((href) => {
-      if (document.querySelector(`link[rel="preconnect"][href="${href}"]`)) return;
-      const link = document.createElement('link');
-      link.rel = 'preconnect';
-      link.href = href;
-      link.crossOrigin = 'anonymous';
-      document.head.appendChild(link);
-    });
-
-    const existing = document.querySelector(
-      'script[src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"]'
-    );
-
-    if (!existing) {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.src =
-        'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
-      script.fetchPriority = 'low';
-
-      script.onload = () => {};
-
-      document.head.appendChild(script);
-    }
-  }, [isDesktopViewport]);
 
   useEffect(() => {
     if (!isDesktopViewport) return undefined;
@@ -710,7 +671,7 @@ export default function ACCALandingPage() {
 
     const handlePointerHover = (event) => {
       const interactive = event.target.closest(
-        'a, button, input, textarea, select, label, [role="button"]'
+        'a, button, input, textarea, select, label, [role="button"], [data-hero-astronaut-canvas]'
       );
       cursorRingRef.current?.classList.toggle('hovered', Boolean(interactive));
     };
@@ -1721,54 +1682,70 @@ export default function ACCALandingPage() {
 
         .hero-glow {
           position: absolute;
-          width: 500px;
-          height: 500px;
+          width: 360px;
+          height: 360px;
           border-radius: 999px;
           background: radial-gradient(circle, rgba(255,255,255,0.95), transparent 70%);
-          filter: blur(100px);
-          opacity: 0.4;
+          filter: blur(82px);
+          opacity: 0.28;
         }
 
-        .hero-image {
-          width: min(500px, 76vw);
-          height: min(500px, 76vw);
+        .hero-astronaut-shell {
+          width: min(520px, 76vw);
+          height: min(520px, 76vw);
           max-width: 100%;
-          object-fit: contain;
+          aspect-ratio: 1;
+          position: relative;
+          contain: layout style size paint;
           background: transparent;
           filter: saturate(1.16) contrast(1.06) !important;
-          animation: heroFloat 8s ease-in-out infinite;
           will-change: transform;
-        }
-
-        model-viewer::part(default-progress-bar) {
-          display: none;
-        }
-
-        model-viewer {
-          background: transparent !important;
-          contain: layout style size;
-          filter: saturate(1.16) contrast(1.06) !important;
           transform: translateZ(0);
           -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
-          will-change: transform;
         }
 
-        model-viewer::part(canvas) {
-          image-rendering: auto;
-          -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
-          transform: translateZ(0);
-        }
-
-        .hero-image {
-          width: 500px;
-          height: 500px;
+        .hero-astronaut-canvas {
+          display: block;
+          width: 100%;
+          height: 100%;
           max-width: 100%;
-          object-fit: contain;
-          filter: saturate(1.16) contrast(1.06) !important;
-          animation: heroFloat 8s ease-in-out infinite;
-          will-change: transform;
+          background: transparent;
+          pointer-events: auto;
+          cursor: grab;
+          touch-action: none;
+          user-select: none;
+          filter:
+            drop-shadow(0 30px 52px rgba(7,26,61,0.24))
+            drop-shadow(0 0 34px rgba(16,185,129,0.18));
+        }
+
+        .hero-astronaut-canvas.is-dragging {
+          cursor: grabbing;
+        }
+
+        .hero-astronaut-loader {
+          position: absolute;
+          inset: 50% auto auto 50%;
+          width: 136px;
+          aspect-ratio: 1;
+          border-radius: 999px;
+          border: 1px solid rgba(16,185,129,0.26);
+          background:
+            radial-gradient(circle at 50% 50%, rgba(16,185,129,0.18), transparent 54%),
+            conic-gradient(from 0deg, rgba(16,185,129,0), rgba(16,185,129,0.68), rgba(232,192,103,0.22), rgba(16,185,129,0));
+          transform: translate(-50%, -50%);
+          filter: blur(0.2px) drop-shadow(0 18px 34px rgba(16,185,129,0.14));
+          animation: heroLoaderSpin 1.4s linear infinite;
+        }
+
+        .hero-astronaut-loader::after {
+          content: '';
+          position: absolute;
+          inset: 13px;
+          border-radius: inherit;
+          background: rgba(245,239,228,0.92);
+          box-shadow: inset 0 0 28px rgba(16,185,129,0.12);
         }
 
         .hero-mobile-astronaut-wrap {
@@ -1809,6 +1786,12 @@ export default function ACCALandingPage() {
 
           100% {
             transform: translateY(0px) rotate(-4deg);
+          }
+        }
+
+        @keyframes heroLoaderSpin {
+          to {
+            transform: translate(-50%, -50%) rotate(360deg);
           }
         }
 
@@ -1860,7 +1843,8 @@ export default function ACCALandingPage() {
         @media (prefers-reduced-motion: reduce) {
           .mesh-gradient,
           .orb,
-          .hero-image,
+          .hero-astronaut-shell,
+          .hero-astronaut-loader,
           .hero-mobile-astronaut,
           .hero-mobile-astronaut-wrap,
           .logo-track {
@@ -2454,8 +2438,6 @@ export default function ACCALandingPage() {
           isFa={isFa}
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
           isDesktopViewport={isDesktopViewport}
-          MODEL_SRC={MODEL_SRC}
-          mouseOffset={mouseOffset}
           onConsultationClick={() => setConsultationOpen(true)}
         />
 

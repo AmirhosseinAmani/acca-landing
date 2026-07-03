@@ -150,7 +150,7 @@ function escapeHtml(value) {
 
 /** Shared no-JS shell: brand logo, content slot, then a canonical nav. */
 function renderShell({ eyebrow, h1, leadHtml, bodyHtml = '', primaryHref, primaryLabel }) {
-  return `      <main style="font-family: Vazirmatn, sans-serif; direction: rtl; min-height: 100vh; background: #f7f1e8; color: #071a3d;">
+  return `      <main class="acca-static-fallback" style="font-family: Vazirmatn, sans-serif; direction: rtl; min-height: 100vh; background: #f7f1e8; color: #071a3d;">
         <section style="max-width: 1120px; margin: 0 auto; padding: 72px 24px 48px;">
           <a href="/" aria-label="ACCA EDU" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:inherit;font-weight:900;">
             <img src="${LOGO_SRC}" alt="ACCA EDU" width="132" height="57" style="width:132px;height:57px;object-fit:contain;" />
