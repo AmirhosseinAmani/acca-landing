@@ -4,14 +4,16 @@ export const COMPANY_WEBSITE_URL = 'https://www.accaco.com';
 export const COMPANY_INSTAGRAM_URL = 'https://www.instagram.com/acca_edu/';
 export const COMPANY_OFFICE_ADDRESS =
   'NAMIK KEMAL MAH. 68. SK. TERRACE LOTUS NO:110 Kat:25 ESENYURT / ISTANBUL';
-export const COMPANY_OFFICE_LAT = '41.00520574261714';
-export const COMPANY_OFFICE_LNG = '28.684467950014007';
+export const COMPANY_OFFICE_LAT = '41.0052';
+export const COMPANY_OFFICE_LNG = '28.6849825';
 export const COMPANY_MAP_COORDINATES = `${COMPANY_OFFICE_LAT},${COMPANY_OFFICE_LNG}`;
+export const COMPANY_GOOGLE_BUSINESS_QUERY =
+  'Acca+edu+international+%7C+%D8%AA%D8%AD%D8%B5%DB%8C%D9%84+%D8%AF%D8%B1+%D8%AA%D8%B1%DA%A9%DB%8C%D9%87';
 /**
  * Direct deep-link to the ACCA EDU Google Business Profile (works as <a href>).
- * The share.google short-link does NOT work inside <iframe> — see COMPANY_MAP_EMBED_URL.
+ * Short Google Maps links do NOT work inside <iframe> — see COMPANY_MAP_EMBED_URL.
  */
-export const COMPANY_MAPS_URL = 'https://share.google/vPr2ZIqZWTKpgNmht';
+export const COMPANY_MAPS_URL = 'https://maps.app.goo.gl/p2UDh4TuAd5gMckN7';
 
 /**
  * Google Maps embed URL (no API key required).
@@ -21,8 +23,8 @@ export const COMPANY_MAPS_URL = 'https://share.google/vPr2ZIqZWTKpgNmht';
  * even if the name query is ambiguous.
  */
 export const COMPANY_MAP_EMBED_URL =
-  `https://www.google.com/maps?q=ACCA+EDU+Esenyurt+Istanbul+Turkey` +
-  `&ll=${COMPANY_MAP_COORDINATES}&z=17&t=m&output=embed`;
+  `https://www.google.com/maps?q=${COMPANY_GOOGLE_BUSINESS_QUERY}` +
+  `&ll=${COMPANY_MAP_COORDINATES}&z=19&t=m&output=embed`;
 
 /* ------------------------------------------------------------------ *
  * Social & messaging channels — single source of truth.
