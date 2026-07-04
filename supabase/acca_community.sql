@@ -48,11 +48,25 @@ create policy "acca_comments_read"  on public.acca_comments for select using (tr
 create policy "acca_ratings_read"   on public.acca_ratings  for select using (true);
 
 -- Public can add a comment / cast a rating.
-create policy "acca_comments_insert" on public.acca_comments for insert with check (true);
-create policy "acca_ratings_insert"  on public.acca_ratings  for insert with check (true);
-
--- Public can update their own rating (enables PostgREST upsert on conflict).
-create policy "acca_ratings_update"  on public.acca_ratings  for update using (true) with check (true);
+create policy "acca_comments_insert" on public.acca_comments
+  for insert
+  to anon, authenticated
+  with check (
+    entity_type in ('blog','glossary')
+    and length(trim(name)) between 1 and 120
+    and email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+    and length(trim(body)) between 2 and 2000
+    and (role is null or role in ('student','professional'))
+    and (location is null or location in ('turkey','iran'))
+  );
+create policy "acca_ratings_insert" on public.acca_ratings
+  for insert
+  to anon, authenticated
+  with check (
+    voter_id is not null
+    and entity_type in ('blog','glossary')
+    and stars between 1 and 5
+  );
 
 -- ---------- Public Data API grants -------------------------------------------
 -- RLS decides which rows are visible; grants decide which columns are exposed.
@@ -65,7 +79,7 @@ grant insert on public.acca_comments to anon, authenticated;
 grant select (client_id, entity_type, entity_slug, name, role, location, body, lang, created_at)
   on public.acca_comments to anon, authenticated;
 
-grant insert, update on public.acca_ratings to anon, authenticated;
+grant insert on public.acca_ratings to anon, authenticated;
 grant select (entity_type, entity_slug, stars, created_at, updated_at)
   on public.acca_ratings to anon, authenticated;
 
