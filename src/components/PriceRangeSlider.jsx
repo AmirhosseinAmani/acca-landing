@@ -166,7 +166,7 @@ export default function PriceRangeSlider({
             step={step}
             onChange={(event) => updateMin(event.target.value)}
             disabled={disabled}
-            className={`${darkMode ? 'bg-white/8 border-white/10 text-white' : 'bg-white border-black/10 text-black'} h-11 w-full rounded-[16px] border px-3 text-sm font-black outline-none disabled:opacity-40`}
+            className={`${darkMode ? 'bg-white/8 border-white/10 text-white' : 'bg-white border-black/10 text-black'} h-11 w-full rounded-[16px] border px-3 text-base font-black outline-none disabled:opacity-40`}
             dir="ltr"
           />
         </label>
@@ -184,7 +184,7 @@ export default function PriceRangeSlider({
             step={step}
             onChange={(event) => updateMax(event.target.value)}
             disabled={disabled}
-            className={`${darkMode ? 'bg-white/8 border-white/10 text-white' : 'bg-white border-black/10 text-black'} h-11 w-full rounded-[16px] border px-3 text-sm font-black outline-none disabled:opacity-40`}
+            className={`${darkMode ? 'bg-white/8 border-white/10 text-white' : 'bg-white border-black/10 text-black'} h-11 w-full rounded-[16px] border px-3 text-base font-black outline-none disabled:opacity-40`}
             dir="ltr"
           />
         </label>
