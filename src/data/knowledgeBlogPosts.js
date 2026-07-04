@@ -25,7 +25,307 @@ export const BLOG_SEO_KEYWORDS = [
   'study in Turkey for international students',
   'Turkey university admission',
   'Istanbul student consulting',
+  'افتتاح حساب بانکی در ترکیه',
+  'افتتاح حساب بانکی ترکیه برای ایرانیان',
+  'حساب بانکی دانشجویی ترکیه',
+  'زراعت بانک برای ایرانیان',
+  'ایش بانک برای ایرانیان',
+  'واکیف بانک برای ایرانیان',
+  'کد مالیاتی ترکیه',
+  'دبیت کارت ترکیه',
+  'IBAN ترکیه',
+  'Findeks ترکیه',
 ].join(', ');
+
+const studentBankAccountTurkey2026 = {
+  slug: 'student-bank-account-turkey-iranian-students-2026',
+  priority: 109,
+  readTime: '۱۵ دقیقه',
+  date: '2026-07-04',
+  sourceName: 'راهنمای رسمی بانک‌ها، اداره مالیات ترکیه، MASAK و TMSF',
+  sourceUrl: 'https://www.isbank.com.tr/en/become-our-customer',
+  sourceLinks: [
+    { label: { fa: 'İşbank؛ مدارک مشتریان خارجی', en: 'Isbank foreign customer documents' }, url: 'https://www.isbank.com.tr/en/become-our-customer' },
+    { label: { fa: 'Ziraat Bankası؛ SWIFT و افتتاح حساب با انتقال خارجی', en: 'Ziraat Bank foreign transfer account opening' }, url: 'https://www.ziraatbank.com.tr/en/retail/services/foreign-exchange-transfer-swift' },
+    { label: { fa: 'VakıfBank؛ کارت‌های Bankomat برای مشتریان expat', en: 'VakifBank expat Bankomat cards' }, url: 'https://www.vakifbank.com.tr/en/expat/cards/bank-cards' },
+    { label: { fa: 'اداره مالیات ترکیه؛ کد مالیاتی اتباع خارجی', en: 'Turkish Digital Tax Office for foreigners' }, url: 'https://dijital.gib.gov.tr/foreigners/kimlikNoBasvuru' },
+    { label: { fa: 'MASAK؛ تعهدات احراز هویت و شناخت مشتری', en: 'MASAK customer due diligence obligations' }, url: 'https://masak.hmb.gov.tr/yukumlulukler' },
+    { label: { fa: 'TMSF؛ بیمه سپرده و سقف ۲۰۲۶', en: 'TMSF deposit insurance coverage' }, url: 'https://www.tmsf.org.tr/tr/Tmsf/Finansman/mevduat.sss.guncel' },
+  ],
+  knowledgeSource: 'راهنمای آکا برای امور مالی دانشجو / بازبینی‌شده با صفحات رسمی İşbank، Ziraat Bankası، VakıfBank، اداره مالیات ترکیه، MASAK و TMSF در جولای ۲۰۲۶',
+  category: 'بانک و امور مالی دانشجو',
+  image: {
+    src: '/assets/blog/student-bank-account-turkey-2026.jpg',
+    alt: 'دانشجوی خارجی در شعبه بانک ترکیه هنگام دریافت دبیت کارت با پاسپورت، کارت اقامت و مدارک افتتاح حساب بانکی',
+  },
+  tags: [
+    'افتتاح حساب بانکی در ترکیه',
+    'افتتاح حساب بانکی ترکیه برای ایرانیان',
+    'حساب بانکی دانشجویی ترکیه',
+    'بانک ترکیه برای دانشجوی خارجی',
+    'زراعت بانک برای ایرانیان',
+    'ایش بانک برای ایرانیان',
+    'واکیف بانک برای ایرانیان',
+    'کد مالیاتی ترکیه',
+    'دبیت کارت ترکیه',
+    'کردیت کارت ترکیه',
+    'IBAN ترکیه',
+    'Findeks ترکیه',
+  ],
+  metricCards: [
+    {
+      label: { fa: 'اولویت عملی', en: 'Practical start' },
+      value: { fa: 'Ziraat، İşbank، VakıfBank', en: 'Ziraat, Isbank, VakifBank' },
+      note: { fa: 'برای دانشجوی ایرانی معمولاً این سه گزینه اول بررسی می‌شوند، اما تصمیم نهایی با شعبه و کنترل compliance است.', en: 'Common first options, but the branch and compliance review decide the final result.' },
+    },
+    {
+      label: { fa: 'مدارک پایه', en: 'Core documents' },
+      value: { fa: 'پاسپورت + کد مالیاتی + آدرس', en: 'Passport + tax number + address' },
+      note: { fa: 'اقامت، برگه دانشجویی، شماره ترک و منبع پول می‌توانند بسته به شعبه درخواست شوند.', en: 'Residence card, student certificate, Turkish phone and source of funds may be requested.' },
+    },
+    {
+      label: { fa: 'کارت واقع‌بینانه', en: 'Realistic card' },
+      value: { fa: 'Debit card، نه credit card', en: 'Debit card first' },
+      note: { fa: 'دبیت کارت از موجودی حساب خرج می‌کند؛ کردیت کارت معمولاً سابقه اعتباری، درآمد یا وثیقه می‌خواهد.', en: 'Debit cards spend account balance; credit cards usually require credit history, income or collateral.' },
+    },
+    {
+      label: { fa: 'ریسک اصلی', en: 'Main risk' },
+      value: { fa: 'تحریم و KYC', en: 'Sanctions and KYC' },
+      note: { fa: 'برای پاسپورت ایرانی، پاسخ یک شعبه به معنی نتیجه قطعی در همه شعب نیست.', en: 'For Iranian passports, one branch result is not a universal guarantee.' },
+    },
+  ],
+  comparisonTitle: { fa: 'مقایسه سریع بانک‌های رایج برای دانشجوی ایرانی', en: 'Common bank options for Iranian students' },
+  comparisonSubtitle: {
+    fa: 'این جدول وعده افتتاح حساب نیست؛ برای انتخاب شعبه، آماده‌سازی مدارک و مدیریت انتظار دانشجو استفاده می‌شود.',
+    en: 'This is not an account-opening guarantee; use it to prepare documents and expectations.',
+  },
+  comparisonHeaders: [
+    { fa: 'بانک', en: 'Bank' },
+    { fa: 'شروع مناسب', en: 'Best starting point' },
+    { fa: 'مزیت برای دانشجو', en: 'Student advantage' },
+    { fa: 'کارت و دیجیتال', en: 'Card and digital' },
+    { fa: 'ریسک/نکته ایرانی‌ها', en: 'Iranian-passport note' },
+  ],
+  comparisonRows: [
+    {
+      degree: { fa: 'Ziraat Bankası', en: 'Ziraat Bankasi' },
+      start: { fa: 'برای دانشجوی تازه‌واردی که می‌خواهد از یک بانک دولتی و شعبه‌محور شروع کند.', en: 'A branch-led public-bank starting point for new students.' },
+      workType: { fa: 'شبکه شعب گسترده، حساب لیر و ارزی، و مسیرهای رسمی برای دریافت انتقال خارجی.', en: 'Large branch network, TRY/FX accounts and official foreign-transfer routes.' },
+      income: { fa: 'Bankkart و اینترنت/موبایل بانک پس از فعال‌سازی؛ سطح دسترسی به تصمیم بانک بستگی دارد.', en: 'Bankkart and digital banking after activation; access level depends on bank approval.' },
+      risk: { fa: 'برای ایرانی‌ها شعبه، منبع پول، آدرس و وضعیت اقامت می‌تواند نتیجه را تغییر دهد.', en: 'Branch, source of funds, address and residence status can change the outcome.' },
+    },
+    {
+      degree: { fa: 'Türkiye İş Bankası', en: 'Turkiye Is Bankasi' },
+      start: { fa: 'برای دانشجویی که مدارک هویتی، آدرس و کد مالیاتی را تمیز آماده کرده است.', en: 'Good when identity, address and tax-number documents are prepared cleanly.' },
+      workType: { fa: 'صفحه رسمی بانک برای مشتری خارجی، کد مالیاتی/شماره هویت خارجی و مدرک آدرس را روشن توضیح می‌دهد.', en: 'Its official page clearly describes foreign customer ID, tax-number and address proof expectations.' },
+      income: { fa: 'Bankamatik debit card، حساب جاری، پرداخت فروشگاهی و مدیریت دیجیتال از مسیر حساب.', en: 'Bankamatik debit card, current account, shopping and digital account management.' },
+      risk: { fa: 'کردیت کارت برای دانشجوی بدون سابقه اعتباری ترکیه معمولاً ساده نیست.', en: 'Credit cards are usually not easy without Turkish credit history.' },
+    },
+    {
+      degree: { fa: 'VakıfBank', en: 'VakifBank' },
+      start: { fa: 'برای دانشجویی که یک گزینه بانکی بزرگ دیگر با کارت Bankomat و شعب زیاد می‌خواهد.', en: 'Another large-bank option with Bankomat cards and many branches.' },
+      workType: { fa: 'کارت‌های Bankomat، پرداخت، ATM، خرید حضوری/آنلاین و سرویس‌های expat در سایت رسمی معرفی شده‌اند.', en: 'Official expat pages describe Bankomat cards, ATM, shopping and online use.' },
+      income: { fa: 'Bankomat card و موبایل بانک؛ محدودیت‌های برداشت/خرید را باید از اپ یا شعبه چک کرد.', en: 'Bankomat card and mobile banking; ATM/POS limits should be checked in app or branch.' },
+      risk: { fa: 'مدارک تکمیلی یا رد درخواست می‌تواند بر اساس compliance همان شعبه اتفاق بیفتد.', en: 'Extra documents or rejection can happen under that branch compliance review.' },
+    },
+  ],
+  glossary: [
+    {
+      labels: ['حساب بانکی دانشجویی در ترکیه', 'افتتاح حساب بانکی در ترکیه', 'student bank account Turkey'],
+      title: 'حساب بانکی دانشجویی در ترکیه چیست؟',
+      definition: 'حساب بانکی دانشجویی در ترکیه حسابی است که دانشجوی خارجی برای پرداخت شهریه، اجاره، دریافت انتقال، خرید روزمره و مدیریت زندگی دانشجویی در بانک ترکیه باز می‌کند.',
+    },
+    {
+      labels: ['کد مالیاتی ترکیه', 'شماره مالیاتی', 'Vergi Kimlik Numarası', 'potential tax number'],
+      title: 'کد مالیاتی ترکیه برای بانک چیست؟',
+      definition: 'کد مالیاتی ترکیه شناسه‌ای است که اتباع خارجی از اداره مالیات یا سامانه دیجیتال مالیات می‌گیرند و بانک‌ها معمولاً برای افتتاح حساب از آن استفاده می‌کنند.',
+    },
+    {
+      labels: ['دبیت کارت ترکیه', 'debit card', 'Bankamatik card', 'Bankkart', 'Bankomat card'],
+      title: 'دبیت کارت ترکیه چیست؟',
+      definition: 'دبیت کارت به موجودی حساب وصل است و خرید، برداشت ATM و پرداخت آنلاین را از پول موجود در حساب انجام می‌دهد؛ با کردیت کارت فرق دارد.',
+    },
+    {
+      labels: ['کردیت کارت ترکیه', 'credit card', 'کارت اعتباری ترکیه'],
+      title: 'کردیت کارت ترکیه برای دانشجو چیست؟',
+      definition: 'کردیت کارت بر پایه اعتبار و سقف بانکی کار می‌کند، نه فقط موجودی حساب. برای دانشجوی خارجی معمولاً سابقه اعتباری، درآمد، وثیقه یا ارزیابی بانک مهم است.',
+    },
+    {
+      labels: ['IBAN ترکیه', 'شماره شبا ترکیه', 'TR IBAN'],
+      title: 'IBAN ترکیه چیست؟',
+      definition: 'IBAN شماره استاندارد بین‌المللی حساب بانکی است. در ترکیه با TR شروع می‌شود و برای انتقال پول داخلی/خارجی و پرداخت‌های بانکی مهم است.',
+    },
+    {
+      labels: ['احراز هویت بانکی', 'KYC', 'شناخت مشتری', 'compliance بانکی'],
+      title: 'احراز هویت بانکی KYC چیست؟',
+      definition: 'KYC یعنی بانک هویت، آدرس، منبع پول، ریسک تحریم و هدف حساب را بررسی می‌کند تا با تعهدات ضدپول‌شویی و compliance هماهنگ باشد.',
+    },
+    {
+      labels: ['مدرک آدرس بانکی', 'اثبات آدرس', 'proof of address', 'Yerleşim Yeri Belgesi'],
+      title: 'مدرک آدرس بانکی چیست؟',
+      definition: 'مدرک آدرس سندی است که نشان می‌دهد دانشجو کجا زندگی می‌کند؛ قبض، برگه نفوس، قرارداد/نامه خوابگاه یا آدرس چاپ‌شده در پاسپورت ممکن است بسته به بانک پذیرفته شود.',
+    },
+    {
+      labels: ['بیمه سپرده TMSF', 'ضمانت سپرده ترکیه', 'deposit insurance Turkey'],
+      title: 'بیمه سپرده TMSF چیست؟',
+      definition: 'TMSF سازوکار بیمه سپرده ترکیه است و طبق اعلام رسمی، در ۲۰۲۶ تا سقف ۱٬۲۰۰٬۰۰۰ لیر برای هر نفر در هر مؤسسه اعتباری، در محدوده‌های تعیین‌شده، پوشش می‌دهد.',
+    },
+    {
+      labels: ['زراعت بانک برای ایرانیان', 'Ziraat Bankası', 'حساب زراعت بانک'],
+      title: 'حساب دانشجویی زراعت بانک چیست؟',
+      definition: 'حساب زراعت بانک برای دانشجو یکی از گزینه‌های رایج شروع است، اما برای پاسپورت ایرانی تضمین قطعی ندارد و شعبه می‌تواند مدارک تکمیلی یا توضیح منبع پول بخواهد.',
+    },
+    {
+      labels: ['ایش بانک برای ایرانیان', 'Türkiye İş Bankası', 'İşbank', 'حساب ایش بانک'],
+      title: 'حساب دانشجویی ایش بانک چیست؟',
+      definition: 'حساب ایش بانک برای دانشجوی خارجی می‌تواند گزینه جدی باشد، مخصوصاً وقتی پاسپورت، کد مالیاتی/شماره هویت خارجی و مدرک آدرس آماده باشد.',
+    },
+    {
+      labels: ['واکیف بانک برای ایرانیان', 'VakıfBank', 'حساب واکیف بانک'],
+      title: 'حساب دانشجویی واکیف بانک چیست؟',
+      definition: 'حساب واکیف بانک یکی از گزینه‌های قابل بررسی برای دانشجوی خارجی است و کارت Bankomat و سرویس‌های دیجیتال دارد، اما نتیجه افتتاح حساب به بررسی شعبه وابسته است.',
+    },
+    {
+      labels: ['Findeks ترکیه', 'KKB', 'اعتبارسنجی ترکیه', 'credit score Turkey'],
+      title: 'اعتبارسنجی Findeks ترکیه چیست؟',
+      definition: 'Findeks و KKB به سابقه اعتباری و رفتار بازپرداخت در ترکیه مربوط هستند. دانشجوی تازه‌وارد معمولاً سابقه قوی ندارد، پس کردیت کارت یا اعتبار بانکی برایش ساده نیست.',
+    },
+  ],
+  fa: {
+    title: 'افتتاح حساب بانکی در ترکیه برای دانشجوی خارجی و ایرانی؛ راهنمای بانک‌ها، مدارک، دبیت کارت و قوانین ۲۰۲۶',
+    excerpt: 'برای دانشجوی ایرانی در ترکیه، حساب بانکی فقط یک کارت نیست؛ مسیر پرداخت شهریه، اجاره، انتقال پول، موبایل بانک، IBAN و ساختن اعتبار مالی است. این راهنما دقیق و عملی توضیح می‌دهد از کدام بانک‌ها شروع کنید، چه مدارکی ببرید و چه ریسک‌هایی را جدی بگیرید.',
+    thesis: 'دانشجوی ایرانی در ترکیه معمولاً باید از مسیر بانک‌های شعبه‌محور مثل Ziraat Bankası، Türkiye İş Bankası و VakıfBank شروع کند، اما هیچ بانکی برای همه پاسپورت‌های ایرانی تضمین عمومی افتتاح حساب نمی‌دهد. نتیجه به مدارک، کد مالیاتی ترکیه، مدرک آدرس، وضعیت اقامت، شماره ترک، منبع پول و بررسی KYC همان شعبه بستگی دارد.',
+    lead: 'اگر تازه وارد ترکیه شده‌ای، افتتاح حساب بانکی را مثل یک کار اداری ساده نبین. این حساب برای پرداخت شهریه، دریافت حواله خانواده، پرداخت اجاره، گرفتن دبیت کارت ترکیه، ساختن IBAN، فعال کردن موبایل بانک و حتی شکل دادن به اعتبار مالی آینده‌ات مهم است. اما برای ایرانی‌ها، به‌خاطر compliance و تحریم، آماده بودن مدارک و انتخاب شعبه مناسب می‌تواند تفاوت زیادی ایجاد کند.',
+    sections: [
+      {
+        heading: 'اول بفهم حساب بانکی در ترکیه دقیقاً به چه درد دانشجو می‌خورد',
+        body: 'حساب بانکی دانشجویی در ترکیه برای پرداخت شهریه دانشگاه، اجاره خانه یا خوابگاه، خرید روزمره، دریافت انتقال از خانواده، پرداخت قبض، فعال کردن اشتراک‌ها، دریافت IBAN ترکیه و مدیریت هزینه‌های ماهانه لازم می‌شود. اگر حساب نداشته باشی، خیلی از کارهای ساده زندگی دانشجویی یا گران‌تر، یا کندتر، یا وابسته به واسطه می‌شود. برای همین بهتر است بعد از ورود، هم‌زمان با گرفتن سیم‌کارت، کد مالیاتی و آماده‌سازی اقامت، مسیر افتتاح حساب را هم برنامه‌ریزی کنی.',
+      },
+      {
+        heading: 'برای ایرانی‌ها کدام بانک‌ها را اول بررسی کنیم؟',
+        body: 'در تجربه عملی دانشجوها، معمولاً Ziraat Bankası، Türkiye İş Bankası و VakıfBank از گزینه‌های اول بررسی هستند. دلیلش ترکیبی از شبکه شعب، حساب جاری لیر و ارزی، دبیت کارت، موبایل بانک و آشنایی بیشتر شعب با مشتری خارجی است. با این حال جمله «برای ایرانی حساب باز می‌کند» نباید به معنی تضمین قطعی فهمیده شود. ممکن است یک شعبه در یک منطقه پرونده را قبول کند و شعبه دیگر همان بانک مدارک بیشتر بخواهد یا درخواست را نپذیرد. به‌خصوص برای پاسپورت ایرانی، پاسخ نهایی همیشه به سیاست داخلی بانک، ریسک compliance، منبع پول و کیفیت مدارک بستگی دارد.',
+      },
+      {
+        heading: 'زراعت بانک؛ گزینه رایج برای شروع، اما نه بدون بررسی',
+        body: 'Ziraat Bankası چون بانک دولتی بزرگ و شعبه‌دار است، برای خیلی از دانشجویان اولین گزینه ذهنی می‌شود. صفحه رسمی Ziraat برای انتقال خارجی و افتتاح حساب با حواله از خارج توضیح می‌دهد که اطلاعاتی مثل صفحه پاسپورت، شماره هویتی، آدرس، تلفن و نام خانوادگی مادر می‌تواند لازم باشد. برای دانشجوی تازه‌وارد، افتتاح حضوری در شعبه معمول‌تر است و شعبه ممکن است کد مالیاتی، پاسپورت، آدرس، اقامت یا برگه دانشجویی را بخواهد. اگر ایرانی هستی، بهتر است قبل از مراجعه، مدارک منبع پول و توضیح ساده هدف حساب را آماده داشته باشی: پرداخت شهریه، اجاره، هزینه زندگی و دریافت کمک‌هزینه خانواده.',
+      },
+      {
+        heading: 'ایش بانک؛ وقتی مدارک مرتب و آدرس قابل ارائه داری',
+        body: 'Türkiye İş Bankası در صفحه رسمی مشتری خارجی، موضوع کد مالیاتی یا شماره هویت خارجی و اثبات آدرس را صریح توضیح داده است. برای دانشجو، این یعنی باید از قبل بدانی آدرست را با چه مدرکی نشان می‌دهی: قبض به نام خودت، آدرس چاپ‌شده در پاسپورت اگر قابل قبول باشد، برگه نفوس بعد از ثبت آدرس، یا مدرک اقامت/سکونت که شعبه بپذیرد. مزیت İşbank برای دانشجو این است که خدمات دیجیتال، حساب جاری، Bankamatik debit card و اپلیکیشن قوی دارد؛ اما کردیت کارت برای دانشجوی تازه‌وارد بدون سابقه اعتباری ترکیه معمولاً مسیر ساده‌ای نیست.',
+      },
+      {
+        heading: 'واکیف بانک؛ گزینه بزرگ دیگر با Bankomat و سرویس expat',
+        body: 'VakıfBank در صفحات رسمی expat، کارت‌های Bankomat و استفاده از کارت برای ATM، خرید و سرویس‌های بانکی را معرفی می‌کند. برای دانشجو این مهم است چون هدف اول معمولاً گرفتن debit card و موبایل بانک است، نه گرفتن اعتبار بانکی. اگر VakıfBank را انتخاب می‌کنی، از شعبه دقیقاً بپرس برای پاسپورت ایرانی و دانشجو چه ترکیبی از پاسپورت، کد مالیاتی، آدرس، اقامت، شماره تلفن ترک و برگه دانشجویی لازم است. جواب شعبه را همان روز با چک‌لیست خودت تطبیق بده و اگر نقص مدارک گفتند، اسم مدرک را دقیق یادداشت کن.',
+      },
+      {
+        heading: 'مدارک لازم؛ چیزی که باید قبل از رفتن به شعبه آماده باشد',
+        body: 'چک‌لیست پایه معمولاً شامل پاسپورت معتبر، کد مالیاتی ترکیه، مدرک آدرس، شماره تلفن فعال ترکیه، ایمیل، و در صورت وجود کارت اقامت یا برگه دانشجویی است. بعضی شعبه‌ها ممکن است ترجمه پاسپورت، کپی صفحه ورود، قرارداد اجاره، نامه خوابگاه، برگه نفوس، یا توضیح منبع پول را هم بخواهند. بهترین کار این است که مدارک را در یک پوشه فیزیکی و فایل PDF مرتب داشته باشی. اگر هنوز اقامت نگرفته‌ای، از شعبه بپرس آیا با پاسپورت و کد مالیاتی شروع می‌کند یا حتماً کیملیک می‌خواهد.',
+      },
+      {
+        heading: 'کد مالیاتی ترکیه؛ قبل از بانک معمولاً این را بگیر',
+        body: 'کد مالیاتی ترکیه برای خارجی‌ها از مسیر اداره مالیات یا سامانه دیجیتال مالیات قابل پیگیری است و در امور بانکی، بیمه، پرداخت هزینه‌های اقامت و بعضی کارهای رسمی استفاده می‌شود. برای دانشجو، این کد معمولاً یکی از اولین مدارک مالی است. اگر سامانه آنلاین برایت درست کار نکرد، مسیر حضوری اداره مالیات با پاسپورت هم می‌تواند راه‌حل باشد. مهم این است که اسم، شماره پاسپورت و اطلاعات هویتی را دقیق وارد کنی؛ چون اختلاف کوچک در نام لاتین بعداً می‌تواند در بانک و اقامت دردسر درست کند.',
+      },
+      {
+        heading: 'دبیت کارت، کردیت کارت و اعتباریت را قاطی نکن',
+        body: 'دبیت کارت ترکیه مثل Bankkart، Bankamatik یا Bankomat معمولاً به موجودی حساب وصل است: هرچقدر پول در حساب داری، با همان خرید می‌کنی یا از ATM برداشت می‌کنی. کردیت کارت فرق دارد؛ بانک به تو اعتبار می‌دهد و بعداً باید بدهی را تسویه کنی. برای دانشجوی خارجی تازه‌وارد، کردیت کارت معمولاً به سابقه مالی در ترکیه، درآمد، وثیقه، حساب مسدود یا ارزیابی داخلی بانک وابسته است. Findeks و KKB هم به سابقه اعتباری مرتبط‌اند. پس هدف واقع‌بینانه روز اول این است: حساب + IBAN + دبیت کارت + موبایل بانک. کردیت کارت را بعد از تثبیت اقامت، درآمد و سابقه بانکی بررسی کن.',
+      },
+      {
+        heading: 'حد برداشت، خرید آنلاین و انتقال پول چطور تعیین می‌شود؟',
+        body: 'سقف برداشت ATM، سقف خرید کارت، انتقال داخلی، EFT/FAST، SWIFT و خرید اینترنتی عدد ثابت جهانی ندارد. بانک، نوع کارت، اپلیکیشن، سطح احراز هویت، سن حساب و سیاست شعبه روی آن اثر می‌گذارد. بعد از افتتاح حساب، همان روز داخل اپلیکیشن یا از کارمند بانک بپرس: سقف برداشت روزانه چقدر است؟ کارت برای خرید اینترنتی فعال است؟ انتقال بین‌بانکی و حواله خارجی فعال است؟ اگر فعال نیست، از کجا و با چه مدرکی فعال می‌شود؟ برای دانشجو بهتر است سقف‌ها خیلی بالا نباشد تا امنیت کارت هم حفظ شود.',
+      },
+      {
+        heading: 'منبع پول و compliance؛ حساس‌ترین بخش برای ایرانی‌ها',
+        body: 'بانک‌ها طبق تعهدات ضدپول‌شویی و شناخت مشتری باید بدانند مشتری کیست، پول از کجا می‌آید و حساب برای چه استفاده می‌شود. برای ایرانی‌ها این بخش به‌خاطر تحریم و ریسک‌های بین‌المللی حساس‌تر می‌شود. جواب حرفه‌ای این نیست که مسیر را دور بزنیم؛ جواب حرفه‌ای این است که پرونده شفاف باشد: دانشجو هستی، شهریه و هزینه زندگی داری، خانواده کمک می‌کند، مبلغ‌ها با سبک زندگی دانشجویی همخوان است و مدارک هویتی و آدرس واقعی هستند. از حساب دانشجویی برای دریافت پول‌های نامرتبط، حساب واسطه‌ای یا تراکنش‌های غیرشفاف استفاده نکن.',
+      },
+      {
+        heading: 'آیا سپرده دانشجو در بانک ترکیه بیمه است؟',
+        body: 'TMSF سازوکار بیمه سپرده ترکیه است. طبق اعلام رسمی، در سال ۲۰۲۶ تا سقف ۱٬۲۰۰٬۰۰۰ لیر برای هر نفر در هر مؤسسه اعتباری، در محدوده شرایط رسمی، تحت پوشش قرار می‌گیرد. این به معنی تضمین سود، تضمین نرخ ارز، یا پوشش هر نوع حساب و هر شرایطی نیست. برای دانشجو نکته عملی این است: پول شهریه و زندگی را در حساب‌های شفاف و به نام خودت نگه دار، رمز کارت و موبایل بانک را به کسی نده، و اگر مبلغ بزرگی باید جابه‌جا شود، قبل از انتقال از بانک درباره مسیر درست، کارمزد و مدارک سؤال کن.',
+      },
+      {
+        heading: 'چک‌لیست روز مراجعه به بانک',
+        body: 'قبل از رفتن به شعبه، این‌ها را آماده کن: پاسپورت اصلی و کپی، کد مالیاتی، شماره تلفن ترک، ایمیل، آدرس کامل ترکیه، مدرک آدرس، کارت اقامت اگر داری، برگه دانشجویی یا پذیرش اگر داری، توضیح ساده هدف حساب، و اگر پولی قرار است بیاید، توضیح منبع پول. از شعبه بپرس حساب لیر و حساب ارزی را چطور باز می‌کند، کارت چه زمانی آماده می‌شود، موبایل بانک چطور فعال می‌شود، IBAN از کجا دیده می‌شود، سقف‌ها چقدر است، و اگر درخواست رد شد آیا نقص مدرک بوده یا تصمیم compliance. با این نظم، حتی اگر شعبه اول جواب ندهد، مسیر بعدی روشن‌تر می‌شود.',
+      },
+    ],
+    keyTakeaways: [
+      'برای دانشجوی ایرانی، افتتاح حساب بانکی در ترکیه ممکن است اما تضمین عمومی برای همه شعب و همه پاسپورت‌ها وجود ندارد.',
+      'Ziraat Bankası، Türkiye İş Bankası و VakıfBank معمولاً از گزینه‌های اول بررسی هستند، ولی نتیجه به شعبه و compliance بستگی دارد.',
+      'مدارک پایه شامل پاسپورت، کد مالیاتی، مدرک آدرس، شماره تلفن ترک و در صورت وجود اقامت/برگه دانشجویی است.',
+      'دبیت کارت از موجودی حساب خرج می‌کند؛ کردیت کارت به اعتبار بانکی و ارزیابی بانک وابسته است.',
+      'IBAN ترکیه برای پرداخت شهریه، اجاره، دریافت انتقال و مدیریت مالی دانشجو ضروری است.',
+      'برای پاسپورت ایرانی، منبع پول، هدف حساب و تراکنش‌های شفاف را جدی بگیر.',
+      'سقف بیمه سپرده TMSF در ۲۰۲۶ طبق اعلام رسمی تا ۱٬۲۰۰٬۰۰۰ لیر برای هر نفر در هر مؤسسه اعتباری است، در چارچوب شرایط رسمی.',
+    ],
+    faq: [
+      {
+        q: 'آیا ایرانی‌ها در ترکیه می‌توانند حساب بانکی باز کنند؟',
+        a: 'بله، در عمل ممکن است، اما تضمین عمومی وجود ندارد. بانک، شعبه، مدارک، وضعیت اقامت، آدرس، منبع پول و بررسی compliance می‌تواند نتیجه را تغییر دهد.',
+      },
+      {
+        q: 'کدام بانک‌ها برای دانشجوی ایرانی بهتر است اول بررسی شوند؟',
+        a: 'معمولاً Ziraat Bankası، Türkiye İş Bankası و VakıfBank گزینه‌های اول بررسی هستند. انتخاب نهایی بهتر است بر اساس شهر، شعبه، مدارک و نیاز دانشجو انجام شود.',
+      },
+      {
+        q: 'آیا بدون کیملیک یا کارت اقامت می‌شود حساب باز کرد؟',
+        a: 'گاهی بعضی شعبه‌ها با پاسپورت، کد مالیاتی و مدرک آدرس بررسی می‌کنند، اما بعضی شعبه‌ها کیملیک یا اقامت معتبر می‌خواهند. قبل از مراجعه حضوری از همان شعبه سؤال کن.',
+      },
+      {
+        q: 'برای افتتاح حساب بانکی در ترکیه چه مدارکی لازم است؟',
+        a: 'پاسپورت معتبر، کد مالیاتی ترکیه، مدرک آدرس، شماره تلفن ترک، ایمیل و در صورت وجود کارت اقامت، برگه دانشجویی یا پذیرش دانشگاه. شعبه ممکن است مدارک تکمیلی بخواهد.',
+      },
+      {
+        q: 'دبیت کارت همان کردیت کارت است؟',
+        a: 'خیر. دبیت کارت از موجودی حساب خرج می‌کند. کردیت کارت یعنی بانک اعتبار می‌دهد و برای دانشجوی تازه‌وارد معمولاً به سابقه اعتباری، درآمد یا وثیقه نیاز دارد.',
+      },
+      {
+        q: 'آیا دانشجو می‌تواند کارت اعتباری ترکیه بگیرد؟',
+        a: 'ممکن است، اما معمولاً در روزهای اول ساده نیست. بانک سابقه مالی، درآمد، اقامت، ریسک و گاهی وثیقه یا حساب مسدود را بررسی می‌کند.',
+      },
+      {
+        q: 'برای انتقال پول از ایران یا خارج به حساب ترکیه باید چه کنم؟',
+        a: 'از مسیرهای شفاف و قابل توضیح استفاده کن و قبل از انتقال مبلغ بالا از شعبه درباره SWIFT، کارمزد، مدارک منبع پول و محدودیت‌های احتمالی بپرس. حساب دانشجویی را برای تراکنش‌های نامرتبط استفاده نکن.',
+      },
+      {
+        q: 'اگر یک شعبه حساب باز نکرد، یعنی همه شعب همان بانک رد می‌کنند؟',
+        a: 'نه لزوماً. اما اگر دلیل رد compliance یا سیاست داخلی باشد، ممکن است در شعب دیگر هم تکرار شود. اگر نقص مدرک بوده، نقص را دقیق رفع کن و بعد دوباره اقدام کن.',
+      },
+    ],
+  },
+  en: {
+    title: 'Opening a Bank Account in Turkey for Foreign and Iranian Students 2026',
+    excerpt: 'A practical guide to Turkish bank accounts, debit cards, tax number, IBAN, KYC, deposit insurance and common bank options for international students.',
+    thesis: 'Iranian students in Turkey often start with branch-led banks such as Ziraat Bankasi, Turkiye Is Bankasi and VakifBank, but no bank can be treated as a universal guarantee for every Iranian passport. Documents, tax number, address proof, residence status, Turkish phone, source of funds and branch compliance decide the outcome.',
+    lead: 'A Turkish bank account helps students pay tuition and rent, receive family support, use debit cards, manage mobile banking and build a clean financial footprint.',
+    sections: [
+      { heading: 'Why it matters', body: 'A Turkish account makes tuition, rent, daily spending, IBAN transfers and budgeting easier and safer.' },
+      { heading: 'Common banks to check first', body: 'Ziraat Bankasi, Turkiye Is Bankasi and VakifBank are common first options, but approval is branch and compliance dependent.' },
+      { heading: 'Ziraat Bankasi', body: 'Ziraat is often a first stop because of its branch network. Prepare passport, tax number, address, phone, student documents and source-of-funds explanation.' },
+      { heading: 'Turkiye Is Bankasi', body: 'Isbank clearly explains foreign-customer identity, tax-number and address proof expectations on its official page.' },
+      { heading: 'VakifBank', body: 'VakifBank expat pages introduce Bankomat debit cards and digital services; branch document requirements still need confirmation.' },
+      { heading: 'Core documents', body: 'Passport, Turkish tax number, proof of address, Turkish phone and, if available, residence card and student certificate are the usual starting set.' },
+      { heading: 'Debit vs credit card', body: 'Debit cards spend the account balance. Credit cards require bank credit assessment and are harder for new students.' },
+      { heading: 'KYC and source of funds', body: 'Banks must know the customer, address, purpose of account and source of funds. Iranian-passport cases should be especially transparent.' },
+      { heading: 'Deposit insurance', body: 'TMSF coverage for 2026 is officially described as up to TRY 1,200,000 per person per credit institution, within the official limits and exclusions.' },
+      { heading: 'Branch checklist', body: 'Ask about TRY and FX accounts, debit card timing, mobile banking, IBAN, card limits, online shopping, SWIFT and missing documents.' },
+    ],
+    keyTakeaways: [
+      'Account opening is possible but not guaranteed for every branch.',
+      'Start with Ziraat, Isbank and VakifBank as practical options.',
+      'Prepare passport, tax number, address proof and Turkish phone.',
+      'Aim first for account, IBAN, debit card and mobile banking.',
+      'Credit cards require credit assessment.',
+      'Keep Iranian-passport cases transparent and well documented.',
+      'TMSF 2026 deposit insurance coverage is up to TRY 1,200,000 within official conditions.',
+    ],
+    faq: [
+      { q: 'Can Iranian students open a bank account in Turkey?', a: 'Often yes, but branch and compliance review decide the final outcome.' },
+      { q: 'Which banks should students check first?', a: 'Ziraat Bankasi, Turkiye Is Bankasi and VakifBank are common first options.' },
+      { q: 'Is residence card always required?', a: 'Some branches may review passport and tax number cases, while others require residence.' },
+      { q: 'What documents are needed?', a: 'Passport, tax number, address proof, Turkish phone and, if available, residence and student documents.' },
+      { q: 'Is a debit card the same as a credit card?', a: 'No. Debit spends balance; credit depends on bank credit approval.' },
+      { q: 'Can students get credit cards?', a: 'Sometimes, but it is usually harder for new foreign students without local history.' },
+    ],
+  },
+};
 
 const eIkametStudentResidenceUpdate = {
   readTime: '۱۲ دقیقه',
@@ -520,6 +820,7 @@ const turkey90180IranianStudentsPost = {
 };
 
 export const knowledgeBlogPosts = [
+  studentBankAccountTurkey2026,
   {
     slug: 'student-work-permit-turkey-2026',
     priority: 108,
@@ -537,8 +838,8 @@ export const knowledgeBlogPosts = [
     knowledgeSource: 'نالج‌بانک داخلی آکا / دسته کار و اجازه کار، بازبینی‌شده با منابع رسمی ترکیه در ژوئن ۲۰۲۶',
     category: 'کار دانشجویی',
     image: {
-      src: '/assets/blog/student-residence-e-ikamet.jpg',
-      alt: 'دانشجو در ترکیه در حال آماده‌سازی مدارک اقامت، اجازه کار و برنامه‌ریزی شغلی',
+      src: '/assets/blog/student-work-permit-turkey-2026.jpg',
+      alt: 'دانشجوی بین‌المللی در استانبول بین دانشگاه و کار پاره‌وقت با نمادهای اجازه کار، حقوق و برنامه‌ریزی شغلی ۲۰۲۶',
     },
     tags: [
       'کار دانشجویی در ترکیه',

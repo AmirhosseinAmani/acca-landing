@@ -27,7 +27,7 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, onConsu
 
       const el = astronautShellRef.current;
       if (!el) return;
-      el.style.transform = `translate3d(0px,${curr * 0.015}px,0px) scale(1.04) rotate(${curr * 0.004}deg)`;
+      el.style.transform = `translate3d(0px,${-18 + curr * 0.008}px,0px) scale(1.02) rotate(${curr * 0.003}deg)`;
       el.style.filter = 'saturate(1.16) contrast(1.06)';
     };
 
@@ -122,21 +122,21 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, onConsu
             {/* Orbital decoration behind astronaut */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
               {/* outer ring */}
-              <div className={`absolute rounded-full border-2 ${darkMode ? 'border-emerald-400/18' : 'border-emerald-600/14'}`} style={{ width: '52%', aspectRatio: '1', maxWidth: 304 }} />
+              <div className={`absolute rounded-full border-2 ${darkMode ? 'border-emerald-400/18' : 'border-emerald-600/14'}`} style={{ width: '46%', aspectRatio: '1', maxWidth: 272 }} />
               {/* inner ring */}
-              <div className={`absolute rounded-full border-2 ${darkMode ? 'border-emerald-400/25' : 'border-emerald-600/20'}`} style={{ width: '32%', aspectRatio: '1', maxWidth: 194 }} />
+              <div className={`absolute rounded-full border-2 ${darkMode ? 'border-emerald-400/25' : 'border-emerald-600/20'}`} style={{ width: '29%', aspectRatio: '1', maxWidth: 168 }} />
               {/* green glow fill */}
-              <div className={`absolute rounded-full ${darkMode ? 'bg-emerald-500/8' : 'bg-emerald-500/7'}`} style={{ width: '35%', aspectRatio: '1', maxWidth: 210 }} />
+              <div className={`absolute rounded-full ${darkMode ? 'bg-emerald-500/8' : 'bg-emerald-500/7'}`} style={{ width: '31%', aspectRatio: '1', maxWidth: 182 }} />
 
               {/* orbit dots */}
-              <div className="absolute" style={{ width: '52%', aspectRatio: '1', maxWidth: 304 }}>
+              <div className="absolute" style={{ width: '46%', aspectRatio: '1', maxWidth: 272 }}>
                 <div className="absolute top-[10%] right-[8%] w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.7)]" />
                 <div className="absolute bottom-[18%] left-[6%] w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.6)]" />
                 <div className="absolute top-[48%] left-[2%] w-2.5 h-2.5 rounded-full bg-emerald-300/70" />
               </div>
 
               {/* sparkle stars */}
-              <svg className="absolute" style={{ width: '58%', height: '58%', maxWidth: 334 }} viewBox="0 0 460 460" fill="none">
+              <svg className="absolute" style={{ width: '52%', height: '52%', maxWidth: 304 }} viewBox="0 0 460 460" fill="none">
                 <path d="M380 100 L383 93 L386 100 L393 103 L386 106 L383 113 L380 106 L373 103 Z" fill={darkMode ? '#34d399' : '#059669'} opacity="0.7"/>
                 <path d="M60 320 L62 315 L64 320 L69 322 L64 324 L62 329 L60 324 L55 322 Z" fill={darkMode ? '#6ee7b7' : '#10b981'} opacity="0.55"/>
                 <path d="M400 360 L402 355.5 L404 360 L408.5 362 L404 364 L402 368.5 L400 364 L395.5 362 Z" fill={darkMode ? '#a7f3d0' : '#059669'} opacity="0.45"/>

@@ -7,24 +7,20 @@ export const COMPANY_OFFICE_ADDRESS =
 export const COMPANY_OFFICE_LAT = '41.0052';
 export const COMPANY_OFFICE_LNG = '28.6849825';
 export const COMPANY_MAP_COORDINATES = `${COMPANY_OFFICE_LAT},${COMPANY_OFFICE_LNG}`;
-export const COMPANY_GOOGLE_BUSINESS_QUERY =
-  'Acca+edu+international+%7C+%D8%AA%D8%AD%D8%B5%DB%8C%D9%84+%D8%AF%D8%B1+%D8%AA%D8%B1%DA%A9%DB%8C%D9%87';
+export const COMPANY_GOOGLE_BUSINESS_CID = '7257116585836902116';
 /**
  * Direct deep-link to the ACCA EDU Google Business Profile (works as <a href>).
- * Short Google Maps links do NOT work inside <iframe> — see COMPANY_MAP_EMBED_URL.
+ * Short Google Maps links do NOT work inside <iframe> - see COMPANY_MAP_EMBED_URL.
  */
 export const COMPANY_MAPS_URL = 'https://maps.app.goo.gl/p2UDh4TuAd5gMckN7';
 
 /**
  * Google Maps embed URL (no API key required).
- * Uses the business-name + location query so the iframe renders the actual
- * Google Business Profile card rather than a bare satellite pin.
- * Fallback coords are passed via &ll= so Google centres on the right building
- * even if the name query is ambiguous.
+ * Uses the Google Business Profile CID so the iframe opens the actual ACCA EDU
+ * office profile instead of a generic coordinate search.
  */
 export const COMPANY_MAP_EMBED_URL =
-  `https://www.google.com/maps?q=${COMPANY_GOOGLE_BUSINESS_QUERY}` +
-  `&ll=${COMPANY_MAP_COORDINATES}&z=19&t=m&output=embed`;
+  `https://www.google.com/maps?cid=${COMPANY_GOOGLE_BUSINESS_CID}&z=19&t=m&output=embed`;
 
 /* ------------------------------------------------------------------ *
  * Social & messaging channels — single source of truth.

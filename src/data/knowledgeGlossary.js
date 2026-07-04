@@ -60,6 +60,21 @@ Object.assign(EXTRA_TERM_SLUG_BY_TITLE, {
 });
 
 Object.assign(EXTRA_TERM_SLUG_BY_TITLE, {
+  'حساب بانکی دانشجویی در ترکیه چیست؟': 'foreign-student-bank-account-turkey',
+  'کد مالیاتی ترکیه برای بانک چیست؟': 'turkish-tax-number-bank-account',
+  'دبیت کارت ترکیه چیست؟': 'debit-card-turkey-students',
+  'کردیت کارت ترکیه برای دانشجو چیست؟': 'credit-card-turkey-students',
+  'IBAN ترکیه چیست؟': 'iban-turkey',
+  'احراز هویت بانکی KYC چیست؟': 'kyc-bank-compliance-turkey',
+  'مدرک آدرس بانکی چیست؟': 'proof-of-address-bank-turkey',
+  'بیمه سپرده TMSF چیست؟': 'deposit-insurance-turkey',
+  'حساب دانشجویی زراعت بانک چیست؟': 'ziraat-bank-student-account',
+  'حساب دانشجویی ایش بانک چیست؟': 'isbank-student-account',
+  'حساب دانشجویی واکیف بانک چیست؟': 'vakifbank-student-account',
+  'اعتبارسنجی Findeks ترکیه چیست؟': 'findeks-credit-score-turkey',
+});
+
+Object.assign(EXTRA_TERM_SLUG_BY_TITLE, {
   'اجازه کار دانشجویی ترکیه چیست؟': 'student-work-permit',
   'کار پاره‌وقت دانشجویی چیست؟': 'part-time-student-work',
   'قانون نیروی کار بین‌المللی ترکیه چیست؟': 'international-workforce-law',
@@ -481,7 +496,372 @@ const TERM_DETAILS = {
   },
 };
 
+const BANK_GLOSSARY_VISUAL = {
+  src: '/assets/blog/student-bank-account-turkey-2026.jpg',
+  alt: 'افتتاح حساب بانکی دانشجویی در ترکیه - تصویر آموزشی فرهنگ‌نامه آکا',
+};
+
 const EXTRA_TERM_DETAILS = {
+  'foreign-student-bank-account-turkey': {
+    title: { fa: 'حساب بانکی دانشجویی در ترکیه', en: 'Student bank account in Turkey' },
+    question: { fa: 'حساب بانکی دانشجویی در ترکیه چیست و چرا برای دانشجوی خارجی مهم است؟', en: 'What is a student bank account in Turkey?' },
+    category: 'بانک و امور مالی دانشجو',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'حساب بانکی دانشجویی در ترکیه حسابی است که دانشجوی خارجی برای پرداخت شهریه، اجاره، دریافت انتقال، گرفتن دبیت کارت و مدیریت هزینه‌های زندگی باز می‌کند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'برای دانشجو، حساب بانکی یعنی زیرساخت مالی زندگی در ترکیه: IBAN، کارت، موبایل بانک، پرداخت‌های روزمره و دریافت پول از خانواده.' },
+      { heading: 'برای ایرانی‌ها', body: 'افتتاح حساب ممکن است، اما نتیجه به شعبه، مدارک، وضعیت اقامت، آدرس و بررسی compliance بستگی دارد.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه یک بانک برای همه ایرانی‌ها در همه شعب قطعاً حساب باز می‌کند.' },
+    ],
+    checklist: ['پاسپورت', 'کد مالیاتی', 'آدرس ترکیه', 'شماره تلفن ترک', 'برگه دانشجویی یا اقامت در صورت وجود'],
+    faq: [
+      { q: 'آیا حساب بانکی برای پرداخت شهریه لازم است؟', a: 'در بسیاری از مسیرها بسیار کمک‌کننده است و پرداخت‌ها را شفاف‌تر می‌کند.' },
+      { q: 'آیا افتتاح حساب تضمینی است؟', a: 'خیر. بانک و شعبه باید پرونده را بپذیرند.' },
+    ],
+    en: {
+      summary: 'A student bank account helps an international student pay tuition, rent, receive transfers, use debit cards and manage daily costs.',
+      sections: [
+        { heading: 'Simple definition', body: 'It provides IBAN, card access, mobile banking and day-to-day payment infrastructure.' },
+        { heading: 'For Iranians', body: 'Opening can be possible but depends on branch, documents, residence, address and compliance.' },
+        { heading: 'Common mistake', body: 'Assuming one bank decision applies to all branches.' },
+      ],
+      checklist: ['Passport', 'Tax number', 'Turkey address', 'Turkish phone', 'Student or residence document if available'],
+      faq: [
+        { q: 'Does it help with tuition?', a: 'Yes, it makes payments more traceable.' },
+        { q: 'Is it guaranteed?', a: 'No.' },
+      ],
+    },
+  },
+  'turkish-tax-number-bank-account': {
+    title: { fa: 'کد مالیاتی ترکیه برای بانک', en: 'Turkish tax number for banking' },
+    question: { fa: 'کد مالیاتی ترکیه برای افتتاح حساب بانکی چیست؟', en: 'What is a Turkish tax number for bank accounts?' },
+    category: 'بانک و امور مالی دانشجو',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'کد مالیاتی ترکیه شناسه‌ای است که اتباع خارجی برای کارهای مالی و اداری می‌گیرند و بانک‌ها معمولاً هنگام افتتاح حساب از آن استفاده می‌کنند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'این کد به بانک کمک می‌کند مشتری خارجی را در سیستم مالی ترکیه شناسایی کند.' },
+      { heading: 'برای دانشجو', body: 'بهتر است قبل از مراجعه به بانک، کد مالیاتی را از سامانه دیجیتال مالیات یا اداره مالیات پیگیری کند.' },
+      { heading: 'اشتباه رایج', body: 'وارد کردن نام یا شماره پاسپورت با خطا؛ همین اختلاف کوچک می‌تواند در بانک دردسر شود.' },
+    ],
+    checklist: ['پاسپورت معتبر', 'نام لاتین دقیق', 'شماره پاسپورت درست', 'ذخیره نسخه PDF یا پرینت', 'هماهنگی اطلاعات با اقامت'],
+    faq: [
+      { q: 'آیا بدون کد مالیاتی حساب باز می‌شود؟', a: 'بعضی شعبه‌ها ممکن است مسیر دیگری داشته باشند، اما معمولاً کد مالیاتی لازم یا بسیار کمک‌کننده است.' },
+      { q: 'از کجا باید گرفت؟', a: 'از مسیر اداره مالیات ترکیه یا سامانه دیجیتال مالیات.' },
+    ],
+    en: {
+      summary: 'A Turkish tax number identifies a foreigner in tax and banking workflows.',
+      sections: [
+        { heading: 'Simple definition', body: 'It helps the bank identify a foreign customer in Turkish financial systems.' },
+        { heading: 'For students', body: 'It should usually be prepared before visiting the branch.' },
+        { heading: 'Common mistake', body: 'Entering passport or Latin-name data incorrectly.' },
+      ],
+      checklist: ['Valid passport', 'Exact Latin name', 'Correct passport number', 'PDF or printout', 'Data consistency'],
+      faq: [
+        { q: 'Is it always required?', a: 'Often yes or highly useful.' },
+        { q: 'Where is it obtained?', a: 'From the Turkish tax office path or digital tax office.' },
+      ],
+    },
+  },
+  'debit-card-turkey-students': {
+    title: { fa: 'دبیت کارت ترکیه', en: 'Turkey debit card' },
+    question: { fa: 'دبیت کارت ترکیه برای دانشجو چیست؟', en: 'What is a Turkey debit card for students?' },
+    category: 'کارت بانکی',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'دبیت کارت به موجودی حساب وصل است و برای خرید، برداشت ATM و پرداخت آنلاین از پول موجود در حساب استفاده می‌شود.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'با دبیت کارت پولی را خرج می‌کنی که در حساب خودت وجود دارد.' },
+      { heading: 'برای دانشجو', body: 'هدف واقع‌بینانه روزهای اول معمولاً گرفتن حساب، IBAN، دبیت کارت و موبایل بانک است.' },
+      { heading: 'اشتباه رایج', body: 'اشتباه گرفتن دبیت کارت با کردیت کارت یا تصور اینکه کارت همیشه برای خرید آنلاین فعال است.' },
+    ],
+    checklist: ['فعال‌سازی کارت', 'رمز کارت', 'سقف برداشت', 'فعال بودن خرید اینترنتی', 'موبایل بانک'],
+    faq: [
+      { q: 'آیا دبیت کارت اعتبار بانکی می‌دهد؟', a: 'خیر. از موجودی حساب خرج می‌کند.' },
+      { q: 'آیا با آن خرید آنلاین می‌شود؟', a: 'باید فعال بودن خرید اینترنتی و سقف‌ها از اپ یا شعبه چک شود.' },
+    ],
+    en: {
+      summary: 'A debit card spends the money already available in the account.',
+      sections: [
+        { heading: 'Simple definition', body: 'It is linked to account balance.' },
+        { heading: 'For students', body: 'Account, IBAN, debit card and mobile banking are the realistic first goals.' },
+        { heading: 'Common mistake', body: 'Confusing debit with credit or assuming online use is active.' },
+      ],
+      checklist: ['Card activation', 'PIN', 'ATM limit', 'Online shopping', 'Mobile banking'],
+      faq: [
+        { q: 'Does it create credit?', a: 'No.' },
+        { q: 'Can it be used online?', a: 'The setting and limits must be checked.' },
+      ],
+    },
+  },
+  'credit-card-turkey-students': {
+    title: { fa: 'کردیت کارت ترکیه برای دانشجو', en: 'Turkey credit card for students' },
+    question: { fa: 'کردیت کارت ترکیه برای دانشجوی خارجی چیست و چرا سخت‌تر است؟', en: 'What is a Turkish credit card for foreign students?' },
+    category: 'کارت بانکی',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'کردیت کارت بر پایه اعتبار بانکی و سقف اعتباری کار می‌کند و برای دانشجوی خارجی تازه‌وارد معمولاً به سابقه مالی، درآمد یا وثیقه نیاز دارد.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'بانک به مشتری اعتبار می‌دهد و مشتری بعداً بدهی کارت را تسویه می‌کند.' },
+      { heading: 'برای دانشجو', body: 'اگر تازه وارد ترکیه شده‌ای، اول حساب و دبیت کارت را تثبیت کن و بعد سراغ کردیت کارت برو.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه افتتاح حساب یعنی گرفتن خودکار کردیت کارت.' },
+    ],
+    checklist: ['سابقه حساب', 'درآمد یا وثیقه', 'اقامت معتبر', 'اعتبارسنجی بانک', 'مدیریت بدهی'],
+    faq: [
+      { q: 'آیا دانشجو می‌تواند کردیت کارت بگیرد؟', a: 'ممکن است، اما معمولاً ساده و فوری نیست.' },
+      { q: 'آیا دبیت کارت همان کردیت کارت است؟', a: 'خیر.' },
+    ],
+    en: {
+      summary: 'A credit card depends on bank credit approval and is harder for new foreign students.',
+      sections: [
+        { heading: 'Simple definition', body: 'The bank gives a credit limit and the customer repays later.' },
+        { heading: 'For students', body: 'Stabilize account and debit card first.' },
+        { heading: 'Common mistake', body: 'Assuming account opening includes credit-card approval.' },
+      ],
+      checklist: ['Account history', 'Income or collateral', 'Valid residence', 'Bank assessment', 'Debt management'],
+      faq: [
+        { q: 'Can a student get one?', a: 'Sometimes, but not usually immediately.' },
+        { q: 'Is debit the same?', a: 'No.' },
+      ],
+    },
+  },
+  'iban-turkey': {
+    title: { fa: 'IBAN ترکیه', en: 'Turkey IBAN' },
+    question: { fa: 'IBAN ترکیه چیست و چرا برای دانشجو مهم است؟', en: 'What is a Turkey IBAN?' },
+    category: 'بانک و امور مالی دانشجو',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'IBAN شماره استاندارد حساب بانکی است و در ترکیه با TR شروع می‌شود. برای انتقال پول، پرداخت شهریه و دریافت حواله اهمیت دارد.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'IBAN آدرس استاندارد حساب بانکی تو در شبکه بانکی است.' },
+      { heading: 'برای دانشجو', body: 'برای شهریه، اجاره، کمک‌هزینه خانواده و انتقال‌های بانکی از آن استفاده می‌شود.' },
+      { heading: 'اشتباه رایج', body: 'ارسال شماره کارت به جای IBAN برای پرداخت‌هایی که شماره حساب استاندارد می‌خواهند.' },
+    ],
+    checklist: ['دریافت IBAN از اپ', 'کنترل نام صاحب حساب', 'ارسال دقیق شماره', 'تطبیق با ارز حساب', 'ذخیره امن'],
+    faq: [
+      { q: 'آیا IBAN همان شماره کارت است؟', a: 'خیر. IBAN شماره استاندارد حساب است.' },
+      { q: 'آیا برای حواله خارجی لازم است؟', a: 'اغلب بله، همراه با اطلاعات تکمیلی بانک.' },
+    ],
+    en: {
+      summary: 'IBAN is the standardized account number used for bank transfers.',
+      sections: [
+        { heading: 'Simple definition', body: 'It is the account address in banking networks.' },
+        { heading: 'For students', body: 'Useful for tuition, rent and transfers.' },
+        { heading: 'Common mistake', body: 'Sending card number where IBAN is required.' },
+      ],
+      checklist: ['Get from app', 'Check account holder', 'Send accurately', 'Match currency', 'Store safely'],
+      faq: [
+        { q: 'Is it a card number?', a: 'No.' },
+        { q: 'Is it used for foreign transfers?', a: 'Often yes with bank details.' },
+      ],
+    },
+  },
+  'kyc-bank-compliance-turkey': {
+    title: { fa: 'احراز هویت بانکی KYC', en: 'Banking KYC compliance' },
+    question: { fa: 'احراز هویت بانکی KYC در ترکیه چیست؟', en: 'What is banking KYC in Turkey?' },
+    category: 'قوانین بانکی',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'KYC یعنی بانک هویت مشتری، آدرس، هدف حساب، منبع پول و ریسک تراکنش‌ها را بررسی می‌کند تا با تعهدات ضدپول‌شویی هماهنگ باشد.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'بانک باید بداند مشتری کیست، چرا حساب می‌خواهد و پول از کجا می‌آید.' },
+      { heading: 'برای ایرانی‌ها', body: 'به‌خاطر ریسک تحریم و compliance، شفاف بودن مدارک و منبع پول اهمیت بیشتری دارد.' },
+      { heading: 'اشتباه رایج', body: 'تلاش برای پنهان کردن هدف حساب یا استفاده از حساب دانشجویی برای تراکنش‌های نامرتبط.' },
+    ],
+    checklist: ['هویت روشن', 'آدرس واقعی', 'هدف حساب', 'منبع پول', 'تراکنش‌های متناسب با دانشجو'],
+    faq: [
+      { q: 'آیا KYC فقط یک فرم است؟', a: 'خیر. بخشی از تصمیم بانک درباره ریسک مشتری است.' },
+      { q: 'آیا شعبه می‌تواند مدارک بیشتر بخواهد؟', a: 'بله.' },
+    ],
+    en: {
+      summary: 'KYC means the bank verifies identity, address, account purpose, source of funds and transaction risk.',
+      sections: [
+        { heading: 'Simple definition', body: 'The bank needs to understand who the customer is and why the account is needed.' },
+        { heading: 'For Iranians', body: 'Sanctions and compliance make transparency more important.' },
+        { heading: 'Common mistake', body: 'Using a student account for unrelated opaque transactions.' },
+      ],
+      checklist: ['Clear identity', 'Real address', 'Account purpose', 'Source of funds', 'Student-like transactions'],
+      faq: [
+        { q: 'Is it only a form?', a: 'No.' },
+        { q: 'Can the branch ask for more?', a: 'Yes.' },
+      ],
+    },
+  },
+  'proof-of-address-bank-turkey': {
+    title: { fa: 'مدرک آدرس بانکی', en: 'Bank proof of address' },
+    question: { fa: 'مدرک آدرس بانکی برای افتتاح حساب ترکیه چیست؟', en: 'What is proof of address for bank account opening?' },
+    category: 'بانک و امور مالی دانشجو',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'مدرک آدرس نشان می‌دهد دانشجو در ترکیه کجا زندگی می‌کند و می‌تواند قبض، برگه نفوس، قرارداد، نامه خوابگاه یا مدرک قابل قبول شعبه باشد.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'بانک برای شناخت مشتری معمولاً باید آدرس قابل پیگیری داشته باشد.' },
+      { heading: 'برای دانشجو', body: 'اگر در خوابگاه یا خانه اجاره‌ای هستی، از قبل بپرس بانک چه مدرکی را می‌پذیرد.' },
+      { heading: 'اشتباه رایج', body: 'بردن آدرس ناقص یا آدرسی که با اقامت و مدارک دیگر نمی‌خواند.' },
+    ],
+    checklist: ['آدرس کامل', 'مدرک قابل قبول شعبه', 'نام دانشجو در صورت نیاز', 'هماهنگی با اقامت', 'نسخه خوانا'],
+    faq: [
+      { q: 'آیا آدرس شفاهی کافی است؟', a: 'معمولاً نه. بانک ممکن است مدرک بخواهد.' },
+      { q: 'آیا نامه خوابگاه کافی است؟', a: 'بسته به بانک و شعبه باید بررسی شود.' },
+    ],
+    en: {
+      summary: 'Proof of address shows where the student lives and may be requested by the branch.',
+      sections: [
+        { heading: 'Simple definition', body: 'The bank needs a traceable address.' },
+        { heading: 'For students', body: 'Ask which dorm or rental document is acceptable.' },
+        { heading: 'Common mistake', body: 'Using incomplete or inconsistent address data.' },
+      ],
+      checklist: ['Full address', 'Accepted document', 'Student name if needed', 'Residence consistency', 'Readable copy'],
+      faq: [
+        { q: 'Is verbal address enough?', a: 'Usually no.' },
+        { q: 'Is dorm letter enough?', a: 'It depends on the branch.' },
+      ],
+    },
+  },
+  'deposit-insurance-turkey': {
+    title: { fa: 'بیمه سپرده TMSF', en: 'TMSF deposit insurance' },
+    question: { fa: 'بیمه سپرده TMSF ترکیه چیست و برای دانشجو چه کاربردی دارد؟', en: 'What is TMSF deposit insurance?' },
+    category: 'قوانین بانکی',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'TMSF سازوکار بیمه سپرده ترکیه است و در ۲۰۲۶ تا سقف ۱٬۲۰۰٬۰۰۰ لیر برای هر نفر در هر مؤسسه اعتباری، در چارچوب شرایط رسمی، پوشش اعلام شده دارد.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'اگر مؤسسه تحت پوشش دچار مشکل شود، سپرده‌های واجد شرایط تا سقف اعلام‌شده بیمه می‌شوند.' },
+      { heading: 'برای دانشجو', body: 'پول شهریه و زندگی باید در حساب شفاف و به نام خود دانشجو مدیریت شود.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه بیمه سپرده یعنی تضمین نرخ ارز، سود یا هر نوع حساب بدون محدودیت.' },
+    ],
+    checklist: ['بانک مجاز', 'حساب به نام خود دانشجو', 'کنترل سقف سال جاری', 'درک استثناها', 'عدم اشتراک رمز کارت'],
+    faq: [
+      { q: 'سقف ۲۰۲۶ چقدر است؟', a: 'طبق اعلام رسمی، ۱٬۲۰۰٬۰۰۰ لیر برای هر نفر در هر مؤسسه اعتباری، در چارچوب شرایط رسمی.' },
+      { q: 'آیا ارز و سود هم همیشه پوشش دارد؟', a: 'باید شرایط رسمی و نوع حساب بررسی شود.' },
+    ],
+    en: {
+      summary: 'TMSF is the Turkish deposit insurance framework; 2026 coverage is officially stated as up to TRY 1,200,000 within conditions.',
+      sections: [
+        { heading: 'Simple definition', body: 'Eligible deposits are insured up to the declared limit.' },
+        { heading: 'For students', body: 'Tuition and living funds should be kept transparently in the student account.' },
+        { heading: 'Common mistake', body: 'Assuming it guarantees FX rates, profit or every account type without limits.' },
+      ],
+      checklist: ['Authorized bank', 'Account in student name', 'Current-year limit', 'Exclusions', 'Password safety'],
+      faq: [
+        { q: 'What is the 2026 limit?', a: 'TRY 1,200,000 per person per credit institution within official conditions.' },
+        { q: 'Does it cover everything?', a: 'Conditions and account type matter.' },
+      ],
+    },
+  },
+  'ziraat-bank-student-account': {
+    title: { fa: 'حساب دانشجویی زراعت بانک', en: 'Ziraat student account' },
+    question: { fa: 'حساب دانشجویی زراعت بانک برای ایرانی‌ها چه نکته‌ای دارد؟', en: 'What should Iranian students know about Ziraat accounts?' },
+    category: 'بانک‌های ترکیه',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'زراعت بانک یکی از گزینه‌های رایج برای شروع افتتاح حساب دانشجویی است، اما برای پاسپورت ایرانی نتیجه به شعبه و بررسی compliance وابسته است.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'یک گزینه شعبه‌محور و بزرگ برای حساب لیر، ارزی، کارت و انتقال.' },
+      { heading: 'برای دانشجو', body: 'با مدارک کامل، هدف حساب روشن و توضیح منبع پول مراجعه کن.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه چون بانک دولتی است همیشه و برای همه حساب باز می‌کند.' },
+    ],
+    checklist: ['پاسپورت', 'کد مالیاتی', 'آدرس', 'شماره ترک', 'هدف حساب و منبع پول'],
+    faq: [
+      { q: 'آیا زراعت برای ایرانی‌ها قطعی است؟', a: 'خیر. شعبه و پرونده تعیین‌کننده است.' },
+      { q: 'برای دانشجو مزیتش چیست؟', a: 'شبکه شعب و آشنایی بیشتر با مشتری خارجی.' },
+    ],
+    en: {
+      summary: 'Ziraat is a common first option, but Iranian-passport outcomes remain branch and compliance dependent.',
+      sections: [
+        { heading: 'Simple definition', body: 'A large branch-led option for TRY/FX accounts, card and transfers.' },
+        { heading: 'For students', body: 'Bring complete documents and source-of-funds clarity.' },
+        { heading: 'Common mistake', body: 'Assuming public-bank status guarantees approval.' },
+      ],
+      checklist: ['Passport', 'Tax number', 'Address', 'Turkish phone', 'Purpose and source of funds'],
+      faq: [
+        { q: 'Is it guaranteed?', a: 'No.' },
+        { q: 'Why consider it?', a: 'Branch network and foreign-customer familiarity.' },
+      ],
+    },
+  },
+  'isbank-student-account': {
+    title: { fa: 'حساب دانشجویی ایش بانک', en: 'Isbank student account' },
+    question: { fa: 'حساب دانشجویی ایش بانک برای دانشجوی خارجی چیست؟', en: 'What is an Isbank student account for foreign students?' },
+    category: 'بانک‌های ترکیه',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'ایش بانک یکی از بانک‌های بزرگ ترکیه است و برای مشتری خارجی مدارکی مانند شناسه/کد مالیاتی و اثبات آدرس را در مسیر رسمی خود برجسته می‌کند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'گزینه‌ای جدی برای حساب جاری، دبیت کارت و خدمات دیجیتال دانشجو.' },
+      { heading: 'برای دانشجو', body: 'وقتی مدارک هویت، آدرس و کد مالیاتی مرتب است، بررسی آن منطقی است.' },
+      { heading: 'اشتباه رایج', body: 'انتظار کردیت کارت فوری بدون سابقه اعتباری ترکیه.' },
+    ],
+    checklist: ['پاسپورت', 'کد مالیاتی یا شماره هویت خارجی', 'مدرک آدرس', 'شماره ترک', 'درخواست فعال‌سازی کارت و اپ'],
+    faq: [
+      { q: 'آیا ایش بانک برای دانشجو مناسب است؟', a: 'می‌تواند مناسب باشد، مخصوصاً اگر مدارک کامل باشد.' },
+      { q: 'آیا کردیت کارت هم می‌دهد؟', a: 'کردیت کارت جداگانه ارزیابی می‌شود.' },
+    ],
+    en: {
+      summary: 'Isbank is a large Turkish bank whose official foreign-customer path highlights identity, tax number and address proof.',
+      sections: [
+        { heading: 'Simple definition', body: 'A strong option for current account, debit card and digital services.' },
+        { heading: 'For students', body: 'Logical when identity, address and tax documents are clean.' },
+        { heading: 'Common mistake', body: 'Expecting immediate credit-card approval.' },
+      ],
+      checklist: ['Passport', 'Tax or foreign ID', 'Address proof', 'Turkish phone', 'Card and app activation'],
+      faq: [
+        { q: 'Is it suitable?', a: 'It can be.' },
+        { q: 'Does it include credit card?', a: 'Credit is assessed separately.' },
+      ],
+    },
+  },
+  'vakifbank-student-account': {
+    title: { fa: 'حساب دانشجویی واکیف بانک', en: 'VakifBank student account' },
+    question: { fa: 'حساب دانشجویی واکیف بانک برای دانشجوی خارجی چیست؟', en: 'What is a VakifBank student account?' },
+    category: 'بانک‌های ترکیه',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'واکیف بانک یکی از بانک‌های بزرگ ترکیه است و برای دانشجو می‌تواند گزینه حساب، Bankomat card، ATM و موبایل بانک باشد؛ تصمیم افتتاح حساب با شعبه است.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'یک گزینه بانکی بزرگ برای حساب و کارت بانکی روزمره.' },
+      { heading: 'برای دانشجو', body: 'قبل از مراجعه، مدارک لازم برای پاسپورت ایرانی و دانشجو را از همان شعبه بپرس.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه معرفی کارت Bankomat به معنی تضمین افتتاح حساب برای همه خارجی‌هاست.' },
+    ],
+    checklist: ['پاسپورت', 'کد مالیاتی', 'آدرس', 'شماره ترک', 'سؤال درباره Bankomat و موبایل بانک'],
+    faq: [
+      { q: 'آیا واکیف بانک برای ایرانی‌ها حساب باز می‌کند؟', a: 'ممکن است، اما به شعبه و بررسی پرونده بستگی دارد.' },
+      { q: 'هدف اول چه باشد؟', a: 'حساب، IBAN، دبیت کارت و موبایل بانک.' },
+    ],
+    en: {
+      summary: 'VakifBank can be an option for account, Bankomat card, ATM and mobile banking, but approval is branch-led.',
+      sections: [
+        { heading: 'Simple definition', body: 'A large-bank option for daily banking.' },
+        { heading: 'For students', body: 'Ask the branch about Iranian-passport student documents before visiting.' },
+        { heading: 'Common mistake', body: 'Assuming card availability guarantees account approval.' },
+      ],
+      checklist: ['Passport', 'Tax number', 'Address', 'Turkish phone', 'Bankomat and app questions'],
+      faq: [
+        { q: 'Can Iranians open it?', a: 'Possibly, depending on branch and review.' },
+        { q: 'What is the first goal?', a: 'Account, IBAN, debit card and mobile banking.' },
+      ],
+    },
+  },
+  'findeks-credit-score-turkey': {
+    title: { fa: 'اعتبارسنجی Findeks ترکیه', en: 'Findeks credit score Turkey' },
+    question: { fa: 'اعتبارسنجی Findeks ترکیه چیست و چه اثری روی کردیت کارت دانشجو دارد؟', en: 'What is Findeks credit scoring in Turkey?' },
+    category: 'کارت بانکی',
+    visual: BANK_GLOSSARY_VISUAL,
+    summary: 'Findeks و KKB به سابقه اعتباری و رفتار بازپرداخت در ترکیه مربوط هستند و روی اعتبار بانکی، کردیت کارت و بعضی تصمیم‌های مالی اثر می‌گذارند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'سابقه پرداخت و اعتبار بانکی مشتری در ترکیه در ارزیابی بانک مهم است.' },
+      { heading: 'برای دانشجوی تازه‌وارد', body: 'اگر تازه وارد شده‌ای، احتمالاً سابقه اعتباری قوی نداری؛ پس دبیت کارت هدف منطقی‌تری است.' },
+      { heading: 'اشتباه رایج', body: 'تصور اینکه موجودی حساب همیشه برای گرفتن کردیت کارت کافی است.' },
+    ],
+    checklist: ['حساب فعال', 'پرداخت‌های منظم', 'عدم بدهی بد', 'درآمد یا وثیقه در صورت نیاز', 'درخواست واقع‌بینانه'],
+    faq: [
+      { q: 'آیا دانشجوی تازه‌وارد سابقه Findeks دارد؟', a: 'معمولاً نه یا بسیار محدود.' },
+      { q: 'آیا برای کردیت کارت مهم است؟', a: 'می‌تواند در ارزیابی بانک مهم باشد.' },
+    ],
+    en: {
+      summary: 'Findeks and KKB relate to Turkish credit history and repayment behavior.',
+      sections: [
+        { heading: 'Simple definition', body: 'Credit history matters in bank assessment.' },
+        { heading: 'For new students', body: 'New arrivals usually have little credit history.' },
+        { heading: 'Common mistake', body: 'Assuming account balance alone guarantees credit card approval.' },
+      ],
+      checklist: ['Active account', 'Regular payments', 'No bad debt', 'Income or collateral if needed', 'Realistic request'],
+      faq: [
+        { q: 'Do new students have Findeks history?', a: 'Usually little or none.' },
+        { q: 'Does it matter for credit cards?', a: 'It can.' },
+      ],
+    },
+  },
   'turkey-90-day-visa-exemption': {
     title: { fa: 'معافیت ویزای ۹۰ روزه ترکیه', en: 'Turkey 90-day visa exemption' },
     question: { fa: 'معافیت ویزای ۹۰ روزه ترکیه برای دانشجوی ایرانی یعنی چه؟', en: 'What does Turkey 90-day visa exemption mean?' },
@@ -1632,7 +2012,7 @@ function buildGlossaryTerms() {
       slug,
       ...detail,
       href: `/glossary/${encodeURIComponent(slug)}/`,
-      visual: {
+      visual: detail.visual || {
         src: `/assets/glossary/${slug}.svg`,
         alt: `${detail.title.fa} - تصویر آموزشی فرهنگ‌نامه آکا`,
       },

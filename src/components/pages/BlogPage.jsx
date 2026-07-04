@@ -667,6 +667,15 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
   ], [copy.sections, isFa, post.comparisonRows?.length, post.metricCards?.length, post.salaryBars?.length]);
 
   const activeId = useActiveId(toc.map((item) => item.id));
+  const comparisonHeaders = post.comparisonHeaders?.length === 5
+    ? post.comparisonHeaders
+    : [
+      { fa: 'مقطع', en: 'Degree' },
+      { fa: 'زمان شروع', en: 'Start point' },
+      { fa: 'نوع کار', en: 'Work type' },
+      { fa: 'درآمد منطقی', en: 'Income lens' },
+      { fa: 'ریسک اصلی', en: 'Main risk' },
+    ];
 
   // Glossary terms referenced by this article, for a "related terms" rail.
   const relatedTerms = useMemo(() => {
@@ -856,10 +865,10 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
                   <div>
                     <h2 className="flex items-center gap-2 text-lg font-black">
                       <FileText size={18} className="text-[#C6A768]" />
-                      {tt('مقایسه سریع قوانین کار بر اساس مقطع', 'Work rules by degree level', isFa)}
+                      {localizedValue(post.comparisonTitle, isFa) || tt('مقایسه سریع قوانین کار بر اساس مقطع', 'Work rules by degree level', isFa)}
                     </h2>
                     <p className={`${darkMode ? 'text-white/55' : 'text-neutral-500'} mt-1 text-xs font-semibold leading-6`}>
-                      {tt('خلاصه تصمیم‌ساز؛ جزئیات هر پرونده باید با کارفرما و مسیر رسمی بررسی شود.', 'Decision summary; each case still needs employer and official-route review.', isFa)}
+                      {localizedValue(post.comparisonSubtitle, isFa) || tt('خلاصه تصمیم‌ساز؛ جزئیات هر پرونده باید با کارفرما و مسیر رسمی بررسی شود.', 'Decision summary; each case still needs employer and official-route review.', isFa)}
                     </p>
                   </div>
                 </div>
@@ -867,9 +876,9 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
                   <table className="w-full min-w-[760px] border-collapse text-right text-sm">
                     <thead className={darkMode ? 'bg-white/[0.04] text-white/65' : 'bg-[#F7F1E8] text-neutral-600'}>
                       <tr>
-                        {['مقطع', 'زمان شروع', 'نوع کار', 'درآمد منطقی', 'ریسک اصلی'].map((label, index) => (
-                          <th key={label} className={`px-4 py-3 text-xs font-black ${!isFa && index === 0 ? 'text-left' : ''}`}>
-                            {tt(label, ['Degree', 'Start point', 'Work type', 'Income lens', 'Main risk'][index], isFa)}
+                        {comparisonHeaders.map((label, index) => (
+                          <th key={localizedValue(label, isFa)} className={`px-4 py-3 text-xs font-black ${!isFa && index === 0 ? 'text-left' : ''}`}>
+                            {localizedValue(label, isFa)}
                           </th>
                         ))}
                       </tr>
