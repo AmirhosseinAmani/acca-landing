@@ -81,17 +81,17 @@ function createOrbitLine(radiusX, radiusY, color, opacity) {
 
 function createOrbitSystem(darkMode) {
   const group = new THREE.Group();
-  group.position.set(0.04, 0.12, -0.55);
+  group.position.set(0.02, 0.18, -0.68);
 
-  const teal = createOrbitLine(1.68, 0.84, darkMode ? 0x82ffe4 : 0x0e9f84, darkMode ? 0.34 : 0.24);
+  const teal = createOrbitLine(1.32, 0.66, darkMode ? 0x82ffe4 : 0x0e9f84, darkMode ? 0.32 : 0.22);
   teal.rotation.set(0.7, 0.2, -0.24);
   group.add(teal);
 
-  const tall = createOrbitLine(1.06, 1.58, darkMode ? 0xb7fff1 : 0x33cdb6, darkMode ? 0.24 : 0.18);
+  const tall = createOrbitLine(0.84, 1.22, darkMode ? 0xb7fff1 : 0x33cdb6, darkMode ? 0.22 : 0.16);
   tall.rotation.set(0.2, -0.18, 0.08);
   group.add(tall);
 
-  const gold = createOrbitLine(1.36, 0.5, 0xe8c067, 0.2);
+  const gold = createOrbitLine(1.06, 0.4, 0xe8c067, 0.18);
   gold.rotation.set(-0.42, 0.1, 0.78);
   group.add(gold);
 
@@ -224,8 +224,8 @@ function normalizeAstronautModel(root) {
 
   root.scale.setScalar(scale);
   root.position.set(
-    -center.x * scale - 0.08,
-    -center.y * scale + 0.01,
+    -center.x * scale - 0.13,
+    -center.y * scale + 0.1,
     -center.z * scale
   );
   root.userData.baseY = root.position.y;

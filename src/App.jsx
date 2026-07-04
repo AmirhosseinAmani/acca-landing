@@ -1682,17 +1682,18 @@ export default function ACCALandingPage() {
 
         .hero-glow {
           position: absolute;
-          width: 360px;
-          height: 360px;
+          width: 326px;
+          height: 326px;
           border-radius: 999px;
           background: radial-gradient(circle, rgba(255,255,255,0.95), transparent 70%);
-          filter: blur(82px);
-          opacity: 0.28;
+          filter: blur(74px);
+          opacity: 0.26;
+          transform: translate3d(0,-14px,0);
         }
 
         .hero-astronaut-shell {
-          width: min(520px, 76vw);
-          height: min(520px, 76vw);
+          width: min(496px, 72vw);
+          height: min(496px, 72vw);
           max-width: 100%;
           aspect-ratio: 1;
           position: relative;
