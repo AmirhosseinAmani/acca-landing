@@ -42,7 +42,8 @@ create index if not exists acca_ratings_entity_idx
 alter table public.acca_comments enable row level security;
 alter table public.acca_ratings  enable row level security;
 
--- Public can read all comments/ratings (needed to display + sort by popularity).
+-- Public can read display-safe comments/ratings (column grants below keep
+-- private fields like email and voter_id out of the public Data API).
 create policy "acca_comments_read"  on public.acca_comments for select using (true);
 create policy "acca_ratings_read"   on public.acca_ratings  for select using (true);
 
@@ -52,6 +53,21 @@ create policy "acca_ratings_insert"  on public.acca_ratings  for insert with che
 
 -- Public can update their own rating (enables PostgREST upsert on conflict).
 create policy "acca_ratings_update"  on public.acca_ratings  for update using (true) with check (true);
+
+-- ---------- Public Data API grants -------------------------------------------
+-- RLS decides which rows are visible; grants decide which columns are exposed.
+-- Keep email and voter_id writable for insert/upsert, but never publicly
+-- readable through the anon/authenticated REST API.
+revoke all on public.acca_comments from anon, authenticated;
+revoke all on public.acca_ratings from anon, authenticated;
+
+grant insert on public.acca_comments to anon, authenticated;
+grant select (client_id, entity_type, entity_slug, name, role, location, body, lang, created_at)
+  on public.acca_comments to anon, authenticated;
+
+grant insert, update on public.acca_ratings to anon, authenticated;
+grant select (entity_type, entity_slug, stars, created_at, updated_at)
+  on public.acca_ratings to anon, authenticated;
 
 -- Optional hardening you may add later:
 --   * a length CHECK on body (e.g. length(body) between 2 and 2000)

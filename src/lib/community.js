@@ -28,6 +28,7 @@ const LS = {
 };
 
 const entityKey = (type, slug) => `${type}:${slug}`;
+const PUBLIC_COMMENT_FIELDS = 'client_id,entity_type,entity_slug,name,role,location,body,lang,created_at';
 
 export function uuid() {
   try {
@@ -98,7 +99,7 @@ async function supaInsert(table, body, extraHeaders = {}) {
 
 export async function fetchComments(entityType, entitySlug) {
   const remote = await supaGet(
-    `acca_comments?entity_type=eq.${entityType}&entity_slug=eq.${encodeURIComponent(entitySlug)}&order=created_at.desc&select=*`
+    `acca_comments?entity_type=eq.${entityType}&entity_slug=eq.${encodeURIComponent(entitySlug)}&order=created_at.desc&select=${PUBLIC_COMMENT_FIELDS}`
   ).catch(() => []);
   const remoteIds = new Set(remote.map((c) => c.client_id));
   const local = localComments().filter(
@@ -138,17 +139,11 @@ export async function submitComment(entityType, entitySlug, fields) {
 
 export async function fetchRating(entityType, entitySlug) {
   const rows = await supaGet(
-    `acca_ratings?entity_type=eq.${entityType}&entity_slug=eq.${encodeURIComponent(entitySlug)}&select=stars,voter_id`
+    `acca_ratings?entity_type=eq.${entityType}&entity_slug=eq.${encodeURIComponent(entitySlug)}&select=stars`
   ).catch(() => []);
   let sum = rows.reduce((s, r) => s + r.stars, 0);
   let count = rows.length;
   const mine = localRatings()[entityKey(entityType, entitySlug)] || 0;
-  // Fold in the visitor's own vote (so the average reflects it before Supabase
-  // sync), unless it is already counted in the remote rows for this voter.
-  if (mine && !rows.some((r) => r.voter_id === voterId())) {
-    sum += mine;
-    count += 1;
-  }
   const avg = count ? sum / count : 0;
   return { avg, count, mine };
 }
@@ -175,31 +170,17 @@ export async function submitRating(entityType, entitySlug, stars) {
 /** Returns a map keyed by `type:slug` → { avg, ratingCount, commentCount }. */
 export async function fetchCommunityStats() {
   const [ratings, comments] = await Promise.all([
-    supaGet('acca_ratings?select=entity_type,entity_slug,stars,voter_id').catch(() => []),
+    supaGet('acca_ratings?select=entity_type,entity_slug,stars').catch(() => []),
     supaGet('acca_comments?select=entity_type,entity_slug,client_id').catch(() => []),
   ]);
 
   const stats = {};
-  const bucket = (k) => (stats[k] ??= { sum: 0, ratingCount: 0, commentCount: 0, voters: new Set() });
+  const bucket = (k) => (stats[k] ??= { sum: 0, ratingCount: 0, commentCount: 0 });
 
   ratings.forEach((r) => {
     const b = bucket(entityKey(r.entity_type, r.entity_slug));
     b.sum += r.stars;
     b.ratingCount += 1;
-    if (r.voter_id) b.voters.add(r.voter_id);
-  });
-
-  // Fold in this browser's own ratings so the average shows before Supabase is
-  // wired and reflects the visitor's vote — skipping any already counted
-  // remotely for this voter so the same vote is never double-counted.
-  const myVoter = voterId();
-  Object.entries(localRatings()).forEach(([key, stars]) => {
-    const b = bucket(key);
-    if (!b.voters.has(myVoter)) {
-      b.sum += Number(stars) || 0;
-      b.ratingCount += 1;
-      b.voters.add(myVoter);
-    }
   });
 
   const remoteCommentIds = new Set(comments.map((c) => c.client_id));
