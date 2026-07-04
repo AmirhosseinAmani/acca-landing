@@ -29,6 +29,7 @@ const LS = {
 
 const entityKey = (type, slug) => `${type}:${slug}`;
 const PUBLIC_COMMENT_FIELDS = 'client_id,entity_type,entity_slug,name,role,location,body,lang,created_at';
+const PUBLIC_RATING_FIELDS = 'entity_type,entity_slug,stars';
 
 export function uuid() {
   try {
@@ -170,7 +171,7 @@ export async function submitRating(entityType, entitySlug, stars) {
 /** Returns a map keyed by `type:slug` → { avg, ratingCount, commentCount }. */
 export async function fetchCommunityStats() {
   const [ratings, comments] = await Promise.all([
-    supaGet('acca_ratings?select=entity_type,entity_slug,stars').catch(() => []),
+    supaGet(`acca_ratings?select=${PUBLIC_RATING_FIELDS}`).catch(() => []),
     supaGet('acca_comments?select=entity_type,entity_slug,client_id').catch(() => []),
   ]);
 
