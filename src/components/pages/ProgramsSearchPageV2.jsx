@@ -664,7 +664,7 @@ function ProgramsSearchWorkspace({
                 }
               }}
               placeholder={ui.searchPlaceholder}
-              className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:opacity-45"
+              className="min-w-0 flex-1 bg-transparent text-base font-bold outline-none placeholder:opacity-45"
             />
           </label>
 
@@ -726,7 +726,7 @@ function ProgramsSearchWorkspace({
                   setPageSize(Number(event.target.value));
                   setPage(1);
                 }}
-                className={`${darkMode ? 'bg-[#111827] text-white border-white/10' : 'bg-white text-black border-black/10'} rounded-[14px] border px-3 py-2 font-black outline-none`}
+                className={`${darkMode ? 'bg-[#111827] text-white border-white/10' : 'bg-white text-black border-black/10'} rounded-[14px] border px-3 py-2 text-base font-black outline-none`}
               >
                 {[10, 25, 50, 100].map((size) => (
                   <option key={size} value={size}>
@@ -1456,7 +1456,7 @@ function MultiFilterSelect({ field, value, options, darkMode, isFa, ui, onChange
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={ui.search}
-                className="min-w-0 flex-1 bg-transparent text-sm font-bold outline-none placeholder:opacity-45"
+                className="min-w-0 flex-1 bg-transparent text-base font-bold outline-none placeholder:opacity-45"
               />
             </label>
             <div className="mt-2 grid grid-cols-2 gap-2">
