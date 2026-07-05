@@ -1008,7 +1008,7 @@ function ProgramsPrintPreview({
       `}</style>
 
       {/* ── Screen toolbar (hidden when printing) ──────────── */}
-      <div className="pp-toolbar sticky top-0 z-20 border-b border-black/[0.07] bg-white/88 backdrop-blur-xl">
+      <div className="pp-toolbar sticky top-0 z-20 border-b border-black/[0.07] bg-white/88 pt-[var(--safe-top)] backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-3 sm:px-8">
           <div className="flex items-center gap-3">
             <img src={ACCA_LOGO_SRC} alt="ACCA EDU" className="h-9 w-auto object-contain" loading="eager" decoding="sync" />

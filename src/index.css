@@ -27,6 +27,35 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
+/*
+ * iOS Safe-Area variables (Notch / Dynamic Island). Requires the viewport meta
+ * to include `viewport-fit=cover`. iOS computes the real inset per device model
+ * and orientation, so we mirror the env() values into custom properties that any
+ * fixed header/footer can use — instead of guessing a fixed padding.
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/*
+ * Fixed site header inside an installed PWA / iOS standalone app: the header
+ * BACKGROUND still reaches the top of the screen, but the logo, menu and buttons
+ * are pushed down by the real safe-area-inset-top so they never sit under the
+ * camera / Dynamic Island. On devices without a cutout the inset is 0px, so this
+ * is simply the normal header top padding.
+ */
+.pwa-safe-top {
+  padding-top: calc(var(--safe-top) + 0.75rem);
+}
+@media (min-width: 640px) {
+  .pwa-safe-top {
+    padding-top: calc(var(--safe-top) + 1rem);
+  }
+}
+
 html {
   font-family: 'Vazirmatn', sans-serif;
   font-synthesis-weight: none;

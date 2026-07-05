@@ -155,7 +155,7 @@ export function KnowledgeHeader({
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-[60] px-3 py-3 sm:px-6 sm:py-4">
+    <header className="pwa-safe-top fixed inset-x-0 top-0 z-[60] px-3 pb-3 sm:px-6 sm:pb-4">
       <div
         className={`${darkMode ? 'border-white/10 bg-[#07111f]/80 text-white' : 'border-black/5 bg-white/80 text-neutral-950'} mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full border px-4 py-2.5 backdrop-blur-xl transition-shadow duration-300 sm:px-6 ${scrolled ? 'shadow-[0_18px_50px_rgba(7,26,61,0.18)]' : 'shadow-[0_8px_30px_rgba(7,26,61,0.08)]'}`}
       >

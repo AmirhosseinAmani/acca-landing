@@ -757,7 +757,7 @@ export default function IstanbulUniversityMapPage({
         </div>
       </div>
 
-      <header className="pointer-events-none fixed left-0 right-0 top-0 z-30 px-3 py-3 sm:px-6 sm:py-4">
+      <header className="pwa-safe-top pointer-events-none fixed left-0 right-0 top-0 z-30 px-3 pb-3 sm:px-6 sm:pb-4">
         <div
           className={`${darkMode ? 'border-white/10 bg-[#071A3D]/70 text-white' : 'border-white/80 bg-white/72 text-[#071A3D]'} pointer-events-auto mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 rounded-[26px] border px-3 py-3 shadow-[0_22px_80px_rgba(7,26,61,0.16)] backdrop-blur-2xl sm:rounded-full sm:px-6`}
         >

@@ -2250,7 +2250,7 @@ export default function ACCALandingPage() {
         <FloatingOrbs floatingObjects={floatingObjects} darkMode={darkMode} />
       )}
 
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-3 sm:px-6 sm:py-4">
+      <nav className="pwa-safe-top fixed top-0 left-0 right-0 z-50 px-4 pb-3 sm:px-6 sm:pb-4">
         <div className={`${darkMode ? 'darkGlass' : 'glass'} relative max-w-7xl mx-auto rounded-full px-5 py-3 sm:px-8 sm:py-4 flex items-center justify-between`}>
           <div className="flex items-center">
             <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
