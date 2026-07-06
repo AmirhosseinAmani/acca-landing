@@ -249,7 +249,7 @@ export function BackToTop({ darkMode, isFa }) {
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })}
       aria-label={tt('بازگشت به بالا', 'Back to top', isFa)}
-      className={`${darkMode ? 'bg-white text-[#071A3D]' : 'bg-[#071A3D] text-white'} fixed bottom-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-[0_16px_40px_rgba(7,26,61,0.3)] transition ${isFa ? 'left-6' : 'right-6'}`}
+      className={`${darkMode ? 'bg-white text-[#071A3D]' : 'bg-[#071A3D] text-white'} fixed bottom-6 z-50 flex h-12 w-12 items-center justify-center rounded-full transition ${isFa ? 'left-6' : 'right-6'}`}
     >
       <ArrowUp size={20} />
     </button>
