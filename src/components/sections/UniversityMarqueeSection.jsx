@@ -1,7 +1,7 @@
 const universityLogos = [
   {
     name: "Acibadem University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/acibadem.svg",
+    src: "/assets/optimized/uni-acibadem.webp",
   },
   {
     name: "Istanbul Arel University",
@@ -9,7 +9,7 @@ const universityLogos = [
   },
   {
     name: "Atlas University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/atlas.svg",
+    src: "/assets/optimized/uni-atlas.webp",
   },
   {
     name: "Istanbul Aydin University",
@@ -21,27 +21,27 @@ const universityLogos = [
   },
   {
     name: "Biruni University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/biruni-universitesi-seeklogo.svg",
+    src: "/assets/optimized/uni-biruni.webp",
   },
   {
     name: "Istinye University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/istinye-universitesi-seeklogo.svg",
+    src: "/assets/optimized/uni-istinye.webp",
   },
   {
     name: "Nisantasi University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/Nisantasi.png",
+    src: "/assets/optimized/uni-nisantasi-96.webp",
   },
   {
     name: "Yeditepe University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/yeditepe-universitesi-seeklogo.svg",
+    src: "/assets/optimized/uni-yeditepe.webp",
   },
   {
     name: "Medipol University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/Medipol.png",
+    src: "/assets/optimized/uni-medipol-96.webp",
   },
   {
     name: "Istanbul Kent University",
-    src: "https://qysluhfrjpcguhneqsuz.supabase.co/storage/v1/object/public/icons/Kent.png",
+    src: "/assets/optimized/uni-kent-96.webp",
   },
 ];
 

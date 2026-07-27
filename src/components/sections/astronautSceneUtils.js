@@ -3,7 +3,9 @@ import * as THREE from 'three';
 const TAU = Math.PI * 2;
 
 export function createStudioReflectionTexture(darkMode) {
-  const canvas = document.createElement('canvas');
+  const canvas = typeof document !== 'undefined'
+    ? document.createElement('canvas')
+    : new OffscreenCanvas(1024, 512);
   canvas.width = 1024;
   canvas.height = 512;
   const context = canvas.getContext('2d');

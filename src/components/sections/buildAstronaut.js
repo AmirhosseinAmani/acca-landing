@@ -48,13 +48,14 @@ const EDITOR_MATERIAL_PATTERN_CODE = Object.freeze({
   rubber: 5,
 });
 
-let templatePromise = null;
+const templatePromises = new Map();
 
 /* Blender round-trip feature flag (see docs/astronaut-export-plan.md): opt in
  * with ?astroModel=production or localStorage 'acca-astronaut-model' set to
  * 'production'. Fallback chain production → source → remote keeps rollback
  * instant — the default experience never changes until QA passes. */
 function productionModelRequested() {
+  if (typeof window === 'undefined') return false;
   try {
     const params = new URLSearchParams(window.location.search);
     const flag = params.get('astroModel') || window.localStorage.getItem('acca-astronaut-model');
@@ -64,17 +65,18 @@ function productionModelRequested() {
   }
 }
 
-function loadTemplate() {
-  if (!templatePromise) {
+function loadTemplate(preferProduction = productionModelRequested()) {
+  const templateKey = preferProduction ? 'production' : 'source';
+  if (!templatePromises.has(templateKey)) {
     const loader = new GLTFLoader();
-    const primary = productionModelRequested()
+    const primary = preferProduction
       ? loader.loadAsync(ASTRONAUT_PRODUCTION_MODEL_URL)
       : loader.loadAsync(ASTRONAUT_MODEL_URL);
-    templatePromise = primary
+    templatePromises.set(templateKey, primary
       .catch(() => loader.loadAsync(ASTRONAUT_MODEL_URL))
-      .catch(() => loader.loadAsync(FALLBACK_MODEL_URL));
+      .catch(() => loader.loadAsync(FALLBACK_MODEL_URL)));
   }
-  return templatePromise;
+  return templatePromises.get(templateKey);
 }
 
 export function preloadAstronautModel() {
@@ -509,9 +511,12 @@ function createSuitMaterial(source, envTexture) {
   return material;
 }
 
-export async function buildAstronaut(rawConfig, { envTexture = null } = {}) {
+export async function buildAstronaut(
+  rawConfig,
+  { envTexture = null, preferProduction = productionModelRequested() } = {}
+) {
   const config = sanitizeAstronautConfig(rawConfig);
-  const template = await loadTemplate();
+  const template = await loadTemplate(preferProduction);
   const sourceMesh = firstMesh(template.scene);
   if (!sourceMesh) throw new Error('Astronaut mesh was not found');
 
