@@ -13,7 +13,7 @@ const contactMethods = [
   { id: 'instagram', icon: Camera, fa: 'اینستاگرام', en: 'Instagram' },
 ];
 
-export default function ConsultationModal({ open, onClose, darkMode, isFa, context }) {
+export default function ConsultationModal({ open, onClose, isFa, context }) {
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -124,25 +124,25 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
     }
   };
 
-  const inputClass = `${darkMode ? 'bg-white/8 border-white/10 text-white placeholder:text-white/35' : 'bg-white/80 border-black/10 text-black placeholder:text-black/35'} w-full rounded-2xl border px-4 py-3 text-sm font-bold outline-none transition focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/15`;
+  const inputClass = 'w-full rounded-2xl border border-black/10 bg-white/90 px-4 py-3 text-sm font-bold text-black outline-none transition placeholder:text-black/35 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-400/15';
   const selectedMethod = contactMethods.find((method) => method.id === form.contactMethod);
 
   return (
     <div className="fixed inset-0 z-[80] overflow-y-auto overscroll-contain" dir={isFa ? 'rtl' : 'ltr'}>
       <button type="button" aria-label={copy.close} className="fixed inset-0 bg-black/55 backdrop-blur-md" onClick={onClose} />
       <div className="relative z-10 flex min-h-full items-center justify-center p-4 py-7 sm:py-10">
-        <div role="dialog" aria-modal="true" aria-labelledby="consultation-title" className={`${darkMode ? 'darkGlass text-white' : 'glass text-black'} w-full max-w-2xl rounded-[32px] border p-5 shadow-[0_30px_120px_rgba(0,0,0,0.32)] sm:p-7`}>
+        <div role="dialog" aria-modal="true" aria-labelledby="consultation-title" className="w-full max-w-2xl rounded-[32px] border border-white/75 bg-[rgba(245,244,242,0.88)] p-5 text-black shadow-[0_30px_120px_rgba(0,0,0,0.32)] backdrop-blur-[30px] sm:p-7">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
-              <div className={`${darkMode ? 'text-emerald-300' : 'text-emerald-700'} mb-2 text-xs font-black uppercase tracking-[0.2em]`}>ACCA CONSULTATION</div>
+              <div className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-emerald-700">ACCA CONSULTATION</div>
               <h2 id="consultation-title" className="text-2xl font-black sm:text-3xl">{copy.title}</h2>
               <p className="mt-2 text-sm font-medium leading-6 opacity-65">{copy.desc}</p>
             </div>
-            <button type="button" onClick={onClose} className={`${darkMode ? 'bg-white/10' : 'bg-black/5'} flex h-11 w-11 shrink-0 items-center justify-center rounded-full`} aria-label={copy.close}><X size={20} /></button>
+            <button type="button" onClick={onClose} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/5" aria-label={copy.close}><X size={20} /></button>
           </div>
 
           {!showPrivacy && context?.title && (
-            <div className={`${darkMode ? 'border-white/10 bg-white/[0.06]' : 'border-black/10 bg-black/[0.035]'} mb-5 flex items-center gap-4 rounded-2xl border p-3`}>
+            <div className="mb-5 flex items-center gap-4 rounded-2xl border border-black/10 bg-white/40 p-3">
               {context.image && <img src={context.image} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0">
                 <div className="text-[10px] font-black uppercase tracking-[0.15em] opacity-45">{copy.selected}</div>
@@ -153,7 +153,7 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
           )}
 
           {showPrivacy ? (
-            <section aria-labelledby="privacy-panel-title" className={`${darkMode ? 'border-white/10 bg-white/[0.04]' : 'border-black/10 bg-white/55'} rounded-3xl border p-5 sm:p-7`}>
+            <section aria-labelledby="privacy-panel-title" className="rounded-3xl border border-black/10 bg-white/55 p-5 sm:p-7">
               <div className="mb-5 flex items-center gap-3">
                 <ShieldCheck className="shrink-0 text-emerald-600" size={26} />
                 <h3 id="privacy-panel-title" className="text-xl font-black sm:text-2xl">{copy.privacyTitle}</h3>
@@ -182,7 +182,7 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
               <div className="grid grid-cols-3 gap-2">
                 {contactMethods.map(({ id, icon: Icon, fa, en }) => {
                   const active = form.contactMethod === id;
-                  return <button key={id} type="button" aria-pressed={active} onClick={() => updateField('contactMethod', id)} className={`${active ? 'border-emerald-500 bg-emerald-500/12 text-emerald-600' : darkMode ? 'border-white/10 bg-white/[0.04]' : 'border-black/10 bg-white/60'} flex items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-xs font-black transition`}><Icon size={18} /><span>{isFa ? fa : en}</span></button>;
+                  return <button key={id} type="button" aria-pressed={active} onClick={() => updateField('contactMethod', id)} className={`${active ? 'border-emerald-500 bg-emerald-500/12 text-emerald-600' : 'border-black/10 bg-white/70'} flex items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-xs font-black transition`}><Icon size={18} /><span>{isFa ? fa : en}</span></button>;
                 })}
               </div>
             </div>
@@ -191,7 +191,7 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
               <input required dir="ltr" autoComplete={form.contactMethod === 'whatsapp' ? 'tel' : 'off'} inputMode={form.contactMethod === 'whatsapp' ? 'tel' : 'text'} placeholder={form.contactMethod === 'whatsapp' ? '+90 5xx xxx xx xx' : '@username'} className={`${inputClass} text-left`} value={form.contactValue} onChange={(e) => updateField('contactValue', e.target.value)} />
             </Field>
 
-            <div className="col-span-2 flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-bold leading-6 text-emerald-700 dark:text-emerald-300"><ShieldCheck size={22} className="mt-0.5 shrink-0" /><span>{copy.promise}</span></div>
+            <div className="col-span-2 flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-bold leading-6 text-emerald-700"><ShieldCheck size={22} className="mt-0.5 shrink-0" /><span>{copy.promise}</span></div>
             <label className="col-span-2 flex cursor-pointer items-start gap-3 text-xs font-bold leading-6 opacity-75">
               <input required type="checkbox" checked={form.privacyAccepted} onChange={(e) => updateField('privacyAccepted', e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-emerald-600" />
               <span>
