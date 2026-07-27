@@ -1740,7 +1740,9 @@ export default function ACCALandingPage() {
           background: transparent;
           pointer-events: auto;
           cursor: grab;
-          touch-action: none;
+          /* pan-y: horizontal drags spin the astronaut, vertical pans still
+             scroll the page (the canvas now renders on mobile too) */
+          touch-action: pan-y;
           user-select: none;
           filter:
             drop-shadow(0 30px 52px rgba(7,26,61,0.24))
