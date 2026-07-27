@@ -18,9 +18,13 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open) {
+      setShowPrivacy(false);
+      return undefined;
+    }
     const handleKeyDown = (event) => event.key === 'Escape' && onClose();
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
@@ -44,6 +48,19 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
     promise: isFa ? 'مشاوره رایگان است و در کمتر از یک ساعت با شما ارتباط می‌گیریم.' : 'Consultation is free and we will contact you in less than one hour.',
     privacy: isFa ? 'با ثبت این درخواست، پردازش اطلاعاتم برای پاسخ‌گویی به مشاوره را طبق قانون KVKK و سیاست حریم خصوصی می‌پذیرم.' : 'I consent to processing my details for this consultation under KVKK and the Privacy Policy.',
     privacyLink: isFa ? 'مطالعه سیاست حریم خصوصی' : 'Read the Privacy Policy',
+    privacyTitle: isFa ? 'سیاست حریم خصوصی و KVKK' : 'Privacy Policy and KVKK',
+    privacyBody: isFa
+      ? [
+          'ACCA EDU اطلاعاتی را که خودتان در این فرم وارد می‌کنید فقط برای بررسی درخواست، تماس از مسیر انتخابی و ارائه مشاوره آموزشی پردازش می‌کند.',
+          'مبنای این پردازش، رضایت شما مطابق قانون حفاظت از داده‌های شخصی ترکیه (KVKK، قانون شماره ۶۶۹۸) است. اطلاعات شما بدون رضایت جداگانه برای تبلیغات استفاده نمی‌شود.',
+          'داده‌ها جز در اختیار ارائه‌دهندگان ضروری زیرساخت قرار نمی‌گیرد. شما می‌توانید برای دسترسی، اصلاح یا حذف اطلاعات خود از طریق صفحه تماس با ما درخواست ثبت کنید.',
+        ]
+      : [
+          'ACCA EDU processes the information you enter in this form only to review your request, contact you through your selected channel, and provide education guidance.',
+          'This processing is based on your consent under Turkey’s Personal Data Protection Law (KVKK, Law No. 6698). Your details are not used for marketing without separate consent.',
+          'Data is not shared beyond essential infrastructure providers. You may request access, correction, or deletion through our contact page.',
+        ],
+    backToForm: isFa ? 'بازگشت به فرم مشاوره' : 'Back to consultation form',
     send: isFa ? 'ارسال درخواست مشاوره' : 'Send consultation request',
     sending: isFa ? 'در حال ارسال…' : 'Sending…',
     close: isFa ? 'بستن' : 'Close',
@@ -124,7 +141,7 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
             <button type="button" onClick={onClose} className={`${darkMode ? 'bg-white/10' : 'bg-black/5'} flex h-11 w-11 shrink-0 items-center justify-center rounded-full`} aria-label={copy.close}><X size={20} /></button>
           </div>
 
-          {context?.title && (
+          {!showPrivacy && context?.title && (
             <div className={`${darkMode ? 'border-white/10 bg-white/[0.06]' : 'border-black/10 bg-black/[0.035]'} mb-5 flex items-center gap-4 rounded-2xl border p-3`}>
               {context.image && <img src={context.image} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover" />}
               <div className="min-w-0">
@@ -135,6 +152,24 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
             </div>
           )}
 
+          {showPrivacy ? (
+            <section aria-labelledby="privacy-panel-title" className={`${darkMode ? 'border-white/10 bg-white/[0.04]' : 'border-black/10 bg-white/55'} rounded-3xl border p-5 sm:p-7`}>
+              <div className="mb-5 flex items-center gap-3">
+                <ShieldCheck className="shrink-0 text-emerald-600" size={26} />
+                <h3 id="privacy-panel-title" className="text-xl font-black sm:text-2xl">{copy.privacyTitle}</h3>
+              </div>
+              <div className="space-y-4 text-sm font-medium leading-7 opacity-75">
+                {copy.privacyBody.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPrivacy(false)}
+                className="mt-7 w-full rounded-2xl bg-black px-6 py-4 text-sm font-black text-white transition hover:scale-[1.01]"
+              >
+                {copy.backToForm}
+              </button>
+            </section>
+          ) : (
           <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 sm:gap-4">
             <Field label={copy.firstName}><input required autoComplete="given-name" className={inputClass} value={form.firstName} onChange={(e) => updateField('firstName', e.target.value)} /></Field>
             <Field label={copy.lastName}><input required autoComplete="family-name" className={inputClass} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></Field>
@@ -159,12 +194,22 @@ export default function ConsultationModal({ open, onClose, darkMode, isFa, conte
             <div className="col-span-2 flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-bold leading-6 text-emerald-700 dark:text-emerald-300"><ShieldCheck size={22} className="mt-0.5 shrink-0" /><span>{copy.promise}</span></div>
             <label className="col-span-2 flex cursor-pointer items-start gap-3 text-xs font-bold leading-6 opacity-75">
               <input required type="checkbox" checked={form.privacyAccepted} onChange={(e) => updateField('privacyAccepted', e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-emerald-600" />
-              <span>{copy.privacy} <a href="/privacy/" target="_blank" rel="noreferrer" className="font-black text-emerald-600 underline underline-offset-4">{copy.privacyLink}</a></span>
+              <span>
+                {copy.privacy}{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacy(true)}
+                  className="font-black text-emerald-600 underline underline-offset-4"
+                >
+                  {copy.privacyLink}
+                </button>
+              </span>
             </label>
             {submitted && <div className="col-span-2 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-600">{copy.success}</div>}
             {error && <div className="col-span-2 rounded-2xl border border-red-400/30 bg-red-400/10 px-5 py-4 text-sm font-black text-red-500">{error}</div>}
             <button type="submit" disabled={submitting || !form.privacyAccepted} className="col-span-2 rounded-2xl bg-black px-8 py-4 text-base font-black text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">{submitting ? copy.sending : copy.send}</button>
           </form>
+          )}
         </div>
       </div>
     </div>
