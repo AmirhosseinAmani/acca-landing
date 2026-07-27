@@ -58,8 +58,8 @@ const LEGAL_PAGES = {
   privacy: {
     title: { fa: 'حریم خصوصی', en: 'Privacy Policy' },
     note: {
-      fa: 'متن کامل سیاست حریم خصوصی به‌زودی در این صفحه قرار می‌گیرد.',
-      en: 'The full privacy policy will be published on this page soon.',
+      fa: 'ACCA EDU اطلاعاتی را که خودتان در فرم مشاوره وارد می‌کنید فقط برای بررسی درخواست، تماس از مسیر انتخابی و ارائه خدمات آموزشی پردازش می‌کند. مبنای این پردازش رضایت شما مطابق قانون حفاظت از داده‌های شخصی ترکیه (KVKK، قانون شماره ۶۶۹۸) است. اطلاعات شما برای تبلیغات بدون رضایت جداگانه استفاده نمی‌شود و جز ارائه‌دهندگان ضروری زیرساخت، در اختیار شخص ثالث قرار نمی‌گیرد. شما می‌توانید درباره داده‌های ذخیره‌شده، اصلاح یا حذف آن‌ها از طریق صفحه تماس با ما درخواست ثبت کنید.',
+      en: 'ACCA EDU processes the details you submit in the consultation form only to review your request, contact you through your chosen channel, and provide education guidance. This processing is based on your consent under Turkey’s Personal Data Protection Law (KVKK, Law No. 6698). We do not use these details for marketing without separate consent or share them beyond essential infrastructure providers. You may request access, correction, or deletion through our contact page.',
     },
   },
   terms: {
@@ -494,6 +494,7 @@ export default function ACCALandingPage() {
   const [language, setLanguage] = useState(getStoredLanguage);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [consultationOpen, setConsultationOpen] = useState(false);
+  const [consultationContext, setConsultationContext] = useState(null);
   const [installPromptEvent, setInstallPromptEvent] = useState(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
   // PWA install prompt dismissal — persisted so it stays hidden for 14 days
@@ -703,6 +704,25 @@ export default function ACCALandingPage() {
     return nextParams;
   }, [search, routeAlias]);
   const page = params.get('page');
+  const openConsultation = (requestedContext) => {
+    const explicitContext = requestedContext && !requestedContext.nativeEvent
+      ? requestedContext
+      : {};
+    const ogImage = document
+      .querySelector('meta[property="og:image"]')
+      ?.getAttribute('content');
+
+    setConsultationContext({
+      source: explicitContext.source || 'website_cta',
+      page: explicitContext.page || page || 'home',
+      title: explicitContext.title || document.title,
+      subtitle: explicitContext.subtitle || null,
+      image: explicitContext.image || ogImage || null,
+      url: explicitContext.url || window.location.href,
+      ...explicitContext,
+    });
+    setConsultationOpen(true);
+  };
   const staticCanonicalUrl = routeAlias?.canonicalPath
     ? `${SITE_CANONICAL_ORIGIN}${routeAlias.canonicalPath}`
     : null;
@@ -904,7 +924,7 @@ export default function ACCALandingPage() {
           darkMode={darkMode}
           isFa={isFa}
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
-          onConsultationClick={() => setConsultationOpen(true)}
+          onConsultationClick={openConsultation}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
           onToggleLanguage={toggleLanguage}
         />
@@ -914,6 +934,7 @@ export default function ACCALandingPage() {
           onClose={() => setConsultationOpen(false)}
           darkMode={darkMode}
           isFa={isFa}
+          context={consultationContext}
         />
       </>
     );
@@ -925,7 +946,7 @@ export default function ACCALandingPage() {
           darkMode={darkMode}
           isFa={isFa}
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
-          onConsultationClick={() => setConsultationOpen(true)}
+          onConsultationClick={openConsultation}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
           onToggleLanguage={toggleLanguage}
         />
@@ -935,6 +956,7 @@ export default function ACCALandingPage() {
           onClose={() => setConsultationOpen(false)}
           darkMode={darkMode}
           isFa={isFa}
+          context={consultationContext}
         />
       </>
     );
@@ -946,7 +968,7 @@ export default function ACCALandingPage() {
             darkMode={darkMode}
             isFa={isFa}
             ACCA_LOGO_SRC={ACCA_LOGO_SRC}
-            onConsultationClick={() => setConsultationOpen(true)}
+            onConsultationClick={openConsultation}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
             onToggleLanguage={toggleLanguage}
           />
@@ -956,6 +978,7 @@ export default function ACCALandingPage() {
           onClose={() => setConsultationOpen(false)}
           darkMode={darkMode}
           isFa={isFa}
+          context={consultationContext}
         />
       </>
     );
@@ -967,7 +990,7 @@ export default function ACCALandingPage() {
           darkMode={darkMode}
           isFa={isFa}
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
-          onConsultationClick={() => setConsultationOpen(true)}
+          onConsultationClick={openConsultation}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
           onToggleLanguage={toggleLanguage}
         />
@@ -977,6 +1000,7 @@ export default function ACCALandingPage() {
           onClose={() => setConsultationOpen(false)}
           darkMode={darkMode}
           isFa={isFa}
+          context={consultationContext}
         />
       </>
     );
@@ -989,7 +1013,7 @@ export default function ACCALandingPage() {
             isFa={isFa}
             ACCA_LOGO_SRC={ACCA_LOGO_SRC}
             postSlug={params.get('post')}
-            onConsultationClick={() => setConsultationOpen(true)}
+            onConsultationClick={openConsultation}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
             onToggleLanguage={toggleLanguage}
           />
@@ -999,6 +1023,7 @@ export default function ACCALandingPage() {
           onClose={() => setConsultationOpen(false)}
           darkMode={darkMode}
           isFa={isFa}
+          context={consultationContext}
         />
         {floatingActions}
       </>
@@ -1012,7 +1037,7 @@ export default function ACCALandingPage() {
             isFa={isFa}
             ACCA_LOGO_SRC={ACCA_LOGO_SRC}
             termSlug={params.get('term')}
-            onConsultationClick={() => setConsultationOpen(true)}
+            onConsultationClick={openConsultation}
             onToggleDarkMode={() => setDarkMode(!darkMode)}
             onToggleLanguage={toggleLanguage}
           />
@@ -1022,6 +1047,7 @@ export default function ACCALandingPage() {
           onClose={() => setConsultationOpen(false)}
           darkMode={darkMode}
           isFa={isFa}
+          context={consultationContext}
         />
         {floatingActions}
       </>
@@ -1714,7 +1740,9 @@ export default function ACCALandingPage() {
           background: transparent;
           pointer-events: auto;
           cursor: grab;
-          touch-action: none;
+          /* pan-y: horizontal drags spin the astronaut, vertical pans still
+             scroll the page (the canvas now renders on mobile too) */
+          touch-action: pan-y;
           user-select: none;
           filter:
             drop-shadow(0 30px 52px rgba(7,26,61,0.24))
@@ -2439,7 +2467,7 @@ export default function ACCALandingPage() {
           isFa={isFa}
           ACCA_LOGO_SRC={ACCA_LOGO_SRC}
           isDesktopViewport={isDesktopViewport}
-          onConsultationClick={() => setConsultationOpen(true)}
+          onConsultationClick={openConsultation}
         />
 
         <UniversityMarqueeSection
@@ -2473,7 +2501,7 @@ export default function ACCALandingPage() {
             darkMode={darkMode}
             isFa={isFa}
             registrationSteps={registrationSteps}
-            onConsultationClick={() => setConsultationOpen(true)}
+            onConsultationClick={openConsultation}
           />
         </DeferredHomeSection>
 
@@ -2481,7 +2509,7 @@ export default function ACCALandingPage() {
           <GreenScholarshipWidget
             isFa={isFa}
             darkMode={darkMode}
-            onConsultationClick={() => setConsultationOpen(true)}
+            onConsultationClick={openConsultation}
           />
         </DeferredHomeSection>
 
@@ -2527,7 +2555,7 @@ export default function ACCALandingPage() {
           <FinalCtaSection
             darkMode={darkMode}
             isFa={isFa}
-            onConsultationClick={() => setConsultationOpen(true)}
+            onConsultationClick={openConsultation}
           />
         </DeferredHomeSection>
 
@@ -2535,7 +2563,7 @@ export default function ACCALandingPage() {
           <ContactSection
             darkMode={darkMode}
             isFa={isFa}
-            onConsultationClick={() => setConsultationOpen(true)}
+            onConsultationClick={openConsultation}
           />
         </DeferredHomeSection>
       </main>
@@ -2545,6 +2573,7 @@ export default function ACCALandingPage() {
         onClose={() => setConsultationOpen(false)}
         darkMode={darkMode}
         isFa={isFa}
+        context={consultationContext}
       />
       </div>
     </>

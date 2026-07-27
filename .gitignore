@@ -16,6 +16,24 @@ dist-ssr
 acca-knowledge-bank/
 acca-knowledge-bank.zip
 
+# Local QA and generated 3D-pipeline artifacts
+.playwright-cli/
+output/
+artifacts/
+**/__pycache__/
+*.pyc
+blender/*.blend
+blender/*.blend1
+
+# Local analysis and one-off maintenance helpers
+.claude/
+campus-worklist.json
+faculties_list.txt
+programs_list.txt
+show-all-gaps.mjs
+verify-translations*.mjs
+components/SmartScholarshipCalculator.jsx
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

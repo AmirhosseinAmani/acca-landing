@@ -284,7 +284,14 @@ function ProgramsSearchWorkspace({
   const [pageSize, setPageSize] = useState(25);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [applyNotice, setApplyNotice] = useState(false);
   const ui = isFa ? copy.fa : copy.en;
+
+  useEffect(() => {
+    if (!applyNotice) return undefined;
+    const timer = window.setTimeout(() => setApplyNotice(false), 4500);
+    return () => window.clearTimeout(timer);
+  }, [applyNotice]);
 
   useEffect(() => {
     let active = true;
@@ -757,6 +764,7 @@ function ProgramsSearchWorkspace({
                     isFa={isFa}
                     ui={ui}
                     onConsultationClick={onConsultationClick}
+                    onUnavailableApply={() => setApplyNotice(true)}
                   />
                 ))}
               </div>
@@ -784,6 +792,18 @@ function ProgramsSearchWorkspace({
               isFa={isFa}
             />
           </div>
+
+          {applyNotice && (
+            <div
+              id="apply-temporarily-unavailable"
+              role="status"
+              className="program-no-print fixed bottom-5 left-1/2 z-50 w-[min(92vw,560px)] -translate-x-1/2 rounded-2xl border border-white/15 bg-black px-5 py-4 text-center text-sm font-black leading-6 text-white shadow-2xl"
+            >
+              {isFa
+                ? 'امکان اپلای آنلاین فعلاً در دسترس نیست. برای انتخاب رشته، مشاوره رایگان رزرو کنید.'
+                : 'Online applications are temporarily unavailable. Book a free consultation for program selection.'}
+            </div>
+          )}
         </section>
       </main>
     </div>
@@ -1526,7 +1546,14 @@ function FilterOption({ active, darkMode, label, optionValue, onClick }) {
 }
 
 /** Card-based program row — no horizontal scroll, mobile-friendly */
-function ProgramCard({ row, darkMode, isFa, ui, onConsultationClick }) {
+function ProgramCard({
+  row,
+  darkMode,
+  isFa,
+  ui,
+  onConsultationClick,
+  onUnavailableApply,
+}) {
   const logo = row.universityLogo || '';
 
   return (
@@ -1588,17 +1615,36 @@ function ProgramCard({ row, darkMode, isFa, ui, onConsultationClick }) {
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={onConsultationClick}
+              onClick={() => onConsultationClick({
+                source: 'program_card',
+                page: 'programs',
+                title: displayValue('program', row.program, isFa),
+                subtitle: `${row.university} · ${displayValue('city', row.city, isFa)}`,
+                image: logo || null,
+                url: window.location.href,
+                program: {
+                  id: row.id,
+                  name: row.program,
+                  university: row.university,
+                  city: row.city,
+                  country: row.country,
+                  degree: row.degree,
+                  language: row.language,
+                  tuitionFee: row.tuitionFee,
+                },
+              })}
               className={`${darkMode ? 'border-white/15 text-white/75 hover:bg-white/10' : 'border-black/10 text-black/65 hover:bg-black/[0.04]'} whitespace-nowrap rounded-[12px] border px-3 py-2 text-[11px] font-black transition`}
             >
-              {ui.consult}
+              {isFa ? 'مشاوره برای این رشته' : 'Consult about this program'}
             </button>
-            <a
-              href={buildSmartApplyProgramUrl(row)}
-              className={`${darkMode ? 'bg-emerald-500 text-white' : 'bg-emerald-600 text-white'} whitespace-nowrap rounded-[12px] px-4 py-2 text-xs font-black transition hover:scale-[1.03] hover:bg-emerald-700`}
+            <button
+              type="button"
+              onClick={onUnavailableApply}
+              aria-describedby="apply-temporarily-unavailable"
+              className={`${darkMode ? 'border-white/15 bg-white/5 text-white/45' : 'border-black/10 bg-black/5 text-black/40'} cursor-not-allowed whitespace-nowrap rounded-[12px] border px-4 py-2 text-xs font-black grayscale`}
             >
               {ui.apply}
-            </a>
+            </button>
           </div>
           <a
             href={buildUniversityCatalogUrl(row.university)}

@@ -353,6 +353,7 @@ export default function IstanbulUniversityMapPage({
     () => mapItems.find((item) => item.id === selectedId) || mapItems[0],
     [mapItems, selectedId]
   );
+  const [activeCampusKey, setActiveCampusKey] = useState('');
 
   useEffect(() => {
     selectedIdRef.current = selectedId;
@@ -467,6 +468,7 @@ export default function IstanbulUniversityMapPage({
               setSelectedPlace(place);
               setProfileOpen(false);
             },
+            onCampusFocus: (key) => setActiveCampusKey(key),
             onReady: () => {
               if (!active) return;
               setMapMode('geospatial');
@@ -518,6 +520,30 @@ export default function IstanbulUniversityMapPage({
     geospatialApiRef.current?.setSelectedBuilding?.(key);
   }, [selectedId, selectedPlace, profileOpen, mapMode]);
 
+  // Campus switcher: every site of the open university, which one the camera is
+  // currently on, and the highlight that makes the siblings findable on the map.
+  const campusList = useMemo(() => campusesForUniversity(selected), [selected]);
+  const hasMultipleCampuses = campusList.length > 1;
+  const resolvedActiveCampusKey = useMemo(
+    () => (
+      campusList.some((campus) => campus.key === activeCampusKey)
+        ? activeCampusKey
+        : campusList[0]?.key || ''
+    ),
+    [campusList, activeCampusKey]
+  );
+
+  useEffect(() => {
+    const highlightParent = profileOpen && hasMultipleCampuses ? selected?.id : null;
+    geospatialApiRef.current?.setCampusHighlight?.(highlightParent, resolvedActiveCampusKey);
+  }, [selected?.id, resolvedActiveCampusKey, profileOpen, hasMultipleCampuses, mapMode]);
+
+  const handleCampusSelect = (campus) => {
+    if (!campus) return;
+    setActiveCampusKey(campus.key);
+    geospatialApiRef.current?.focusCampus?.(campus.lon, campus.lat, campus.side);
+  };
+
   const handleSelect = (id) => {
     setSelectedId(id);
     setProfileOpen(true);
@@ -563,6 +589,18 @@ export default function IstanbulUniversityMapPage({
           @keyframes acca-map-pulse {
             0%, 100% { transform: scale(.96); opacity: .55; }
             50% { transform: scale(1.04); opacity: 1; }
+          }
+          /* Sibling campuses of the open university blink so they are findable. */
+          @keyframes acca-campus-blink {
+            0%, 100% { transform: rotate(45deg) scale(1.02); box-shadow: 0 0 0 2px rgba(45,212,191,0.25), 0 6px 16px rgba(7,26,61,0.45); }
+            50% { transform: rotate(45deg) scale(1.16); box-shadow: 0 0 0 7px rgba(45,212,191,0.05), 0 6px 20px rgba(7,26,61,0.5); }
+          }
+          @keyframes acca-campus-hint {
+            0%, 100% { opacity: .78; }
+            50% { opacity: 1; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .campus-core, [data-campus-hint] { animation: none !important; }
           }
           .acca-mapbox-canvas,
           .maplibregl-canvas { outline: none; }
@@ -796,10 +834,18 @@ export default function IstanbulUniversityMapPage({
         </div>
       </header>
 
-      <main className="pointer-events-none fixed inset-0 z-10 px-3 pb-3 pt-24 sm:px-6 sm:pb-6 sm:pt-28">
+      {/* Padding must follow the SAME safe-area inset as the header
+          (.pwa-safe-top), otherwise on notched iPhones the header drops down
+          but this layer does not, and the map-control panel slides underneath
+          it and becomes untappable. */}
+      <main className="pointer-events-none fixed inset-0 z-10 px-3 pb-[calc(var(--safe-bottom)+0.75rem)] pt-[calc(var(--safe-top)+6rem)] sm:px-6 sm:pb-[calc(var(--safe-bottom)+1.5rem)] sm:pt-[calc(var(--safe-top)+7rem)]">
         <section className={`pointer-events-auto ${isFa ? 'ml-auto' : 'mr-auto'} w-full max-w-[430px]`}>
+          {/* The panel itself scrolls: it used to be overflow-hidden, so on a
+              phone everything past the category tabs (the whole list) was
+              simply clipped and unreachable. touch-pan-y keeps the vertical
+              drag on the panel instead of letting the Mapbox canvas eat it. */}
           {overviewOpen ? (
-            <div className={`${darkMode ? 'border-white/12 bg-[#061018]/72' : 'border-white/75 bg-white/72'} max-h-[58vh] overflow-hidden rounded-[24px] border p-3 shadow-[0_22px_80px_rgba(7,26,61,0.18)] backdrop-blur-2xl sm:max-h-[66vh] sm:p-4`}>
+            <div className={`${darkMode ? 'border-white/12 bg-[#061018]/72' : 'border-white/75 bg-white/72'} max-h-[58vh] touch-pan-y overflow-y-auto overscroll-contain rounded-[24px] border p-3 shadow-[0_22px_80px_rgba(7,26,61,0.18)] backdrop-blur-2xl [-webkit-overflow-scrolling:touch] sm:max-h-[66vh] sm:p-4`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className={`${darkMode ? 'text-emerald-200' : 'text-emerald-700'} text-[10px] font-black uppercase tracking-[0.28em]`}>
@@ -912,9 +958,15 @@ export default function IstanbulUniversityMapPage({
 
               {/* List — universities OR the selected place category. Shown on
                   every screen size (was desktop-only, which hid it on mobile). */}
-              <div className="mt-2 max-h-[23vh] overflow-y-auto rounded-[18px] sm:max-h-[24vh]">
+              {/* On phones the list flows and the PANEL scrolls (one scroll
+                  container — nested touch scrolling was unusable and squeezed
+                  the list to a few pixels). Desktop keeps its own inner scroll. */}
+              <div className="mt-2 rounded-[18px] sm:max-h-[34vh] sm:overflow-y-auto sm:overscroll-contain">
                 {typeFilter === 'university' ? (
-                  visibleItems.length ? visibleItems.slice(0, 16).map((item) => (
+                  // No cap: the panel advertises "37 universities", so it must list
+                  // all of them. This used to slice(0, 16), which silently hid 21
+                  // universities that no amount of scrolling could reach.
+                  visibleItems.length ? visibleItems.map((item) => (
                     <button
                       key={item.id}
                       type="button"
@@ -974,7 +1026,7 @@ export default function IstanbulUniversityMapPage({
         </section>
 
         {(editMode || debugMap) ? (
-        <div className="pointer-events-auto fixed left-1/2 top-[84px] z-40 flex max-w-[calc(100vw-24px)] -translate-x-1/2 items-center gap-2 sm:top-[92px]">
+        <div className="pointer-events-auto fixed left-1/2 top-[calc(var(--safe-top)+84px)] z-40 flex max-w-[calc(100vw-24px)] -translate-x-1/2 items-center gap-2 sm:top-[calc(var(--safe-top)+92px)]">
           {editing ? (
             <div className="flex items-center gap-2 rounded-full border-2 border-[#D8B05B] bg-[#071A3D] px-3 py-2 text-xs font-black text-white shadow-[0_18px_50px_rgba(7,26,61,0.4)]">
               <span>✏️ {isFa ? 'نشانگرها را به محل دقیق بکشید' : 'Drag pins to the exact spot'}</span>
@@ -1063,6 +1115,9 @@ export default function IstanbulUniversityMapPage({
               item={selected}
               onConsultationClick={onConsultationClick}
               onMinimize={() => setProfileOpen(false)}
+              campusList={campusList}
+              activeCampusKey={resolvedActiveCampusKey}
+              onCampusSelect={handleCampusSelect}
             />
           ) : (
             <button
@@ -1081,6 +1136,16 @@ export default function IstanbulUniversityMapPage({
           )}
         </aside>
       </main>
+
+      <CampusEdgeHints
+        apiRef={geospatialApiRef}
+        campuses={campusList}
+        activeCampusKey={resolvedActiveCampusKey}
+        onSelect={handleCampusSelect}
+        isFa={isFa}
+        darkMode={darkMode}
+        enabled={mapMode === 'geospatial' && profileOpen && hasMultipleCampuses}
+      />
 
       {debugMap ? (
         <aside className={`${darkMode ? 'border-white/12 bg-[#061018]/82 text-white' : 'border-white/80 bg-white/82 text-[#071A3D]'} pointer-events-none fixed bottom-4 right-4 z-40 hidden w-72 rounded-[18px] border p-3 text-[11px] font-bold shadow-[0_18px_60px_rgba(7,26,61,0.18)] backdrop-blur-2xl lg:block`}>
@@ -1118,16 +1183,104 @@ function MetricCard({ label, value, darkMode, isFa }) {
   );
 }
 
-function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick, onMinimize }) {
+// Edge arrows for campuses that are currently off-screen: "this university also
+// has a site over there — drag this way". Tapping one flies straight to it.
+function CampusEdgeHints({ apiRef, campuses, activeCampusKey, onSelect, isFa, darkMode, enabled }) {
+  const [hints, setHints] = useState([]);
+
+  useEffect(() => {
+    if (!enabled || campuses.length < 2) {
+      return undefined;
+    }
+
+    const MARGIN = 78;
+    const compute = () => {
+      const api = apiRef.current;
+      if (!api?.getCampusHints) return;
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const halfWidth = Math.max(width / 2 - MARGIN, 40);
+      const halfHeight = Math.max(height / 2 - MARGIN, 40);
+
+      const next = api.getCampusHints(campuses)
+        .filter((campus) => !campus.inView && campus.key !== activeCampusKey)
+        .map((campus) => {
+          const radians = (campus.screenBearing * Math.PI) / 180;
+          const dirX = Math.sin(radians);
+          const dirY = -Math.cos(radians);
+          const scale = Math.min(
+            Math.abs(dirX) < 1e-6 ? Infinity : halfWidth / Math.abs(dirX),
+            Math.abs(dirY) < 1e-6 ? Infinity : halfHeight / Math.abs(dirY)
+          );
+          return {
+            campus,
+            key: campus.key,
+            label: campus.label,
+            x: width / 2 + dirX * scale,
+            y: height / 2 + dirY * scale,
+            angleDeg: (Math.atan2(dirY, dirX) * 180) / Math.PI,
+          };
+        });
+      setHints(next);
+    };
+
+    compute();
+    const unsubscribe = apiRef.current?.onViewportChange?.(compute);
+    window.addEventListener('resize', compute);
+    return () => {
+      unsubscribe?.();
+      window.removeEventListener('resize', compute);
+    };
+  }, [apiRef, campuses, activeCampusKey, enabled]);
+
+  if (!enabled || !hints.length) return null;
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-20" aria-hidden={false}>
+      {hints.map((hint) => (
+        <button
+          key={hint.key}
+          type="button"
+          data-campus-hint
+          onClick={() => onSelect?.(hint.campus)}
+          aria-label={`${isFa ? 'رفتن به کمپوس' : 'Go to campus'}: ${hint.label}`}
+          style={{
+            left: `${hint.x}px`,
+            top: `${hint.y}px`,
+            transform: 'translate(-50%, -50%)',
+            animation: 'acca-campus-hint 1.4s ease-in-out infinite',
+          }}
+          className={`${darkMode ? 'bg-[#061018]/86 text-emerald-200 ring-emerald-300/40' : 'bg-white/92 text-emerald-800 ring-emerald-600/30'} pointer-events-auto absolute inline-flex max-w-[46vw] items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[10px] font-black shadow-[0_10px_28px_rgba(7,26,61,0.28)] ring-2 backdrop-blur-xl transition hover:scale-105`}
+        >
+          <span
+            className="shrink-0 text-[13px] leading-none"
+            style={{ transform: `rotate(${hint.angleDeg}deg)`, display: 'inline-block' }}
+          >
+            ➤
+          </span>
+          <span className="truncate">{hint.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SelectedUniversityCard({
+  darkMode, isFa, ui, item, onConsultationClick, onMinimize,
+  campusList = [], activeCampusKey = '', onCampusSelect,
+}) {
   if (!item) return null;
 
   const summary = isFa ? item.summaryFa : item.summaryEn;
-  const campuses = item.campusesCount || 1;
+  // Count what the map actually plots (main + mapped secondaries) so the fact
+  // tile can never disagree with the campus switcher right below it.
+  const campuses = Math.max(campusList.length, item.campusesCount || 1);
+  const showCampusSwitcher = campusList.length > 1;
 
   return (
     <article
       data-selected-university-card
-      className={`${darkMode ? 'border-white/12 bg-[#061018]/74 text-white' : 'border-white/80 bg-white/78 text-[#071A3D]'} max-h-[38vh] overflow-y-auto rounded-[24px] border p-3 shadow-[0_24px_82px_rgba(7,26,61,0.22)] backdrop-blur-2xl sm:max-h-[52vh] sm:p-4`}
+      className={`${darkMode ? 'border-white/12 bg-[#061018]/74 text-white' : 'border-white/80 bg-white/78 text-[#071A3D]'} max-h-[38vh] touch-pan-y overflow-y-auto overscroll-contain rounded-[24px] border p-3 shadow-[0_24px_82px_rgba(7,26,61,0.22)] backdrop-blur-2xl [-webkit-overflow-scrolling:touch] sm:max-h-[52vh] sm:p-4`}
     >
       <div className="flex items-start gap-3">
         <div className={`${darkMode ? 'bg-white text-[#071A3D]' : 'bg-[#071A3D] text-white'} grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-[16px] sm:h-14 sm:w-14`}>
@@ -1172,6 +1325,45 @@ function SelectedUniversityCard({ darkMode, isFa, ui, item, onConsultationClick,
         <MiniFact icon={<Building2 size={17} />} label={ui.campuses} value={campuses} darkMode={darkMode} isFa={isFa} />
         <MiniFact icon={<MapPin size={17} />} label={ui.districtLabel} value={item.district} darkMode={darkMode} isFa={isFa} compact />
       </div>
+
+      {/* Campus switcher — universities with more than one site let the visitor
+          jump between them here; the matching pins pulse on the map. */}
+      {showCampusSwitcher ? (
+        <div className={`${darkMode ? 'bg-white/8' : 'bg-[#071A3D]/[0.04]'} mt-3 rounded-[18px] p-2`}>
+          <div className={`${darkMode ? 'text-emerald-200' : 'text-emerald-700'} flex items-center gap-1.5 px-1 pb-1.5 text-[10px] font-black uppercase tracking-[0.16em]`}>
+            <Building2 size={12} />
+            {isFa ? `کمپوس‌ها (${formatNumber(campusList.length, isFa)})` : `Campuses (${campusList.length})`}
+          </div>
+          <div className="flex flex-col gap-1">
+            {campusList.map((campus) => {
+              const active = campus.key === activeCampusKey;
+              return (
+                <button
+                  key={campus.key}
+                  type="button"
+                  onClick={() => onCampusSelect?.(campus)}
+                  aria-pressed={active}
+                  className={`flex min-h-10 w-full items-center justify-between gap-2 rounded-[14px] px-3 py-2 text-start text-xs font-black transition ${
+                    active
+                      ? 'bg-[#C6A768] text-[#071A3D] shadow-[0_6px_18px_rgba(198,167,104,0.36)]'
+                      : darkMode
+                        ? 'bg-white/8 text-white/80 hover:bg-white/14'
+                        : 'bg-white/84 text-[#071A3D]/78 hover:bg-white'
+                  }`}
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${active ? 'bg-[#071A3D]' : 'bg-emerald-500'}`} />
+                    <span className="truncate">{campus.label}</span>
+                  </span>
+                  <span className="shrink-0 text-[10px] font-bold opacity-70">
+                    {campus.isMain ? (isFa ? 'اصلی' : 'Main') : ui[campus.side]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <a
@@ -1247,7 +1439,7 @@ function createMapItems() {
   });
 }
 
-function initGeospatialMap({ maplibregl, container, darkMode, editable, items, selectedId, onPick, onPlacePick, onReady, onError, apiRef }) {
+function initGeospatialMap({ maplibregl, container, darkMode, editable, items, selectedId, onPick, onPlacePick, onCampusFocus, onReady, onError, apiRef }) {
   if (!supportsGeospatialWebGL(maplibregl)) {
     throw new Error('MapLibre WebGL is not supported');
   }
@@ -1350,7 +1542,8 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
   // Fly to a specific secondary campus (the parent profile is opened separately
   // by the marker's onPick). Tighter zoom than a main campus since it marks one
   // building.
-  const focusCampus = (lng, lat, side) => {
+  const focusCampus = (lng, lat, side, key) => {
+    if (key) onCampusFocus?.(key);
     map.flyTo({
       center: [lng, lat],
       zoom: compactViewport ? 11.8 : 13.4,
@@ -1387,13 +1580,54 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
   };
 
   let cinematicLayer = null;
-  apiRef.current = { focusUniversity, resetView, focusPlace, setSelectedBuilding: (key) => cinematicLayer?.setSelected?.(key) };
+  const campusElements = new Map();
+  apiRef.current = {
+    focusUniversity,
+    resetView,
+    focusPlace,
+    focusCampus,
+    setSelectedBuilding: (key) => cinematicLayer?.setSelected?.(key),
+    setCampusHighlight: (parentId, activeKey) => applyCampusHighlight(campusElements, parentId, activeKey),
+    // For each campus: is it inside the current view, and which way is it from
+    // the middle of the screen? Uses geographic bearing (not map.project) so it
+    // stays correct at high pitch, where points behind the camera project to
+    // nonsense screen coordinates.
+    getCampusHints: (points) => {
+      const bounds = map.getBounds();
+      const center = map.getCenter();
+      const mapBearing = map.getBearing();
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      return points.map((point) => {
+        const deltaLon = toRad(point.lon - center.lng);
+        const lat1 = toRad(center.lat);
+        const lat2 = toRad(point.lat);
+        const y = Math.sin(deltaLon) * Math.cos(lat2);
+        const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
+        const geoBearing = (Math.atan2(y, x) * 180) / Math.PI;
+        return {
+          ...point,
+          inView: bounds.contains([point.lon, point.lat]),
+          screenBearing: (((geoBearing - mapBearing) % 360) + 360) % 360,
+        };
+      });
+    },
+    onViewportChange: (handler) => {
+      map.on('move', handler);
+      map.on('zoom', handler);
+      map.on('rotate', handler);
+      return () => {
+        map.off('move', handler);
+        map.off('zoom', handler);
+        map.off('rotate', handler);
+      };
+    },
+  };
 
   map.on('load', () => {
     loaded = true;
     window.__accaMapFallbackReason = '';
     addGeospatialUniversityMarkers({ maplibregl, map, items, markersById, onPick, focusUniversity, editable });
-    addGeospatialCampusMarkers({ maplibregl, map, items, campuses: SECONDARY_CAMPUSES, onPick, focusCampus, editable });
+    addGeospatialCampusMarkers({ maplibregl, map, items, campuses: SECONDARY_CAMPUSES, onPick, focusCampus, editable, campusElements });
     addOfficeMarker({ maplibregl, map, onPlacePick, editable });
     addLandmarkMarkers({ maplibregl, map, onPlacePick, editable });
     addPlaceMarkers({ maplibregl, map, onPlacePick, editable });
@@ -1414,6 +1648,7 @@ function initGeospatialMap({ maplibregl, container, darkMode, editable, items, s
 
   return () => {
     markersById.clear();
+    campusElements.clear();
     apiRef.current = null;
     window.__accaGeospatialMapReady = false;
     map.remove();
@@ -1477,7 +1712,7 @@ function addGeospatialUniversityMarkers({ maplibregl, map, items, markersById, o
 // when clicked, opens the SAME profile as the main campus (onPick(parent.id))
 // while flying to this specific campus. Styled as a smaller sibling of the
 // university diamond (navy + gold) so it reads as "another site of X".
-function addGeospatialCampusMarkers({ maplibregl, map, items, campuses, onPick, focusCampus, editable }) {
+function addGeospatialCampusMarkers({ maplibregl, map, items, campuses, onPick, focusCampus, editable, campusElements }) {
   const byName = new Map();
   items.forEach((it) => byName.set(normalizeKey(it.name), it));
   campuses.forEach(([parent, lat, lon, label, side]) => {
@@ -1493,23 +1728,71 @@ function addGeospatialCampusMarkers({ maplibregl, map, items, campuses, onPick, 
     element.innerHTML = `
       <span style="display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 4px 10px rgba(7,26,61,0.4));">
         <span class="campus-label" style="opacity:0;transition:opacity .15s;pointer-events:none;white-space:nowrap;margin-bottom:3px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,0.94);color:#071A3D;font-weight:800;font-size:8.5px;max-width:200px;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(parentItem.name)} · ${escapeHtml(label)}</span>
-        <span style="display:grid;place-items:center;width:21px;height:21px;border-radius:7px 7px 7px 2px;transform:rotate(45deg);background:${fill};border:1.5px solid #C6A768;box-shadow:0 0 0 1px rgba(7,26,61,0.3),0 5px 12px rgba(7,26,61,0.45);">
+        <span class="campus-core" style="display:grid;place-items:center;width:21px;height:21px;border-radius:7px 7px 7px 2px;transform:rotate(45deg);background:${fill};border:1.5px solid #C6A768;box-shadow:0 0 0 1px rgba(7,26,61,0.3),0 5px 12px rgba(7,26,61,0.45);">
           <span style="transform:rotate(-45deg);color:#E7D3A0;font-weight:900;font-size:7.5px;line-height:1;">${escapeHtml(getUniversityInitials(parentItem.name))}</span>
         </span>
       </span>
     `;
     const labelEl = element.querySelector('.campus-label');
     element.addEventListener('mouseenter', () => { labelEl.style.opacity = '1'; element.style.zIndex = '6'; });
-    element.addEventListener('mouseleave', () => { labelEl.style.opacity = '0'; element.style.zIndex = '1'; });
+    element.addEventListener('mouseleave', () => { labelEl.style.opacity = '0'; if (!element.dataset.campusState) element.style.zIndex = '1'; });
     element.addEventListener('click', (event) => {
       event.stopPropagation();
       onPick(parentItem.id);
-      focusCampus(lon, lat, side);
+      focusCampus(lon, lat, side, campusKey(parent, label));
     });
     const marker = new maplibregl.Marker({ element, anchor: 'bottom', draggable: Boolean(editable) })
       .setLngLat([lon, lat])
       .addTo(map);
     if (editable) marker.on('dragend', () => recordEditedCoord(`${parent} — ${label}`, marker));
+    campusElements?.set(campusKey(parent, label), {
+      element,
+      parentId: parentItem.id,
+      labelEl,
+      defaultFill: fill,
+    });
+  });
+}
+
+// Sibling campuses of the OPEN university pulse in emerald so they read as
+// "there is more of this university over there"; the campus you are actually
+// looking at turns solid gold. Everything else returns to its resting navy.
+function applyCampusHighlight(campusElements, parentId, activeKey) {
+  campusElements.forEach((entry, key) => {
+    const { element, labelEl, defaultFill } = entry;
+    const core = element.querySelector('.campus-core');
+    if (!core) return;
+    const isSibling = Boolean(parentId) && entry.parentId === parentId;
+    const isActive = isSibling && key === activeKey;
+
+    if (isActive) {
+      element.dataset.campusState = 'active';
+      core.style.background = 'linear-gradient(135deg,#E2C179 0%,#C6A768 100%)';
+      core.style.borderColor = '#FFF4DA';
+      core.style.boxShadow = '0 0 0 4px rgba(198,167,104,0.45), 0 8px 20px rgba(7,26,61,0.5)';
+      core.style.transform = 'rotate(45deg) scale(1.18)';
+      core.style.animation = 'none';
+      labelEl.style.opacity = '1';
+      element.style.zIndex = '8';
+    } else if (isSibling) {
+      element.dataset.campusState = 'sibling';
+      core.style.background = 'linear-gradient(135deg,#1f9d76 0%,#0d6b52 100%)';
+      core.style.borderColor = '#7DF0C4';
+      core.style.boxShadow = '0 0 0 3px rgba(45,212,191,0.34), 0 6px 16px rgba(7,26,61,0.45)';
+      core.style.transform = 'rotate(45deg) scale(1.05)';
+      core.style.animation = 'acca-campus-blink 1.25s ease-in-out infinite';
+      labelEl.style.opacity = '1';
+      element.style.zIndex = '7';
+    } else {
+      delete element.dataset.campusState;
+      core.style.background = defaultFill;
+      core.style.borderColor = '#C6A768';
+      core.style.boxShadow = '0 0 0 1px rgba(7,26,61,0.3),0 5px 12px rgba(7,26,61,0.45)';
+      core.style.transform = 'rotate(45deg) scale(1)';
+      core.style.animation = 'none';
+      labelEl.style.opacity = '0';
+      element.style.zIndex = '1';
+    }
   });
 }
 
@@ -1567,7 +1850,47 @@ const SECONDARY_CAMPUSES = [
   ['BAHCESEHIR UNIVERSITY', 41.15988, 28.89633, 'Future Campus (Başakşehir)', 'europe'],
   ['ALTINBAS UNIVERSITY', 41.0654, 28.8339, 'Mahmutbey Campus', 'europe'],
   ['ALTINBAS UNIVERSITY', 40.9833, 28.87197, 'Bakırköy Campus', 'europe'],
+  // Pin-exact campuses supplied from Google Maps, each resolved to its official
+  // campus name before being added.
+  ['BEYKENT UNIVERSITY', 41.1223281744328, 29.022596868931583, 'Ayazağa–Maslak Campus', 'europe'],
+  ['ISTANBUL KULTUR UNIVERSITY', 41.036062241435616, 28.81031835576908, 'Basın Ekspres Campus', 'europe'],
+  ['ISTINYE UNIVERSITY', 41.01756675902919, 28.90881897415851, 'Topkapı Health Sciences Campus', 'europe'],
+  ['KOC UNIVERSITY', 41.121199853532985, 29.048141743171783, 'İstinye Campus', 'europe'],
+  ['BAHCESEHIR UNIVERSITY', 40.99701234536092, 29.081698781057828, 'Göztepe Medical Campus', 'asia'],
 ];
+
+// A campus is identified by parent + label so the profile card, the map markers
+// and the off-screen edge hints all agree on "which campus is active".
+const MAIN_CAMPUS_SUFFIX = '__main__';
+function campusKey(parentName, label) {
+  return `${normalizeKey(parentName)}|${label}`;
+}
+
+// Every campus of a university: its main site (carried on the item from
+// GEO_POINTS) plus each secondary campus naming it as parent.
+function campusesForUniversity(item) {
+  if (!item) return [];
+  const parentKey = normalizeKey(item.name);
+  const main = {
+    key: campusKey(item.name, MAIN_CAMPUS_SUFFIX),
+    label: item.district || 'Main',
+    lat: item.lat,
+    lon: item.lon,
+    side: item.side,
+    isMain: true,
+  };
+  const others = SECONDARY_CAMPUSES
+    .filter(([parent]) => normalizeKey(parent) === parentKey)
+    .map(([parent, lat, lon, label, side]) => ({
+      key: campusKey(parent, label),
+      label,
+      lat,
+      lon,
+      side,
+      isMain: false,
+    }));
+  return [main, ...others];
+}
 
 // Key landmarks that help a first-time student orient: the two airports and the
 // main university teaching hospitals. [type, name, lon, lat].

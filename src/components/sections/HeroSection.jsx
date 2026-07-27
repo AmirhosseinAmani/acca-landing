@@ -1,10 +1,12 @@
-import { lazy, Suspense, useEffect, useRef } from 'react';
-import { MessageCircle } from 'lucide-react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { MessageCircle, Palette } from 'lucide-react';
 import { COMPANY_WHATSAPP_URL } from '../../constants/contact';
+import { loadAstronautConfig, saveAstronautConfig } from '../../lib/astronautConfig';
 
 const MOBILE_ASTRONAUT_SRC =
   '/assets/optimized/astronaut-384.webp';
 const HeroAstronautScene = lazy(() => import('./HeroAstronautScene'));
+const AstronautCustomizerModal = lazy(() => import('./AstronautCustomizerModal'));
 
 /**
  * HeroSection owns its own scroll tracking so the parent App never re-renders
@@ -12,6 +14,14 @@ const HeroAstronautScene = lazy(() => import('./HeroAstronautScene'));
  */
 export default function HeroSection({ darkMode, isFa, isDesktopViewport, onConsultationClick }) {
   const astronautShellRef = useRef(null);
+  const [astroConfig, setAstroConfig] = useState(() => loadAstronautConfig());
+  const [customizerOpen, setCustomizerOpen] = useState(false);
+
+  const handleAstronautSave = (nextConfig) => {
+    setAstroConfig(nextConfig);
+    saveAstronautConfig(nextConfig);
+    setCustomizerOpen(false);
+  };
   const heroTrustItems = isFa
     ? ['مشاوره رایگان ۲۴ ساعته', 'پذیرش دانشگاه', 'راهنمای ثبت‌نام', 'اقامت دانشجویی', 'مسکن و خوابگاه', 'بیمه سلامت', 'ورود و اسکان']
     : ['Free 24-hour consultation', 'University admission', 'Registration guidance', 'Student residence', 'Housing support', 'Insurance guidance', 'Arrival support'];
@@ -150,27 +160,71 @@ export default function HeroSection({ darkMode, isFa, isDesktopViewport, onConsu
                     <div className="hero-astronaut-loader" aria-hidden="true" />
                   )}
                 >
-                  <HeroAstronautScene darkMode={darkMode} />
+                  <HeroAstronautScene
+                    darkMode={darkMode}
+                    config={astroConfig}
+                    fallbackSrc={MOBILE_ASTRONAUT_SRC}
+                    fallbackAlt={isFa ? 'راهنمای هوشمند آکا برای تحصیل در ترکیه' : 'ACCA EDU study in Turkey guide'}
+                  />
                 </Suspense>
               </div>
             ) : (
               <div className="hero-mobile-astronaut-wrap relative z-10 flex items-center justify-center">
-                <img
-                  src={MOBILE_ASTRONAUT_SRC}
-                  srcSet="/assets/optimized/astronaut-384.webp 384w, /assets/optimized/astronaut-640.webp 640w"
-                  sizes="(max-width: 480px) 78vw, 300px"
-                  alt={isFa ? 'راهنمای هوشمند آکا برای تحصیل در ترکیه' : 'ACCA EDU study in Turkey guide'}
-                  width="384"
-                  height="384"
-                  fetchPriority="high"
-                  loading="eager"
-                  decoding="async"
-                  className="hero-mobile-astronaut"
-                />
+                <Suspense
+                  fallback={(
+                    <img
+                      src={MOBILE_ASTRONAUT_SRC}
+                      srcSet="/assets/optimized/astronaut-384.webp 384w, /assets/optimized/astronaut-640.webp 640w"
+                      sizes="(max-width: 480px) 78vw, 300px"
+                      alt={isFa ? 'راهنمای هوشمند آکا برای تحصیل در ترکیه' : 'ACCA EDU study in Turkey guide'}
+                      width="384"
+                      height="384"
+                      fetchPriority="high"
+                      loading="eager"
+                      decoding="async"
+                      className="hero-mobile-astronaut"
+                    />
+                  )}
+                >
+                  <HeroAstronautScene
+                    darkMode={darkMode}
+                    config={astroConfig}
+                    fallbackSrc={MOBILE_ASTRONAUT_SRC}
+                    fallbackAlt={isFa ? 'راهنمای هوشمند آکا برای تحصیل در ترکیه' : 'ACCA EDU study in Turkey guide'}
+                  />
+                </Suspense>
               </div>
             )}
+
+            {/* Game-style character customizer — popup button "near the astronaut" */}
+            <button
+              type="button"
+              onClick={() => setCustomizerOpen(true)}
+              aria-label={isFa ? 'شخصی‌سازی فضانورد' : 'Customize astronaut'}
+              className={`${darkMode ? 'darkGlass text-white' : 'glass text-neutral-800'} absolute bottom-0 left-1/2 z-20 inline-flex -translate-x-1/2 items-center gap-2 rounded-full px-4 py-2 text-xs font-black shadow-[0_10px_30px_rgba(7,26,61,0.16)] transition hover:scale-[1.06] lg:bottom-2`}
+            >
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              <Palette className="h-3.5 w-3.5" aria-hidden="true" />
+              {isFa ? 'شخصی‌سازی فضانورد' : 'Customize astronaut'}
+            </button>
           </div>
         </div>
+
+        {customizerOpen && (
+          <Suspense fallback={null}>
+            <AstronautCustomizerModal
+              open={customizerOpen}
+              onClose={() => setCustomizerOpen(false)}
+              onSave={handleAstronautSave}
+              config={astroConfig}
+              darkMode={darkMode}
+              isFa={isFa}
+            />
+          </Suspense>
+        )}
       </section>
   );
 }

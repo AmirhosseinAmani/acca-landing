@@ -1,0 +1,238 @@
+{
+  "version": 4,
+  "model": "/assets/models/acca-astronaut.glb",
+  "sourceModel": "/models/astronaut-source.glb",
+  "productionModel": "/models/astronaut-production.glb",
+  "idProperty": "web_id",
+  "notes": "The web customizer binds via shader uniforms, hardware group ids and pose ids — never child index, traversal order or Blender-generated names. glbBindings anchor the GLB contents with stable web_id custom properties so Blender round-trips stay identifiable.",
+  "glbBindings": {
+    "objects": {
+      "obj.astronaut.body": {
+        "match": "firstMesh",
+        "legacyNames": ["Astronaut", "acca-astronaut", "ACCA skinned astronaut"],
+        "description": "The single body mesh. The web runtime synthesizes bones + skin weights onto it at load."
+      }
+    },
+    "materials": {
+      "mat.astronaut.body": {
+        "match": "firstMaterial",
+        "legacyNames": ["acca-astronaut-surface"],
+        "description": "Single PBR material with baked basecolor map. Web replaces it with a shader-patched clone; the baked map must keep its luminance structure (recolor masks are luminance/position based)."
+      }
+    }
+  },
+  "editor": {
+    "storageVersion": 8,
+    "targetIdProperty": "editorTargetId",
+    "transformSpace": ["local", "world"],
+    "transformModes": ["translate", "rotate", "scale"],
+    "limits": {
+      "position": [-1.25, 1.25],
+      "rotationDegrees": [-180, 180],
+      "scale": [0.2, 3],
+      "maxSavedTargets": 64
+    },
+    "targetIds": {
+      "character": ["edit.character"],
+      "joints": [
+        "rig.left.shoulder",
+        "rig.left.elbow",
+        "rig.left.hand",
+        "rig.right.shoulder",
+        "rig.right.elbow",
+        "rig.right.hand",
+        "rig.left.hip",
+        "rig.left.knee",
+        "rig.right.hip",
+        "rig.right.knee"
+      ],
+      "embeddedModelParts": [
+        "body.helmet.shell",
+        "body.pack.shell",
+        "body.hose.right.upper",
+        "body.hose.right.lower",
+        "body.hose.left.upper",
+        "body.hose.left.lower",
+        "body.connector.right.upper",
+        "body.connector.right.lower",
+        "body.connector.left.upper",
+        "body.connector.left.lower",
+        "body.chest.panel"
+      ],
+      "patches": [
+        "hw.patch.leftSleeve",
+        "hw.patch.rightSleeve",
+        "hw.patch.chest"
+      ],
+      "hardwarePatterns": [
+        "hw.helmet.<optionId>",
+        "hw.pack.<optionId>",
+        "hw.chest.<optionId>"
+      ],
+      "bodyMaterialParts": [
+        "body.helmet.shell",
+        "body.pack.shell",
+        "body.hose.right.upper",
+        "body.hose.right.lower",
+        "body.hose.left.upper",
+        "body.hose.left.lower",
+        "body.connector.right.upper",
+        "body.connector.right.lower",
+        "body.connector.left.upper",
+        "body.connector.left.lower",
+        "body.chest.panel",
+        "rig.left.shoulder",
+        "rig.left.elbow",
+        "rig.left.hand",
+        "rig.right.shoulder",
+        "rig.right.elbow",
+        "rig.right.hand"
+      ]
+    },
+    "materialPresets": [
+      "default",
+      "cobalt",
+      "charcoal",
+      "diamond",
+      "titanium",
+      "silver",
+      "ceramic",
+      "emerald-chrome",
+      "mars-copper",
+      "gold-foil",
+      "obsidian",
+      "cotton",
+      "polyester",
+      "velvet",
+      "carbon-fiber",
+      "eva-rubber",
+      "kevlar"
+    ],
+    "notes": "Transforms are stored as deltas from each stable target baseline. Joint offsets wrap pose bones, so manual edits compose with procedural poses. The source body remains one skinned mesh, while runtime part ids provide independent transforms and per-region material uniforms for the helmet, backpack, hoses, connectors, chest panel, sleeves, forearms and gloves."
+  },
+  "slots": {
+    "suitColor": {
+      "label": "Suit",
+      "targetType": "shaderUniform",
+      "targetIds": ["uniform.suit"],
+      "property": "color",
+      "default": "eva",
+      "options": "SUIT_COLORS in src/lib/astronautConfig.js"
+    },
+    "suitFinish": {
+      "label": "Suit surface finish",
+      "targetType": "shaderUniform",
+      "targetIds": ["uniform.suitFinish"],
+      "property": "physicalMaterial",
+      "default": "fabric",
+      "options": "SUIT_FINISHES"
+    },
+    "accentColor": {
+      "label": "Accents",
+      "targetType": "shaderUniform",
+      "targetIds": ["uniform.accent"],
+      "property": "color",
+      "default": "orange",
+      "options": "ACCENT_COLORS"
+    },
+    "accentFinish": {
+      "label": "Accent surface finish",
+      "targetType": "shaderUniform",
+      "targetIds": ["uniform.accentFinish"],
+      "property": "physicalMaterial",
+      "default": "matte",
+      "options": "ACCENT_FINISHES"
+    },
+    "visorTint": {
+      "label": "Visor",
+      "targetType": "shaderUniform",
+      "targetIds": ["uniform.visor"],
+      "property": "color",
+      "default": "original",
+      "preservePhysicalProperties": true,
+      "options": "VISOR_COLORS"
+    },
+    "packPrimary": {
+      "label": "Pack main color",
+      "targetType": "shaderUniform",
+      "targetIds": ["uniform.packPrimary"],
+      "property": "color",
+      "default": "eva",
+      "options": "PACK_COLORS"
+    },
+    "packSecondary": {
+      "label": "Pack panels, details, gloves, boots",
+      "targetType": "shaderUniform",
+      "targetIds": ["uniform.packSecondary"],
+      "property": "color",
+      "default": "graphite",
+      "options": "PACK_COLORS"
+    },
+    "packShadow": {
+      "label": "Pack recess and shadow color",
+      "targetType": "shaderUniformAndHardwareMaterial",
+      "targetIds": ["uniform.packShadow", "material.packShadow"],
+      "property": "color",
+      "default": "graphite",
+      "preservePhysicalProperties": true,
+      "options": "PACK_SHADOW_COLORS"
+    },
+    "packHoses": {
+      "label": "Fixed titanium life-support hoses",
+      "targetType": "shaderUniform",
+      "targetIds": [
+        "body.hose.right.upper",
+        "body.hose.right.lower",
+        "body.hose.left.upper",
+        "body.hose.left.lower"
+      ],
+      "property": "fixedPhysicalMaterial",
+      "default": "titanium",
+      "userEditable": false
+    },
+    "chestColor": {
+      "label": "Chest module body color",
+      "targetType": "hardwareMaterial",
+      "targetIds": ["hw.chest.dcm", "hw.chest.terminal", "hw.chest.camera", "hw.chest.oxygen", "hw.chest.telemetry"],
+      "property": "color",
+      "default": "eva",
+      "preservePhysicalProperties": true,
+      "options": "PACK_COLORS"
+    },
+    "helmet": {
+      "label": "Helmet add-on",
+      "targetType": "hardwareGroup",
+      "targetIds": ["hw.helmet.classic", "hw.helmet.comms", "hw.helmet.explorer", "hw.helmet.camera", "hw.helmet.sunshield"],
+      "property": "visible",
+      "default": "classic"
+    },
+    "pack": {
+      "label": "Life-support pack",
+      "targetType": "hardwareGroup",
+      "targetIds": ["hw.pack.standard", "hw.pack.compact", "hw.pack.explorer", "hw.pack.jetpack", "hw.pack.student", "hw.pack.minimal"],
+      "property": "visible",
+      "default": "standard"
+    },
+    "chest": {
+      "label": "Chest module",
+      "targetType": "hardwareGroup",
+      "targetIds": ["hw.chest.dcm", "hw.chest.terminal", "hw.chest.camera", "hw.chest.oxygen", "hw.chest.telemetry", "hw.chest.clean"],
+      "property": "visible",
+      "default": "dcm"
+    },
+    "logo": {
+      "label": "Suit patch",
+      "targetType": "hardwareGroup",
+      "targetIds": ["hw.patch.leftSleeve", "hw.patch.rightSleeve", "hw.patch.chest"],
+      "property": "texture",
+      "default": "acca"
+    },
+    "pose": {
+      "label": "Pose",
+      "targetType": "rigPose",
+      "targetIds": ["pose.float", "pose.reference", "pose.drift", "pose.sit", "pose.walk", "pose.jet"],
+      "property": "pose",
+      "default": "float"
+    }
+  }
+}
