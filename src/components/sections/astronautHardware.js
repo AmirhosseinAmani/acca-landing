@@ -26,10 +26,18 @@ function drawStar(context, cx, cy, outer, inner, points = 5) {
   context.fill();
 }
 
+function createTextureCanvas(width, height) {
+  if (typeof document !== 'undefined') {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    return canvas;
+  }
+  return new OffscreenCanvas(width, height);
+}
+
 function createPatchTexture(id, accentHex, bare = false) {
-  const canvas = document.createElement('canvas');
-  canvas.width = 320;
-  canvas.height = 180;
+  const canvas = createTextureCanvas(320, 180);
   const context = canvas.getContext('2d');
   context.clearRect(0, 0, canvas.width, canvas.height);
   const isFlag = id === 'turkey' || id === 'iran' || id === 'azerbaijan';
@@ -222,14 +230,26 @@ function createPatchTexture(id, accentHex, bare = false) {
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;
   if (id === 'acca-mark') {
-    const image = new Image();
-    image.decoding = 'async';
-    image.onload = () => {
+    const drawAccaMark = (image) => {
       const size = bare ? 142 : 134;
       context.drawImage(image, (canvas.width - size) / 2, (canvas.height - size) / 2, size, size);
       texture.needsUpdate = true;
     };
-    image.src = '/favicon-512x512.png';
+    if (typeof Image !== 'undefined') {
+      const image = new Image();
+      image.decoding = 'async';
+      image.onload = () => drawAccaMark(image);
+      image.src = '/favicon-512x512.png';
+    } else if (typeof createImageBitmap === 'function') {
+      fetch('/favicon-512x512.png')
+        .then((response) => response.blob())
+        .then((blob) => createImageBitmap(blob))
+        .then((bitmap) => {
+          drawAccaMark(bitmap);
+          bitmap.close();
+        })
+        .catch(() => {});
+    }
   }
   return texture;
 }

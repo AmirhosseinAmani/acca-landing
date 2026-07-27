@@ -31,6 +31,8 @@ const ContactSection = lazy(() => import('./components/sections/ContactSection')
 
 const ACCA_LOGO_SRC =
   '/assets/optimized/acca-logo-320.webp';
+const ACCA_LOGO_SRCSET =
+  '/assets/optimized/acca-logo-192.webp 192w, /assets/optimized/acca-logo-320.webp 320w';
 const SITE_CANONICAL_ORIGIN = 'https://www.accaco.com';
 const BRAND_NAME = 'ACCA EDU';
 const BRAND_TAGLINE = 'Study in Turkey & International Student Placement';
@@ -1062,6 +1064,8 @@ export default function ACCALandingPage() {
           <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
             <img
               src={ACCA_LOGO_SRC}
+              srcSet={ACCA_LOGO_SRCSET}
+              sizes="108px"
               alt="ACCA EDU Logo"
               width="160"
               height="44"
@@ -1121,6 +1125,8 @@ export default function ACCALandingPage() {
           <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
             <img
               src={ACCA_LOGO_SRC}
+              srcSet={ACCA_LOGO_SRCSET}
+              sizes="108px"
               alt="ACCA EDU Logo"
               width="160"
               height="44"
@@ -2284,6 +2290,8 @@ export default function ACCALandingPage() {
             <a href="/" aria-label={isFa ? 'بازگشت به صفحه اصلی ACCA EDU' : 'Back to ACCA EDU home'}>
               <img
                 src={ACCA_LOGO_SRC}
+                srcSet={ACCA_LOGO_SRCSET}
+                sizes="108px"
                 alt="ACCA EDU Logo"
                 width="160"
                 height="48"
