@@ -819,7 +819,536 @@ const turkey90180IranianStudentsPost = {
   },
 };
 
+const istanbulkartStudentCard2026 = {
+  slug: 'istanbulkart-student-card-istanbul-2026',
+  priority: 110,
+  readTime: '۱۴ دقیقه',
+  date: '2026-07-28',
+  sourceName: 'İstanbulkart (Belbim)، شهرداری کلان‌شهر استانبول و تعرفه مصوب UKOME',
+  sourceUrl: 'https://www.istanbulkart.istanbul/',
+  sourceLinks: [
+    { label: { fa: 'İstanbulkart؛ صفحه رسمی کارت دانشجویی (İndirimli)', en: 'Istanbulkart official student card page' }, url: 'https://www.istanbulkart.istanbul/CardDetail/ogrenci' },
+    { label: { fa: 'پورتال درخواست فردی İstanbulkart', en: 'Istanbulkart individual application portal' }, url: 'https://bireysel.istanbulkart.istanbul/' },
+    { label: { fa: 'اطلاعیه رسمی؛ درخواست کارت دانشجویی فقط از سایت رسمی', en: 'Official notice: student card applications only via the official site' }, url: 'https://www.istanbulkart.istanbul/news/60124' },
+    { label: { fa: 'İETT؛ اپراتور اتوبوس‌های استانبول', en: 'IETT, Istanbul bus operator' }, url: 'https://www.iett.istanbul/' },
+    { label: { fa: 'Metro İstanbul؛ شبکه مترو و فونیکولر', en: 'Metro Istanbul network' }, url: 'https://www.metro.istanbul/' },
+    { label: { fa: 'شهرداری کلان‌شهر استانبول (İBB)', en: 'Istanbul Metropolitan Municipality' }, url: 'https://www.ibb.istanbul/' },
+  ],
+  knowledgeSource: 'راهنمای آکا برای زندگی دانشجویی در استانبول / بازبینی‌شده با صفحات رسمی İstanbulkart و Belbim و تعرفه اجراشده از ۲۰ جولای ۲۰۲۶',
+  category: 'حمل‌ونقل و زندگی دانشجویی',
+  image: {
+    src: '/assets/blog/istanbulkart-student-card-2026.jpg',
+    alt: 'کارت دانشجویی استانبول کارت در کنار تراموای استانبول و دستگاه اعتبارگذاری برای دانشجوی بین‌المللی',
+  },
+  tags: [
+    'استانبول کارت دانشجویی',
+    'İstanbulkart öğrenci',
+    'کارت دانشجویی استانبول',
+    'حمل و نقل عمومی استانبول',
+    'آبونمان دانشجویی استانبول',
+    'مترو استانبول',
+    'متروبوس',
+    'مارمارای',
+    'وایز کارت دانشجویی',
+    'برگه دانشجویی ترکیه',
+    'هزینه رفت و آمد دانشجو در استانبول',
+  ],
+  metricCards: [
+    {
+      label: { fa: 'تعرفه تک‌سفر دانشجویی', en: 'Student single ride' },
+      value: { fa: '۲۲٫۵۵ لیر', en: 'TRY 22.55' },
+      note: { fa: 'در برابر ۴۶٫۲۰ لیر تعرفه کامل؛ اجراشده از ۲۰ جولای ۲۰۲۶.', en: 'Versus TRY 46.20 full fare, effective 20 July 2026.' },
+    },
+    {
+      label: { fa: 'آبونمان ماهانه دانشجو', en: 'Student monthly pass' },
+      value: { fa: '۶۵۳ لیر', en: 'TRY 653' },
+      note: { fa: 'سفر نامحدود در ماه؛ از حدود ۲۹ سفر به بعد از تک‌سفر ارزان‌تر می‌شود.', en: 'Unlimited monthly travel; cheaper than pay-per-ride after roughly 29 trips.' },
+    },
+    {
+      label: { fa: 'شرط اصلی دانشجوی خارجی', en: 'Key condition for internationals' },
+      value: { fa: 'شماره YÖK با ۹۷ یا ۹۸', en: 'YOK number starting 97 or 98' },
+      note: { fa: 'دانشجوی خارجی با شماره موقت YÖK که با ۹۷ یا ۹۸ شروع شود می‌تواند درخواست بدهد.', en: 'Foreign students with a temporary YOK number starting 97 or 98 can apply.' },
+    },
+    {
+      label: { fa: 'کار سالانه فراموش‌شده', en: 'The yearly step people forget' },
+      value: { fa: 'ویزه (vize) سالانه', en: 'Annual vize' },
+      note: { fa: 'اگر در بازه اعلام‌شده ویزه نکنی، کارت تخفیف را از دست می‌دهد و تعرفه کامل می‌گیرد.', en: 'Miss the vize window and the card drops to full fare.' },
+    },
+  ],
+  processStepsTitle: { fa: 'مسیر گرفتن استانبول کارت دانشجویی، گام‌به‌گام', en: 'Getting the student Istanbulkart, step by step' },
+  processSteps: [
+    {
+      title: { fa: 'اول مطمئن شو در سیستم دانشجو هستی', en: 'Confirm you exist in the student system' },
+      body: { fa: 'ثبت‌نام دانشگاه باید نهایی شده و اطلاعاتت در سیستم YÖK ثبت شده باشد. دانشجوی خارجی معمولاً یک شماره موقت YÖK می‌گیرد که با ۹۷ یا ۹۸ شروع می‌شود؛ همین شماره کلید درخواست است. اگر تازه ثبت‌نام کرده‌ای، چند روز صبر کن تا داده‌ها منتقل شود.', en: 'Your enrolment must be final and registered in the YOK system. Foreign students usually receive a temporary YOK number starting 97 or 98, and that number is the key to the application.' },
+    },
+    {
+      title: { fa: 'در پورتال فردی İstanbulkart حساب بساز', en: 'Create an account on the individual portal' },
+      body: { fa: 'به bireysel.istanbulkart.istanbul برو و با شماره موبایل ترک ثبت‌نام کن. پروفایل فردی‌ات را کامل کن؛ بدون شماره ترک فعال، مسیر تأیید پیامکی جلو نمی‌رود.', en: 'Register at bireysel.istanbulkart.istanbul with a Turkish mobile number and complete your individual profile. Without an active Turkish line the SMS verification will not pass.' },
+    },
+    {
+      title: { fa: 'از «درخواست کارت» گزینه «Öğrenci» را انتخاب کن', en: 'Choose Student under Card Application' },
+      body: { fa: 'در صفحه اصلی پروفایل، «Kart Başvurusu» و بعد «Öğrenci» را بزن. سیستم اطلاعات دانشجویی‌ات را از پایگاه رسمی می‌خواند؛ اگر دانشگاه یا مقطعت درست نمایش داده نشد، همان‌جا متوقف شو و اول با دانشگاه چک کن.', en: 'Open Kart Basvurusu then Ogrenci. The system reads your student data from the official database; if your university or level is wrong, stop and check with your university first.' },
+    },
+    {
+      title: { fa: 'عکس و اطلاعات را طبق استاندارد آپلود کن', en: 'Upload photo and details to spec' },
+      body: { fa: 'عکس باید واضح، رو‌به‌رو و شبیه عکس پرسنلی باشد. عکس سلفی، فیلتردار یا با کلاه و عینک آفتابی رد می‌شود و کل درخواست را عقب می‌اندازد. نام و نام خانوادگی را دقیقاً مثل پاسپورت وارد کن.', en: 'The photo must be a clear, front-facing ID-style image. Selfies, filters, hats or sunglasses get rejected and delay the whole application. Enter your name exactly as in your passport.' },
+    },
+    {
+      title: { fa: 'روش تحویل را انتخاب و هزینه را پرداخت کن', en: 'Pick delivery and pay' },
+      body: { fa: 'می‌توانی تحویل به آدرس را انتخاب کنی یا بعد از پرداخت آنلاین، کارت را از شعبه تحویل بگیری. تحویل به خارج از استانبول انجام نمی‌شود، پس اگر هنوز آدرس استانبول نداری، گزینه شعبه امن‌تر است.', en: 'Choose address delivery or branch pickup after online payment. There is no delivery outside Istanbul, so branch pickup is safer if you do not yet have an Istanbul address.' },
+    },
+    {
+      title: { fa: 'کارت را شارژ کن و تخفیف را تست کن', en: 'Top up and test the discount' },
+      body: { fa: 'بعد از دریافت، از دستگاه‌های شارژ یا اپلیکیشن اعتبار بگذار و اولین سفر را چک کن: اگر مبلغ کسر‌شده تعرفه دانشجویی نبود، یعنی کارت هنوز فعال یا ویزه نشده و باید پیگیری کنی.', en: 'Top up at a kiosk or in the app, then check your first ride. If the deducted amount is not the student fare, the card is not active or vized yet.' },
+    },
+  ],
+  dataTables: [
+    {
+      id: 'card-types',
+      afterSection: 0,
+      title: { fa: 'انواع استانبول کارت؛ کدام برای دانشجو معنی دارد؟', en: 'Istanbulkart types and which one a student needs' },
+      subtitle: { fa: 'قبل از درخواست بدان دنبال کدام کارت هستی؛ اشتباه گرفتن این چهار نوع رایج‌ترین خطای تازه‌واردهاست.', en: 'Know which card you actually want before applying.' },
+      headers: [
+        { fa: 'نوع کارت', en: 'Card type' },
+        { fa: 'تخفیف دارد؟', en: 'Discounted?' },
+        { fa: 'به اسم شما ثبت می‌شود؟', en: 'Registered to you?' },
+        { fa: 'مناسب چه کسی', en: 'Who it suits' },
+      ],
+      rows: [
+        { cells: [
+          { fa: 'کارت آنونیم (Anonim)', en: 'Anonymous card' },
+          { fa: 'خیر؛ تعرفه کامل', en: 'No, full fare' },
+          { fa: 'خیر', en: 'No' },
+          { fa: 'روزهای اول ورود یا مهمان؛ از دکه و دستگاه خریدنی است و نیاز به مدرک ندارد.', en: 'First days after arrival or guests; sold at kiosks with no documents.' },
+        ] },
+        { cells: [
+          { fa: 'کارت شخصی‌سازی‌شده (Kişiselleştirilmiş)', en: 'Personalised card' },
+          { fa: 'خیر (مگر با حق تخفیف)', en: 'No, unless entitled' },
+          { fa: 'بله', en: 'Yes' },
+          { fa: 'کسی که می‌خواهد در صورت گم‌شدن، کارت مسدود و موجودی محافظت شود.', en: 'Anyone who wants the card blocked and balance protected if lost.' },
+        ] },
+        { cells: [
+          { fa: 'استانبول کارت دانشجویی (Öğrenci)', en: 'Student Istanbulkart' },
+          { fa: 'بله؛ حدود نصف تعرفه کامل', en: 'Yes, about half the full fare' },
+          { fa: 'بله', en: 'Yes' },
+          { fa: 'دانشجوی ثبت‌شده در سیستم که در استانبول تحصیل می‌کند؛ هدف اصلی این مقاله.', en: 'Registered students studying in Istanbul; the focus of this guide.' },
+        ] },
+        { cells: [
+          { fa: 'ماوی کارت (Mavi Kart)', en: 'Mavi Kart' },
+          { fa: 'آبونمان نامحدود، نه تخفیف تک‌سفر', en: 'Unlimited pass, not a per-ride discount' },
+          { fa: 'بله', en: 'Yes' },
+          { fa: 'کسی که خیلی زیاد سفر می‌کند؛ نسخه دانشجویی آبونمان بسیار ارزان‌تر از نسخه کامل است.', en: 'Heavy commuters; the student version is far cheaper than the full one.' },
+        ] },
+      ],
+      note: { fa: 'دانشجوی خارجی معمولاً از کارت آنونیم شروع می‌کند و بعد از ثبت‌نام کامل، درخواست کارت دانشجویی می‌دهد.', en: 'Most international students start with an anonymous card and apply for the student card after enrolment is complete.' },
+    },
+    {
+      id: 'eligibility',
+      afterSection: 1,
+      title: { fa: 'چه کسی واجد شرایط است؟ چک‌لیست صادقانه', en: 'Who actually qualifies: an honest checklist' },
+      subtitle: { fa: 'هر چهار شرط باید هم‌زمان برقرار باشد؛ نبودن یکی از آن‌ها یعنی درخواست رد می‌شود یا معلق می‌ماند.', en: 'All four conditions must hold at once.' },
+      headers: [
+        { fa: 'شرط', en: 'Condition' },
+        { fa: 'یعنی چه', en: 'What it means' },
+        { fa: 'اگر برقرار نباشد', en: 'If it is missing' },
+      ],
+      rows: [
+        { cells: [
+          { fa: 'دانشجوی دانشگاه مورد تأیید', en: 'Enrolled at a recognised university' },
+          { fa: 'ثبت‌نام در یکی از دانشگاه‌های مورد تأیید ترکیه، نه دوره آزاد یا غیررسمی.', en: 'Enrolled at a recognised Turkish university, not an informal course.' },
+          { fa: 'درخواست پذیرفته نمی‌شود.', en: 'The application will not be accepted.' },
+        ] },
+        { cells: [
+          { fa: 'ثبت اطلاعات در سیستم', en: 'Your data is in the system' },
+          { fa: 'اطلاعات دانشجویی در پایگاه رسمی ثبت شده باشد؛ دانشجوی خارجی معمولاً شماره موقت YÖK با پیش‌شماره ۹۷ یا ۹۸ می‌گیرد.', en: 'Student data registered officially; internationals usually get a temporary YOK number starting 97 or 98.' },
+          { fa: 'سیستم شما را پیدا نمی‌کند؛ باید با دفتر بین‌الملل دانشگاه پیگیری کنی.', en: 'The system cannot find you; follow up with the international office.' },
+        ] },
+        { cells: [
+          { fa: 'محل تحصیل در استانبول', en: 'Studying in Istanbul' },
+          { fa: 'کارت برای شبکه حمل‌ونقل استانبول است، نه سراسر ترکیه.', en: 'The card is for the Istanbul network, not all of Turkey.' },
+          { fa: 'برای شهر خودت باید کارت همان شهر را بگیری.', en: 'You need your own city card instead.' },
+        ] },
+        { cells: [
+          { fa: 'مدارک هویتی سازگار', en: 'Consistent identity documents' },
+          { fa: 'نام لاتین در پاسپورت، اقامت و سیستم دانشگاه یکسان باشد.', en: 'Latin name identical across passport, residence and university records.' },
+          { fa: 'اختلاف یک حرف می‌تواند تأیید را متوقف کند.', en: 'A one-letter mismatch can stall approval.' },
+        ] },
+      ],
+    },
+    {
+      id: 'documents',
+      afterSection: 2,
+      title: { fa: 'مدارکی که باید آماده داشته باشی', en: 'Documents to have ready' },
+      subtitle: { fa: 'همه را قبل از باز کردن فرم آماده کن؛ نیمه‌کاره رها کردن فرم یعنی شروع دوباره.', en: 'Prepare everything before opening the form.' },
+      headers: [
+        { fa: 'مدرک', en: 'Document' },
+        { fa: 'چرا لازم است', en: 'Why it is needed' },
+        { fa: 'نکته عملی', en: 'Practical note' },
+      ],
+      rows: [
+        { cells: [
+          { fa: 'برگه دانشجویی (Öğrenci Belgesi)', en: 'Student certificate' },
+          { fa: 'اثبات فعال بودن دانشجویی در ترم جاری.', en: 'Proves active enrolment this term.' },
+          { fa: 'از دفتر دانشجویی یا سیستم دانشگاه بگیر؛ تاریخ آن باید تازه باشد.', en: 'Get it from the student office; the date must be recent.' },
+        ] },
+        { cells: [
+          { fa: 'شماره YÖK (۹۷ یا ۹۸)', en: 'YOK number (97 or 98)' },
+          { fa: 'شناسه‌ای که سیستم با آن تو را به‌عنوان دانشجو می‌شناسد.', en: 'The identifier the system recognises you by.' },
+          { fa: 'اگر نداری یا کار نمی‌کند، اول دانشگاه باید ثبتت را تکمیل کند.', en: 'If missing, the university must complete your registration first.' },
+        ] },
+        { cells: [
+          { fa: 'پاسپورت و کارت اقامت', en: 'Passport and residence card' },
+          { fa: 'احراز هویت و تطبیق اطلاعات.', en: 'Identity verification and data matching.' },
+          { fa: 'اقامت دانشجویی وضعیت تو را روشن‌تر می‌کند؛ نام لاتین را دقیق وارد کن.', en: 'A student residence permit makes your status clearer.' },
+        ] },
+        { cells: [
+          { fa: 'عکس پرسنلی دیجیتال', en: 'Digital ID photo' },
+          { fa: 'روی کارت چاپ می‌شود و مبنای تأیید بصری است.', en: 'It is printed on the card.' },
+          { fa: 'سلفی، فیلتر، کلاه و عینک آفتابی رد می‌شود.', en: 'Selfies, filters, hats and sunglasses are rejected.' },
+        ] },
+        { cells: [
+          { fa: 'شماره موبایل فعال ترک', en: 'Active Turkish mobile number' },
+          { fa: 'برای ساخت حساب و تأیید پیامکی.', en: 'For account creation and SMS verification.' },
+          { fa: 'شماره خارجی معمولاً کار نمی‌کند؛ اول سیم‌کارت بگیر.', en: 'Foreign numbers usually fail; get a SIM first.' },
+        ] },
+        { cells: [
+          { fa: 'آدرس معتبر در استانبول', en: 'Valid Istanbul address' },
+          { fa: 'برای تحویل کارت به آدرس.', en: 'For address delivery.' },
+          { fa: 'تحویل به خارج از استانبول انجام نمی‌شود؛ در نبود آدرس، تحویل از شعبه را انتخاب کن.', en: 'No delivery outside Istanbul; pick branch collection instead.' },
+        ] },
+      ],
+    },
+    {
+      id: 'fares-2026',
+      afterSection: 4,
+      title: { fa: 'تعرفه‌های ۲۰۲۶؛ دقیقاً چقدر صرفه‌جویی می‌کنی؟', en: '2026 fares and your real saving' },
+      subtitle: { fa: 'تعرفه اجراشده از ۲۰ جولای ۲۰۲۶ پس از افزایش ۱۰ درصدی. ارقام حمل‌ونقل در ترکیه مرتب به‌روز می‌شود، پس قبل از تصمیم بزرگ، عدد روز را چک کن.', en: 'Tariff effective 20 July 2026 after a 10 percent increase. Always re-check current figures.' },
+      headers: [
+        { fa: 'مورد', en: 'Item' },
+        { fa: 'تعرفه کامل', en: 'Full fare' },
+        { fa: 'تعرفه دانشجویی', en: 'Student fare' },
+        { fa: 'تفاوت', en: 'Difference' },
+      ],
+      rows: [
+        { cells: [
+          { fa: 'یک سفر (تک‌بلیت الکترونیکی)', en: 'Single electronic ride' },
+          { fa: '۴۶٫۲۰ لیر', en: 'TRY 46.20' },
+          { fa: '۲۲٫۵۵ لیر', en: 'TRY 22.55' },
+          { fa: '۲۳٫۶۵ لیر کمتر در هر سفر (حدود نصف)', en: 'TRY 23.65 less per ride, about half' },
+        ] },
+        { cells: [
+          { fa: 'آبونمان ماهانه', en: 'Monthly pass' },
+          { fa: '۳٬۶۲۸ لیر (ماوی کارت)', en: 'TRY 3,628 (Mavi Kart)' },
+          { fa: '۶۵۳ لیر', en: 'TRY 653' },
+          { fa: '۲٬۹۷۵ لیر کمتر در ماه', en: 'TRY 2,975 less per month' },
+        ] },
+        { cells: [
+          { fa: 'دو سفر در روز، ۲۲ روز کاری', en: 'Two rides a day, 22 days' },
+          { fa: 'حدود ۲٬۰۳۳ لیر', en: 'About TRY 2,033' },
+          { fa: 'حدود ۹۹۲ لیر با تک‌سفر، یا ۶۵۳ لیر با آبونمان', en: 'About TRY 992 pay-per-ride, or TRY 653 with the pass' },
+          { fa: 'با آبونمان دانشجویی حدود ۱٬۳۸۰ لیر در ماه صرفه‌جویی', en: 'About TRY 1,380 saved per month with the student pass' },
+        ] },
+      ],
+      note: { fa: 'ارقام قبل از ۲۰ جولای ۲۰۲۶: تک‌سفر کامل ۴۲ لیر، دانشجویی ۲۰٫۵۰ لیر، آبونمان دانشجویی ۵۹۳ لیر و ماوی کارت ۳٬۲۹۸ لیر بود.', en: 'Before 20 July 2026: full 42, student 20.50, student pass 593 and Mavi Kart 3,298.' },
+    },
+    {
+      id: 'abonman-vs-single',
+      afterSection: 5,
+      title: { fa: 'آبونمان بگیرم یا تک‌سفر؟ نقطه سربه‌سر', en: 'Monthly pass or pay-per-ride? The break-even' },
+      subtitle: { fa: 'با تعرفه دانشجویی ۲۲٫۵۵ لیر و آبونمان ۶۵۳ لیر، از حدود ۲۹ سفر در ماه به بعد آبونمان می‌صرفد.', en: 'At TRY 22.55 per ride and TRY 653 per month, the pass pays off after about 29 rides.' },
+      headers: [
+        { fa: 'الگوی رفت‌وآمد', en: 'Travel pattern' },
+        { fa: 'سفر در ماه', en: 'Rides per month' },
+        { fa: 'هزینه با تک‌سفر', en: 'Pay-per-ride cost' },
+        { fa: 'بهتر است چه بگیری', en: 'Better choice' },
+      ],
+      rows: [
+        { cells: [
+          { fa: 'خوابگاه نزدیک دانشگاه، بیشتر پیاده', en: 'Dorm near campus, mostly walking' },
+          { fa: 'حدود ۱۰', en: 'About 10' },
+          { fa: 'حدود ۲۲۶ لیر', en: 'About TRY 226' },
+          { fa: 'تک‌سفر؛ آبونمان صرف نمی‌کند.', en: 'Pay-per-ride; the pass is not worth it.' },
+        ] },
+        { cells: [
+          { fa: 'هفته‌ای سه روز کلاس', en: 'Class three days a week' },
+          { fa: 'حدود ۲۴', en: 'About 24' },
+          { fa: 'حدود ۵۴۱ لیر', en: 'About TRY 541' },
+          { fa: 'مرز تصمیم؛ اگر آخر هفته هم سفر داری، آبونمان.', en: 'Borderline; take the pass if you also travel at weekends.' },
+        ] },
+        { cells: [
+          { fa: 'هر روز کلاس، رفت و برگشت', en: 'Daily commute both ways' },
+          { fa: 'حدود ۴۴', en: 'About 44' },
+          { fa: 'حدود ۹۹۲ لیر', en: 'About TRY 992' },
+          { fa: 'آبونمان؛ حدود ۳۳۹ لیر در ماه کمتر.', en: 'The pass; about TRY 339 cheaper.' },
+        ] },
+        { cells: [
+          { fa: 'کلاس + کار پاره‌وقت یا کارآموزی', en: 'Class plus part-time work' },
+          { fa: '۶۰ و بیشتر', en: '60 or more' },
+          { fa: 'بیش از ۱٬۳۵۳ لیر', en: 'Over TRY 1,353' },
+          { fa: 'آبونمان، بدون تردید.', en: 'The pass, clearly.' },
+        ] },
+      ],
+    },
+    {
+      id: 'modes',
+      afterSection: 6,
+      title: { fa: 'با این کارت کجاها می‌توانی سوار شوی؟', en: 'Where the card works' },
+      headers: [
+        { fa: 'وسیله', en: 'Mode' },
+        { fa: 'کاربرد برای دانشجو', en: 'Student use case' },
+      ],
+      rows: [
+        { cells: [{ fa: 'مترو و فونیکولر', en: 'Metro and funicular' }, { fa: 'ستون فقرات جابه‌جایی روزانه بین محله و دانشگاه.', en: 'The backbone of daily commuting.' }] },
+        { cells: [{ fa: 'متروبوس', en: 'Metrobus' }, { fa: 'سریع‌ترین مسیر بین اروپا و آسیا در ساعات شلوغ.', en: 'Fastest cross-continent link at rush hour.' }] },
+        { cells: [{ fa: 'اتوبوس (İETT)', en: 'Bus (IETT)' }, { fa: 'پوشش محله‌هایی که مترو ندارند.', en: 'Covers neighbourhoods without metro.' }] },
+        { cells: [{ fa: 'تراموا', en: 'Tram' }, { fa: 'مسیرهای مرکز شهر و مناطق تاریخی.', en: 'City-centre and historic routes.' }] },
+        { cells: [{ fa: 'مارمارای', en: 'Marmaray' }, { fa: 'عبور زیردریایی بسفر؛ برای دانشجوی دو‌قاره‌ای حیاتی.', en: 'Under-Bosphorus crossing.' }] },
+        { cells: [{ fa: 'کشتی و واپور', en: 'Ferry' }, { fa: 'ارزان‌ترین «تور» استانبول و مسیر واقعی رفت‌وآمد.', en: 'The cheapest sightseeing and a real commute route.' }] },
+      ],
+      note: { fa: 'قاعده انتقال (aktarma) باعث می‌شود سفرهای پشت‌سرهم در بازه زمانی مشخص ارزان‌تر حساب شود؛ برای مسیرهای چندمرحله‌ای این تفاوت در ماه قابل توجه است.', en: 'Transfer rules make consecutive rides within a window cheaper, which adds up on multi-leg commutes.' },
+    },
+    {
+      id: 'troubleshooting',
+      afterSection: 8,
+      title: { fa: 'مشکلات رایج و راه‌حل واقعی', en: 'Common problems and real fixes' },
+      subtitle: { fa: 'بیشتر مشکلات دانشجوی خارجی از سه چیز می‌آید: داده ناقص در سیستم، عکس نامناسب و فراموش کردن ویزه.', en: 'Most international-student problems come from incomplete data, a bad photo, or a missed vize.' },
+      headers: [
+        { fa: 'مشکل', en: 'Problem' },
+        { fa: 'علت محتمل', en: 'Likely cause' },
+        { fa: 'کاری که باید بکنی', en: 'What to do' },
+      ],
+      rows: [
+        { cells: [
+          { fa: 'سیستم می‌گوید دانشجو پیدا نشد', en: 'System says student not found' },
+          { fa: 'ثبت‌نام هنوز به پایگاه رسمی منتقل نشده یا شماره YÖK فعال نیست.', en: 'Enrolment not yet synced or the YOK number is inactive.' },
+          { fa: 'با دفتر بین‌الملل دانشگاه تماس بگیر و بخواه ثبت را در سیستم تأیید کنند؛ بعد چند روز بعد دوباره امتحان کن.', en: 'Ask the international office to confirm your registration, then retry in a few days.' },
+        ] },
+        { cells: [
+          { fa: 'عکس رد شد', en: 'Photo rejected' },
+          { fa: 'سلفی، نور کم، فیلتر، کلاه یا عینک.', en: 'Selfie, low light, filter, hat or glasses.' },
+          { fa: 'عکس پرسنلی ساده با پس‌زمینه روشن بگیر و دوباره آپلود کن.', en: 'Take a plain ID photo on a light background and re-upload.' },
+        ] },
+        { cells: [
+          { fa: 'کارت تعرفه کامل می‌گیرد', en: 'Card charges full fare' },
+          { fa: 'کارت هنوز فعال نشده یا ویزه سالانه انجام نشده.', en: 'Card not activated, or the annual vize was missed.' },
+          { fa: 'وضعیت ویزه را در پورتال یا اپ چک کن؛ اگر بازه گذشته، در بازه بعدی ویزه کن.', en: 'Check vize status in the portal or app and renew in the next window.' },
+        ] },
+        { cells: [
+          { fa: 'کارت گم یا دزدیده شد', en: 'Card lost or stolen' },
+          { fa: 'کارت شخصی‌سازی‌شده قابل مسدود کردن است.', en: 'Personalised cards can be blocked.' },
+          { fa: 'سریع از پورتال یا اپ مسدود کن تا موجودی محافظت شود و برای کارت جایگزین اقدام کن.', en: 'Block it in the portal or app to protect the balance and request a replacement.' },
+        ] },
+        { cells: [
+          { fa: 'نام روی کارت با پاسپورت فرق دارد', en: 'Name mismatch with passport' },
+          { fa: 'املای لاتین در سیستم دانشگاه متفاوت ثبت شده.', en: 'Different Latin spelling in university records.' },
+          { fa: 'اول در دانشگاه اصلاح کن، بعد درخواست کارت بده؛ اصلاح بعدی سخت‌تر است.', en: 'Fix it at the university first, then apply.' },
+        ] },
+        { cells: [
+          { fa: 'با کارت دانشجویی شخص دیگری سفر کردی', en: 'Using someone else’s student card' },
+          { fa: 'کارت تخفیف‌دار شخصی است و قابل انتقال نیست.', en: 'Discounted cards are personal and non-transferable.' },
+          { fa: 'انجامش نده؛ کارت می‌تواند ضبط یا مسدود شود و جریمه در پی دارد.', en: 'Do not do it; the card can be seized or blocked and a fine applied.' },
+        ] },
+      ],
+    },
+  ],
+  glossary: [
+    {
+      labels: ['استانبول کارت', 'İstanbulkart', 'ایستانبول کارت'],
+      title: 'استانبول کارت چیست؟',
+      definition: 'استانبول کارت، کارت هوشمند پرداخت کرایه حمل‌ونقل عمومی استانبول است که در مترو، متروبوس، اتوبوس، تراموا، مارمارای، فونیکولر و کشتی استفاده می‌شود و توسط شرکت Belbim وابسته به شهرداری کلان‌شهر استانبول اداره می‌شود.',
+    },
+    {
+      labels: ['استانبول کارت دانشجویی', 'Öğrenci İstanbulkart', 'کارت دانشجویی استانبول', 'اوگرنجی کارت'],
+      title: 'استانبول کارت دانشجویی چیست؟',
+      definition: 'استانبول کارت دانشجویی نسخه تخفیف‌دار استانبول کارت است که به دانشجوی ثبت‌شده در سیستم رسمی تعلق می‌گیرد و کرایه هر سفر را تقریباً نصف تعرفه کامل حساب می‌کند. این کارت شخصی است و به اسم خود دانشجو ثبت می‌شود.',
+    },
+    {
+      labels: ['ماوی کارت', 'Mavi Kart', 'آبونمان نامحدود استانبول'],
+      title: 'ماوی کارت چیست؟',
+      definition: 'ماوی کارت اشتراک ماهانه حمل‌ونقل استانبول است که به‌جای پرداخت هر سفر، سفر نامحدود در یک ماه می‌دهد. نسخه دانشجویی آن بسیار ارزان‌تر از نسخه کامل است.',
+    },
+    {
+      labels: ['آبونمان', 'abonman', 'اشتراک ماهانه حمل و نقل'],
+      title: 'آبونمان حمل‌ونقل چیست؟',
+      definition: 'آبونمان یعنی پرداخت یک مبلغ ثابت ماهانه برای سفر نامحدود، به‌جای کسر کرایه در هر سفر. برای دانشجویی که هر روز رفت‌وبرگشت دارد معمولاً از تک‌سفر ارزان‌تر تمام می‌شود.',
+    },
+    {
+      labels: ['ویزه کارت', 'vize', 'vizeleme', 'تمدید سالانه کارت دانشجویی'],
+      title: 'ویزه کارت دانشجویی چیست؟',
+      definition: 'ویزه یا vizeleme فرایند تأیید سالانه دانشجو بودن است. اگر دانشجو در بازه اعلام‌شده کارتش را ویزه نکند، تخفیف دانشجویی قطع می‌شود و کارت با تعرفه کامل کار می‌کند.',
+    },
+    {
+      labels: ['آکتارما', 'aktarma', 'تخفیف انتقال'],
+      title: 'آکتارما یا انتقال چیست؟',
+      definition: 'آکتارما یعنی وقتی در بازه زمانی مشخص از یک وسیله به وسیله دیگر منتقل می‌شوی، کرایه سفرهای بعدی کمتر از کرایه کامل حساب می‌شود. برای مسیرهای چندمرحله‌ای این تخفیف در ماه رقم قابل توجهی است.',
+    },
+    {
+      labels: ['شماره YÖK', 'YÖK numarası', 'شماره موقت دانشجویی ترکیه', 'کد ۹۷ و ۹۸'],
+      title: 'شماره YÖK دانشجوی خارجی چیست؟',
+      definition: 'شماره YÖK شناسه‌ای است که دانشجو با آن در سیستم آموزش عالی ترکیه شناخته می‌شود. دانشجوی خارجی معمولاً شماره موقتی می‌گیرد که با ۹۷ یا ۹۸ شروع می‌شود و برای درخواست استانبول کارت دانشجویی استفاده می‌شود.',
+    },
+    {
+      labels: ['اوگرنجی بلگه‌سی', 'Öğrenci Belgesi', 'برگه دانشجویی ترکیه'],
+      title: 'اوگرنجی بلگه‌سی چیست؟',
+      definition: 'اوگرنجی بلگه‌سی همان برگه یا گواهی دانشجویی است که دانشگاه صادر می‌کند و نشان می‌دهد دانشجو در ترم جاری فعال است. برای کارت دانشجویی، اقامت و خیلی از کارهای اداری لازم می‌شود.',
+    },
+    {
+      labels: ['بلبیم', 'Belbim', 'اپراتور استانبول کارت'],
+      title: 'بلبیم چیست؟',
+      definition: 'Belbim شرکت وابسته به شهرداری کلان‌شهر استانبول است که سامانه استانبول کارت، پرداخت الکترونیکی کرایه و زیرساخت شارژ کارت را اداره می‌کند.',
+    },
+    {
+      labels: ['کارت آنونیم', 'Anonim kart', 'کارت بدون نام'],
+      title: 'کارت آنونیم چیست؟',
+      definition: 'کارت آنونیم نسخه بدون نام استانبول کارت است که از دکه و دستگاه بدون مدرک خریده می‌شود، تخفیف دانشجویی ندارد و در صورت گم شدن قابل مسدود کردن یا بازگرداندن موجودی نیست.',
+    },
+    {
+      labels: ['متروبوس', 'Metrobüs', 'اتوبوس تندرو استانبول'],
+      title: 'متروبوس چیست؟',
+      definition: 'متروبوس خط اتوبوس تندروی استانبول با مسیر اختصاصی است که بخش اروپایی و آسیایی را به‌هم وصل می‌کند و در ساعات شلوغ معمولاً سریع‌ترین گزینه رفت‌وآمد دانشجوست.',
+    },
+    {
+      labels: ['مارمارای', 'Marmaray', 'تونل زیر بسفر'],
+      title: 'مارمارای چیست؟',
+      definition: 'مارمارای خط ریلی حومه‌ای استانبول است که از تونل زیر تنگه بسفر عبور می‌کند و جابه‌جایی بین دو قاره را برای دانشجویانی که دانشگاه و خانه‌شان در دو سمت است ساده می‌کند.',
+    },
+  ],
+  fa: {
+    title: 'استانبول کارت دانشجویی و طریقه دریافت آن؛ راهنمای کامل ۲۰۲۶ برای دانشجوی بین‌المللی',
+    excerpt: 'استانبول کارت دانشجویی کرایه هر سفر را تقریباً نصف می‌کند و برای دانشجویی که هر روز رفت‌وآمد دارد ماهانه بیش از هزار لیر صرفه‌جویی می‌سازد. این راهنما شرایط، مدارک، مسیر دقیق درخواست، تعرفه‌های به‌روز ۲۰۲۶، مقایسه آبونمان با تک‌سفر و مشکلات رایج دانشجوی خارجی را با جدول و مثال توضیح می‌دهد.',
+    thesis: 'دانشجوی خارجی در استانبول با شماره موقت YÖK که با ۹۷ یا ۹۸ شروع می‌شود و برگه دانشجویی معتبر می‌تواند استانبول کارت دانشجویی بگیرد و کرایه را از ۴۶٫۲۰ لیر به ۲۲٫۵۵ لیر در هر سفر برساند. اما کارت خودکار فعال نمی‌ماند: هر سال باید ویزه شود، وگرنه به تعرفه کامل برمی‌گردد.',
+    lead: 'در استانبول رفت‌وآمد یکی از سه هزینه اصلی زندگی دانشجویی است، کنار اجاره و خوراک. تفاوت بین تعرفه کامل و تعرفه دانشجویی در یک سال تحصیلی به اندازه چند ماه اجاره می‌شود. برای همین استانبول کارت دانشجویی یک کارت ساده نیست؛ یکی از اولین تصمیم‌های مالی درست تو در این شهر است.',
+    sections: [
+      {
+        heading: 'استانبول کارت دقیقاً چیست و چرا نسخه دانشجویی فرق دارد؟',
+        body: 'استانبول کارت، کارت هوشمند پرداخت کرایه در کل شبکه حمل‌ونقل عمومی استانبول است: مترو، متروبوس، اتوبوس، تراموا، مارمارای، فونیکولر و کشتی. بدون این کارت عملاً نمی‌توانی از شبکه استفاده کنی. نسخه دانشجویی همان کارت است با یک تفاوت مهم: تعرفه هر سفر تقریباً نصف تعرفه کامل حساب می‌شود. اما این تخفیف رایگان و خودکار نیست؛ باید ثابت کنی دانشجویی، کارت را به نام خودت بگیری و هر سال وضعیت دانشجویی‌ات را دوباره تأیید کنی.',
+      },
+      {
+        heading: 'چه کسانی می‌توانند این کارت را بگیرند؟',
+        body: 'شرط اصلی این است که دانشجوی یکی از دانشگاه‌های مورد تأیید ترکیه باشی، اطلاعاتت در سیستم رسمی ثبت شده باشد و محل تحصیلت استانبول باشد. برای دانشجوی خارجی نکته کلیدی شماره موقت YÖK است که معمولاً با ۹۷ یا ۹۸ شروع می‌شود؛ سیستم با همین شماره تو را پیدا می‌کند. داشتن اقامت دانشجویی وضعیت را روشن‌تر و مسیر را ساده‌تر می‌کند. اگر تازه ثبت‌نام کرده‌ای، ممکن است چند روز طول بکشد تا اطلاعاتت به پایگاه رسمی منتقل شود؛ در این فاصله سیستم تو را پیدا نمی‌کند و این طبیعی است.',
+      },
+      {
+        heading: 'چه مدارکی باید آماده باشد؟',
+        body: 'قبل از باز کردن فرم، همه‌چیز را آماده کن تا وسط کار گیر نکنی: برگه دانشجویی تازه، شماره YÖK، پاسپورت، کارت اقامت در صورت وجود، یک عکس پرسنلی استاندارد، شماره موبایل فعال ترک و آدرس معتبر در استانبول. مهم‌ترین نکته‌ای که تازه‌واردها دست‌کم می‌گیرند، یکسان بودن املای لاتین نام در پاسپورت، اقامت و سیستم دانشگاه است. اختلاف یک حرف می‌تواند تأیید را متوقف کند و اصلاحش بعداً سخت‌تر از انجام درست آن در ابتداست.',
+      },
+      {
+        heading: 'درخواست فقط از مسیر رسمی؛ مراقب واسطه‌ها باش',
+        body: 'درخواست کارت دانشجویی از پورتال رسمی انجام می‌شود و نیازی به واسطه، دفتر خصوصی یا پرداخت اضافه ندارد. اطلاعیه رسمی هم روی همین تأکید کرده است. اگر کسی پیشنهاد داد در ازای مبلغی برایت کارت دانشجویی بگیرد یا خواست اطلاعات ورود پورتالت را بدهی، این یک زنگ خطر است: نه فقط پول اضافه می‌دهی، بلکه هویت دیجیتالت را هم در اختیار غریبه می‌گذاری. مسیر درست، ساخت حساب با شماره خودت و انجام مراحل با دست خودت است.',
+      },
+      {
+        heading: 'بعد از دریافت کارت: فعال‌سازی، شارژ و تست اولین سفر',
+        body: 'کارت را می‌توانی از دستگاه‌های شارژ در ایستگاه‌ها، دکه‌های مجاز یا از طریق اپلیکیشن و روش‌های آنلاین شارژ کنی. اولین سفرت را جدی بگیر: بعد از عبور، مبلغ کسرشده را چک کن. اگر تعرفه کامل کسر شد یعنی تخفیف دانشجویی هنوز روی کارت فعال نشده و باید وضعیت را در پورتال بررسی کنی. خیلی از دانشجوها ماه‌ها تعرفه کامل می‌دهند فقط به این دلیل که هیچ‌وقت اولین تراکنش را چک نکردند.',
+      },
+      {
+        heading: 'آبونمان ماهانه بگیرم یا هر سفر را جدا بدهم؟',
+        body: 'این تصمیم کاملاً به الگوی رفت‌وآمد تو بستگی دارد و یک جواب واحد ندارد. منطق ساده است: آبونمان ماهانه دانشجویی مبلغ ثابتی است و سفر نامحدود می‌دهد، پس هرچه بیشتر سفر کنی، هزینه هر سفرت پایین‌تر می‌آید. با اعداد فعلی، نقطه سربه‌سر حدود ۲۹ سفر در ماه است. اگر خوابگاهت کنار دانشگاه است و بیشتر پیاده می‌روی، تک‌سفر منطقی‌تر است. اگر هر روز رفت‌وبرگشت داری یا کنار درس کار یا کارآموزی می‌کنی، آبونمان تقریباً همیشه برنده است.',
+      },
+      {
+        heading: 'با این کارت کجاها می‌توانی سوار شوی؟',
+        body: 'کارت روی کل شبکه شهری کار می‌کند و همین یکپارچگی، بزرگ‌ترین مزیت زندگی در استانبول است. یک نکته که در ماه تفاوت می‌سازد قاعده انتقال یا آکتارما است: اگر در بازه زمانی مشخص از یک وسیله به وسیله بعدی منتقل شوی، کرایه سفرهای بعدی کمتر حساب می‌شود. اگر مسیر دانشگاهت چندمرحله‌ای است، سعی کن مسیرت را طوری ببندی که از این قاعده استفاده کنی، نه اینکه هر پا را جدا و با فاصله زیاد بدهی.',
+      },
+      {
+        heading: 'ویزه سالانه؛ کاری که فراموش کردنش گران تمام می‌شود',
+        body: 'تخفیف دانشجویی همیشگی نیست. هر سال در بازه‌ای که اعلام می‌شود باید کارت را ویزه کنی، یعنی تأیید کنی هنوز دانشجو هستی. اگر این کار را نکنی، کارت تخفیف را از دست می‌دهد و از همان لحظه با تعرفه کامل کار می‌کند؛ یعنی هر سفر به‌جای ۲۲٫۵۵ لیر، ۴۶٫۲۰ لیر. بدتر اینکه خیلی‌ها این را وقتی می‌فهمند که چند هفته با تعرفه کامل سفر کرده‌اند. یک یادآور در تقویم گوشی‌ات بگذار و در ابتدای هر سال تحصیلی وضعیت ویزه را چک کن. وضعیت دانشجویی هم به‌صورت دوره‌ای بررسی می‌شود، پس اگر انصراف دادی یا فارغ‌التحصیل شدی، تخفیف در ادامه باقی نمی‌ماند.',
+      },
+      {
+        heading: 'اشتباه‌هایی که بیشترین هزینه را روی دست دانشجو می‌گذارد',
+        body: 'سه اشتباه بیشترین ضرر را می‌زند. اول، ماه‌ها با کارت آنونیم و تعرفه کامل سفر کردن چون «فعلاً وقت ندارم درخواست بدهم»؛ این تعلل در یک ترم به اندازه چند صد لیر در ماه هزینه دارد. دوم، فراموش کردن ویزه سالانه. سوم، استفاده از کارت دانشجویی شخص دیگر یا دادن کارت خود به دیگری؛ این کارت شخصی است و در بازرسی می‌تواند ضبط یا مسدود شود و جریمه در پی داشته باشد. صرفه‌جویی چند لیری با ریسک از دست دادن کل کارت و پرونده انضباطی معامله بدی است.',
+      },
+      {
+        heading: 'جمع‌بندی عملی برای هفته اول ورودت',
+        body: 'روز اول یک کارت آنونیم بخر تا معطل نمانی و بتوانی جابه‌جا شوی. هم‌زمان سیم‌کارت ترک بگیر، چون بدون شماره ترک هیچ‌کدام از سامانه‌ها جلو نمی‌رود. تا وقتی ثبت‌نام دانشگاهت نهایی و در سیستم ثبت شود صبر کن، بعد برگه دانشجویی بگیر و از پورتال رسمی درخواست کارت دانشجویی بده. کارت که رسید، اولین سفر را چک کن که تعرفه دانشجویی کسر شود و بعد بر اساس تعداد سفر ماهانه‌ات تصمیم بگیر آبونمان بگیری یا نه. همین ترتیب ساده، در یک سال تحصیلی مبلغ قابل توجهی برایت نگه می‌دارد.',
+      },
+    ],
+    keyTakeaways: [
+      'تعرفه دانشجویی از ۲۰ جولای ۲۰۲۶ برابر ۲۲٫۵۵ لیر در هر سفر است، در برابر ۴۶٫۲۰ لیر تعرفه کامل.',
+      'آبونمان ماهانه دانشجویی ۶۵۳ لیر است و از حدود ۲۹ سفر در ماه به بعد از تک‌سفر ارزان‌تر می‌شود.',
+      'دانشجوی خارجی با شماره موقت YÖK که با ۹۷ یا ۹۸ شروع شود می‌تواند درخواست بدهد.',
+      'درخواست فقط از پورتال رسمی انجام می‌شود؛ به واسطه پول نده و اطلاعات ورودت را به کسی نده.',
+      'عکس باید پرسنلی و استاندارد باشد؛ سلفی و عکس فیلتردار رد می‌شود و کل روند را عقب می‌اندازد.',
+      'تحویل کارت به خارج از استانبول انجام نمی‌شود؛ در نبود آدرس، تحویل از شعبه را انتخاب کن.',
+      'ویزه سالانه اجباری است و بدون آن کارت به تعرفه کامل برمی‌گردد.',
+      'کارت دانشجویی شخصی است؛ استفاده توسط شخص دیگر می‌تواند به ضبط کارت و جریمه منجر شود.',
+    ],
+    faq: [
+      {
+        q: 'دانشجوی خارجی می‌تواند استانبول کارت دانشجویی بگیرد؟',
+        a: 'بله. دانشجویی که در دانشگاه مورد تأیید در استانبول ثبت‌نام کرده و شماره موقت YÖK او با ۹۷ یا ۹۸ شروع می‌شود می‌تواند با برگه دانشجویی درخواست بدهد.',
+      },
+      {
+        q: 'قبل از گرفتن اقامت هم می‌شود درخواست داد؟',
+        a: 'شرط تعیین‌کننده ثبت اطلاعات دانشجویی در سیستم است. داشتن اقامت دانشجویی وضعیت را روشن‌تر و مسیر را ساده‌تر می‌کند، اما نقطه شروع واقعی، تکمیل ثبت‌نام دانشگاه و فعال بودن شماره YÖK است.',
+      },
+      {
+        q: 'تفاوت قیمت دقیقاً چقدر است؟',
+        a: 'با تعرفه اجراشده از ۲۰ جولای ۲۰۲۶، هر سفر با تعرفه کامل ۴۶٫۲۰ لیر و با تعرفه دانشجویی ۲۲٫۵۵ لیر است؛ یعنی حدود ۲۳٫۶۵ لیر صرفه‌جویی در هر سفر.',
+      },
+      {
+        q: 'آبونمان ماهانه دانشجویی چقدر است و کی به‌صرفه می‌شود؟',
+        a: 'آبونمان ماهانه دانشجویی ۶۵۳ لیر است. با تعرفه ۲۲٫۵۵ لیر، از حدود ۲۹ سفر در ماه به بعد از پرداخت تک‌سفر ارزان‌تر می‌شود.',
+      },
+      {
+        q: 'کارت را کجا تحویل می‌گیرم؟',
+        a: 'می‌توانی تحویل به آدرس در استانبول را انتخاب کنی یا بعد از پرداخت آنلاین، کارت را از شعبه تحویل بگیری. تحویل به خارج از استانبول انجام نمی‌شود.',
+      },
+      {
+        q: 'ویزه سالانه یعنی چه و اگر انجام ندهم چه می‌شود؟',
+        a: 'ویزه یعنی تأیید سالانه دانشجو بودن. اگر در بازه اعلام‌شده انجام نشود، کارت تخفیف دانشجویی را از دست می‌دهد و با تعرفه کامل کار می‌کند تا زمانی که ویزه انجام شود.',
+      },
+      {
+        q: 'کارتم گم شد، موجودی از بین می‌رود؟',
+        a: 'اگر کارت شخصی‌سازی‌شده و به نام تو باشد، می‌توانی آن را مسدود کنی تا موجودی محافظت شود. کارت آنونیم چنین امکانی ندارد و این یکی از دلایل مهم گرفتن کارت به نام خودت است.',
+      },
+      {
+        q: 'می‌توانم کارت دانشجویی‌ام را به دوستم بدهم؟',
+        a: 'خیر. کارت تخفیف‌دار شخصی است و قابل انتقال نیست. در بازرسی می‌تواند ضبط یا مسدود شود و جریمه در پی داشته باشد.',
+      },
+      {
+        q: 'این کارت در شهرهای دیگر ترکیه هم کار می‌کند؟',
+        a: 'خیر. استانبول کارت برای شبکه حمل‌ونقل استانبول است. شهرهای دیگر کارت و تعرفه خودشان را دارند.',
+      },
+    ],
+  },
+  en: {
+    title: 'Student Istanbulkart 2026: How International Students Get the Discounted Transport Card',
+    excerpt: 'The student Istanbulkart roughly halves the fare on every ride in Istanbul. This guide covers eligibility, documents, the official application path, 2026 fares, pass-versus-per-ride maths and the mistakes that cost students the most.',
+    thesis: 'International students in Istanbul with a temporary YOK number starting 97 or 98 and a valid student certificate can obtain the discounted Istanbulkart, cutting the fare from TRY 46.20 to TRY 22.55 per ride. The discount is not permanent: it must be revalidated every year through the vize process.',
+    lead: 'Transport is one of the three main student costs in Istanbul, alongside rent and food. Over an academic year, the gap between the full and student fare adds up to several months of rent.',
+    sections: [
+      { heading: 'What the card is', body: 'Istanbulkart is the smart card used across metro, metrobus, bus, tram, Marmaray, funicular and ferries. The student version charges roughly half the full fare but must be issued in your own name.' },
+      { heading: 'Who qualifies', body: 'You must be enrolled at a recognised university, registered in the official system and studying in Istanbul. International students are identified by a temporary YOK number starting 97 or 98.' },
+      { heading: 'Documents', body: 'Recent student certificate, YOK number, passport, residence card if available, a standard ID photo, an active Turkish mobile number and a valid Istanbul address.' },
+      { heading: 'Apply only through the official portal', body: 'Applications go through the official portal at no extra cost. Never pay an intermediary or share your portal login.' },
+      { heading: 'After you receive the card', body: 'Top up at kiosks or in the app, then check the first ride. If the full fare is deducted, the student discount is not active yet.' },
+      { heading: 'Pass or pay-per-ride', body: 'The student monthly pass costs TRY 653 and beats pay-per-ride from roughly 29 rides a month.' },
+      { heading: 'Where it works', body: 'The card covers the whole city network, and transfer rules make consecutive legs cheaper on multi-stage commutes.' },
+      { heading: 'The annual vize', body: 'Student status must be revalidated each year. Miss the window and the card reverts to the full fare until it is renewed.' },
+      { heading: 'Costly mistakes', body: 'Delaying the application, forgetting the vize, and lending the card to someone else are the three most expensive errors.' },
+      { heading: 'First-week plan', body: 'Buy an anonymous card on day one, get a Turkish SIM, wait for enrolment to sync, then apply through the official portal and verify your first ride.' },
+    ],
+    keyTakeaways: [
+      'Student fare is TRY 22.55 per ride versus TRY 46.20 full, effective 20 July 2026.',
+      'The student monthly pass is TRY 653 and pays off after about 29 rides.',
+      'A temporary YOK number starting 97 or 98 identifies international students.',
+      'Apply only through the official portal; never pay an intermediary.',
+      'ID-style photos only; selfies and filters are rejected.',
+      'No card delivery outside Istanbul; choose branch collection instead.',
+      'The annual vize is mandatory or the card reverts to full fare.',
+      'The card is personal and non-transferable.',
+    ],
+    faq: [
+      { q: 'Can international students get the discounted card?', a: 'Yes, if enrolled at a recognised Istanbul university and registered in the system with a YOK number starting 97 or 98.' },
+      { q: 'How much is the saving?', a: 'TRY 22.55 instead of TRY 46.20 per ride, about TRY 23.65 saved each trip.' },
+      { q: 'When is the monthly pass worth it?', a: 'From roughly 29 rides per month at the TRY 653 student pass price.' },
+      { q: 'Where do I collect the card?', a: 'Delivery to an Istanbul address or collection from a branch. There is no delivery outside Istanbul.' },
+      { q: 'What is the vize?', a: 'An annual revalidation of student status. Without it the card charges the full fare.' },
+      { q: 'Can I lend my card to a friend?', a: 'No. Discounted cards are personal and can be seized or blocked, with a fine.' },
+    ],
+  },
+};
+
 export const knowledgeBlogPosts = [
+  istanbulkartStudentCard2026,
   studentBankAccountTurkey2026,
   {
     slug: 'student-work-permit-turkey-2026',

@@ -82,6 +82,22 @@ Object.assign(EXTRA_TERM_SLUG_BY_TITLE, {
   'SGK و بیمه کار در ترکیه چیست؟': 'sgk-work-insurance',
 });
 
+// Istanbulkart / student transport vocabulary.
+Object.assign(EXTRA_TERM_SLUG_BY_TITLE, {
+  'استانبول کارت چیست؟': 'istanbulkart',
+  'استانبول کارت دانشجویی چیست؟': 'student-istanbulkart',
+  'ماوی کارت چیست؟': 'mavi-kart-istanbul',
+  'آبونمان حمل‌ونقل چیست؟': 'transport-monthly-pass-istanbul',
+  'ویزه کارت دانشجویی چیست؟': 'istanbulkart-vize',
+  'آکتارما یا انتقال چیست؟': 'aktarma-transfer-discount',
+  'شماره YÖK دانشجوی خارجی چیست؟': 'yok-student-number',
+  'اوگرنجی بلگه‌سی چیست؟': 'ogrenci-belgesi',
+  'بلبیم چیست؟': 'belbim',
+  'کارت آنونیم چیست؟': 'anonim-istanbulkart',
+  'متروبوس چیست؟': 'metrobus-istanbul',
+  'مارمارای چیست؟': 'marmaray',
+});
+
 const ALL_TERM_SLUG_BY_TITLE = {
   ...TERM_SLUG_BY_TITLE,
   ...EXTRA_TERM_SLUG_BY_TITLE,
@@ -1974,6 +1990,314 @@ Object.assign(EXTRA_TERM_DETAILS, {
         { q: 'Does SGK replace a permit?', a: 'No.' },
         { q: 'Is cash work safe?', a: 'Usually risky for international students.' },
       ],
+    },
+  },
+});
+
+// Istanbulkart and student transport vocabulary.
+Object.assign(EXTRA_TERM_DETAILS, {
+  istanbulkart: {
+    title: { fa: 'استانبول کارت', en: 'Istanbulkart' },
+    question: { fa: 'استانبول کارت چیست و چرا برای دانشجو لازم است؟', en: 'What is Istanbulkart?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'استانبول کارت، کارت هوشمند پرداخت کرایه در کل شبکه حمل‌ونقل عمومی استانبول است و در مترو، متروبوس، اتوبوس، تراموا، مارمارای، فونیکولر و کشتی استفاده می‌شود.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'استانبول کارت یک کارت هوشمند است که به‌جای پول نقد، کرایه سفر را پرداخت می‌کند. بدون آن عملاً نمی‌توان از شبکه حمل‌ونقل عمومی استانبول استفاده کرد.' },
+      { heading: 'چند نوع دارد؟', body: 'کارت آنونیم بدون نام و بدون تخفیف است، کارت شخصی‌سازی‌شده به نام صاحبش ثبت می‌شود و در صورت گم شدن قابل مسدود کردن است، و نسخه دانشجویی تخفیف‌دار برای دانشجوی ثبت‌شده در سیستم صادر می‌شود.' },
+      { heading: 'اشتباه رایج', body: 'خیلی از دانشجویان تازه‌وارد ماه‌ها با کارت آنونیم و تعرفه کامل سفر می‌کنند و درخواست کارت دانشجویی را عقب می‌اندازند؛ این تعلل در هر ماه چند صد لیر هزینه اضافه دارد.' },
+    ],
+    checklist: ['خرید کارت آنونیم برای روزهای اول', 'شماره موبایل فعال ترک', 'تکمیل ثبت‌نام دانشگاه', 'درخواست کارت دانشجویی از پورتال رسمی'],
+    faq: [
+      { q: 'استانبول کارت در شهرهای دیگر ترکیه کار می‌کند؟', a: 'خیر. این کارت برای شبکه حمل‌ونقل استانبول است و هر شهر کارت و تعرفه خودش را دارد.' },
+      { q: 'کارت را از کجا بخرم؟', a: 'کارت آنونیم از دکه‌ها و دستگاه‌های فروش در ایستگاه‌ها بدون مدرک قابل خرید است.' },
+    ],
+    en: {
+      summary: 'Istanbulkart is the smart card used to pay fares across the entire Istanbul public transport network, including metro, metrobus, bus, tram, Marmaray, funicular and ferries.',
+      sections: [
+        { heading: 'Simple definition', body: 'Istanbulkart replaces cash for public transport fares in Istanbul. Without it you effectively cannot use the network.' },
+        { heading: 'Card types', body: 'Anonymous cards carry no name and no discount, personalised cards are registered to the holder and can be blocked if lost, and the student version carries a discount for registered students.' },
+        { heading: 'Common mistake', body: 'Many new students travel for months on an anonymous card at the full fare instead of applying for the student card, which costs hundreds of lira per month.' },
+      ],
+      checklist: ['Buy an anonymous card for the first days', 'Get an active Turkish mobile number', 'Complete university enrolment', 'Apply for the student card through the official portal'],
+      faq: [
+        { q: 'Does it work in other Turkish cities?', a: 'No. It is for the Istanbul network only; other cities have their own cards.' },
+        { q: 'Where can I buy one?', a: 'Anonymous cards are sold at kiosks and station vending machines without documents.' },
+      ],
+    },
+  },
+  'student-istanbulkart': {
+    title: { fa: 'استانبول کارت دانشجویی', en: 'Student Istanbulkart' },
+    question: { fa: 'استانبول کارت دانشجویی چیست و چطور گرفته می‌شود؟', en: 'What is the student Istanbulkart?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'نسخه تخفیف‌دار استانبول کارت که به دانشجوی ثبت‌شده در سیستم رسمی تعلق می‌گیرد و کرایه هر سفر را تقریباً نصف تعرفه کامل حساب می‌کند. این کارت شخصی است و به نام خود دانشجو صادر می‌شود.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'کارت دانشجویی همان استانبول کارت است با تعرفه تخفیف‌دار. با تعرفه اجراشده از ۲۰ جولای ۲۰۲۶، هر سفر با این کارت ۲۲٫۵۵ لیر است در برابر ۴۶٫۲۰ لیر تعرفه کامل.' },
+      { heading: 'شرط دانشجوی خارجی', body: 'دانشجوی بین‌المللی باید در دانشگاه مورد تأیید در استانبول ثبت‌نام کرده باشد و در سیستم رسمی ثبت شده باشد؛ معمولاً با شماره موقت YÖK که با ۹۷ یا ۹۸ شروع می‌شود شناخته می‌شود.' },
+      { heading: 'اشتباه رایج', body: 'تخفیف خودکار و همیشگی نیست. اگر ویزه سالانه انجام نشود، کارت به تعرفه کامل برمی‌گردد و بسیاری این را وقتی می‌فهمند که هفته‌ها گران‌تر سفر کرده‌اند.' },
+    ],
+    checklist: ['برگه دانشجویی تازه', 'شماره YÖK فعال', 'عکس پرسنلی استاندارد', 'شماره موبایل فعال ترک', 'آدرس معتبر در استانبول یا انتخاب تحویل از شعبه'],
+    faq: [
+      { q: 'دانشجوی خارجی می‌تواند بگیرد؟', a: 'بله، در صورتی که ثبت‌نامش نهایی و اطلاعاتش در سیستم رسمی ثبت شده باشد.' },
+      { q: 'می‌توانم کارتم را به دوستم بدهم؟', a: 'خیر. کارت شخصی است و در بازرسی می‌تواند ضبط یا مسدود شود و جریمه در پی داشته باشد.' },
+    ],
+    en: {
+      summary: 'The discounted version of Istanbulkart issued to registered students, charging roughly half the full fare per ride. It is personal and issued in the student’s own name.',
+      sections: [
+        { heading: 'Simple definition', body: 'Effective 20 July 2026, a ride costs TRY 22.55 with this card versus TRY 46.20 at the full fare.' },
+        { heading: 'Condition for internationals', body: 'You must be enrolled at a recognised Istanbul university and registered in the official system, usually identified by a temporary YOK number starting 97 or 98.' },
+        { heading: 'Common mistake', body: 'The discount is not permanent. Without the annual vize the card reverts to the full fare.' },
+      ],
+      checklist: ['Recent student certificate', 'Active YOK number', 'Standard ID photo', 'Active Turkish mobile number', 'Valid Istanbul address or branch collection'],
+      faq: [
+        { q: 'Can international students get it?', a: 'Yes, once enrolment is final and registered in the official system.' },
+        { q: 'Can I lend it to a friend?', a: 'No. It is personal and can be seized or blocked, with a fine.' },
+      ],
+    },
+  },
+  'mavi-kart-istanbul': {
+    title: { fa: 'ماوی کارت', en: 'Mavi Kart' },
+    question: { fa: 'ماوی کارت چیست و برای دانشجو به‌صرفه است؟', en: 'What is Mavi Kart?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'ماوی کارت اشتراک ماهانه حمل‌ونقل استانبول است که به‌جای پرداخت هر سفر، سفر نامحدود در یک ماه می‌دهد. نسخه دانشجویی آن بسیار ارزان‌تر از نسخه کامل است.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'به‌جای کسر کرایه در هر سفر، یک مبلغ ثابت ماهانه می‌دهی و در آن ماه نامحدود سفر می‌کنی.' },
+      { heading: 'کی به‌صرفه است؟', body: 'با آبونمان دانشجویی ۶۵۳ لیر و تعرفه ۲۲٫۵۵ لیر، نقطه سربه‌سر حدود ۲۹ سفر در ماه است. اگر هر روز رفت‌وبرگشت داری، آبونمان تقریباً همیشه ارزان‌تر تمام می‌شود.' },
+      { heading: 'اشتباه رایج', body: 'گرفتن آبونمان بدون حساب کردن تعداد واقعی سفر. اگر خوابگاهت کنار دانشگاه است و بیشتر پیاده می‌روی، تک‌سفر منطقی‌تر است.' },
+    ],
+    checklist: ['شمردن تعداد سفر واقعی در ماه', 'مقایسه با نقطه سربه‌سر ۲۹ سفر', 'در نظر گرفتن سفرهای آخر هفته و کارآموزی'],
+    faq: [
+      { q: 'ماوی کارت همان کارت دانشجویی است؟', a: 'خیر. کارت دانشجویی تخفیف روی هر سفر می‌دهد؛ ماوی کارت اشتراک ماهانه سفر نامحدود است.' },
+      { q: 'نسخه دانشجویی چقدر است؟', a: 'آبونمان ماهانه دانشجویی ۶۵۳ لیر است، در برابر ۳٬۶۲۸ لیر نسخه کامل.' },
+    ],
+    en: {
+      summary: 'Mavi Kart is the monthly Istanbul transport pass giving unlimited travel instead of per-ride charges. The student version is far cheaper than the full one.',
+      sections: [
+        { heading: 'Simple definition', body: 'You pay a fixed monthly amount and travel without per-ride deductions that month.' },
+        { heading: 'When it pays off', body: 'At TRY 653 for the student pass and TRY 22.55 per ride, the break-even is roughly 29 rides a month.' },
+        { heading: 'Common mistake', body: 'Buying the pass without counting actual monthly trips.' },
+      ],
+      checklist: ['Count real monthly rides', 'Compare against the 29-ride break-even', 'Include weekend and internship travel'],
+      faq: [
+        { q: 'Is Mavi Kart the same as the student card?', a: 'No. The student card discounts each ride; Mavi Kart is an unlimited monthly pass.' },
+        { q: 'How much is the student version?', a: 'TRY 653 per month versus TRY 3,628 for the full pass.' },
+      ],
+    },
+  },
+  'transport-monthly-pass-istanbul': {
+    title: { fa: 'آبونمان حمل‌ونقل', en: 'Transport monthly pass' },
+    question: { fa: 'آبونمان حمل‌ونقل چیست و چه زمانی می‌صرفد؟', en: 'What is a transport monthly pass?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'آبونمان یعنی پرداخت یک مبلغ ثابت ماهانه برای سفر نامحدود، به‌جای کسر کرایه در هر سفر.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'هرچه بیشتر سفر کنی، هزینه هر سفرت پایین‌تر می‌آید، چون مبلغ ماهانه ثابت است.' },
+      { heading: 'حساب سرانگشتی', body: 'مبلغ آبونمان را بر تعرفه تک‌سفر تقسیم کن؛ نتیجه، حداقل تعداد سفری است که آبونمان را توجیه می‌کند.' },
+      { heading: 'اشتباه رایج', body: 'در نظر نگرفتن سفرهای غیردرسی مثل خرید، دیدار دوستان و کارآموزی که تعداد واقعی سفر را بالا می‌برد.' },
+    ],
+    checklist: ['محاسبه تعداد سفر ماهانه', 'تقسیم مبلغ آبونمان بر تعرفه تک‌سفر', 'بازبینی در ابتدای هر ترم'],
+    faq: [
+      { q: 'اگر یک ماه کم سفر کنم ضرر می‌کنم؟', a: 'بله. آبونمان وقتی معنی دارد که تعداد سفرت از نقطه سربه‌سر بیشتر باشد.' },
+    ],
+    en: {
+      summary: 'A monthly pass means paying a fixed amount for unlimited travel instead of per-ride fares.',
+      sections: [
+        { heading: 'Simple definition', body: 'The more you travel, the lower your effective cost per ride.' },
+        { heading: 'Quick maths', body: 'Divide the pass price by the single-ride fare to find the minimum trips that justify it.' },
+        { heading: 'Common mistake', body: 'Ignoring non-class trips such as shopping, socialising and internships.' },
+      ],
+      checklist: ['Count monthly rides', 'Divide pass price by single fare', 'Review each term'],
+      faq: [{ q: 'Do I lose money in a quiet month?', a: 'Yes, if your trips fall below the break-even point.' }],
+    },
+  },
+  'istanbulkart-vize': {
+    title: { fa: 'ویزه کارت دانشجویی', en: 'Istanbulkart vize' },
+    question: { fa: 'ویزه کارت دانشجویی چیست و اگر انجام نشود چه می‌شود؟', en: 'What is the annual vize?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'ویزه یا vizeleme فرایند تأیید سالانه دانشجو بودن است. بدون آن، تخفیف دانشجویی قطع می‌شود و کارت با تعرفه کامل کار می‌کند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'هر سال در بازه‌ای که اعلام می‌شود باید تأیید کنی هنوز دانشجو هستی تا تخفیف کارت ادامه پیدا کند.' },
+      { heading: 'اگر فراموش شود', body: 'کارت از همان لحظه تعرفه کامل می‌گیرد؛ یعنی هر سفر به‌جای ۲۲٫۵۵ لیر، ۴۶٫۲۰ لیر. وضعیت دانشجویی هم دوره‌ای بررسی می‌شود، پس با انصراف یا فارغ‌التحصیلی تخفیف ادامه نمی‌یابد.' },
+      { heading: 'اشتباه رایج', body: 'فرض اینکه کارت یک‌بار برای همیشه فعال است. یک یادآور در تقویم بگذار و ابتدای هر سال تحصیلی وضعیت را چک کن.' },
+    ],
+    checklist: ['یادآور سالانه در تقویم', 'بررسی وضعیت ویزه در پورتال یا اپلیکیشن', 'چک کردن مبلغ کسرشده در اولین سفر بعد از ویزه'],
+    faq: [
+      { q: 'اگر بازه ویزه را از دست بدهم چه کنم؟', a: 'کارت تا زمان انجام ویزه با تعرفه کامل کار می‌کند؛ در بازه بعدی ویزه را انجام بده.' },
+      { q: 'چطور بفهمم ویزه شده یا نه؟', a: 'ساده‌ترین راه، چک کردن مبلغ کسرشده در اولین سفر است.' },
+    ],
+    en: {
+      summary: 'Vize is the annual revalidation of student status. Without it the discount stops and the card charges the full fare.',
+      sections: [
+        { heading: 'Simple definition', body: 'Each year, within an announced window, you confirm you are still a student so the discount continues.' },
+        { heading: 'If you miss it', body: 'The card charges TRY 46.20 instead of TRY 22.55 per ride. Student status is also checked periodically.' },
+        { heading: 'Common mistake', body: 'Assuming the card is activated once and forever.' },
+      ],
+      checklist: ['Set a yearly calendar reminder', 'Check vize status in the portal or app', 'Verify the deducted fare after renewal'],
+      faq: [
+        { q: 'What if I miss the window?', a: 'The card charges the full fare until you complete the vize in the next window.' },
+        { q: 'How do I know it worked?', a: 'Check the amount deducted on your next ride.' },
+      ],
+    },
+  },
+  'aktarma-transfer-discount': {
+    title: { fa: 'آکتارما (انتقال)', en: 'Aktarma transfer' },
+    question: { fa: 'آکتارما یا تخفیف انتقال چیست؟', en: 'What is the aktarma transfer discount?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'آکتارما یعنی وقتی در بازه زمانی مشخص از یک وسیله به وسیله دیگر منتقل می‌شوی، کرایه سفرهای بعدی کمتر از کرایه کامل حساب می‌شود.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'اگر مسیرت چندمرحله‌ای است، لازم نیست هر پا را با کرایه کامل بدهی؛ انتقال در بازه مجاز ارزان‌تر حساب می‌شود.' },
+      { heading: 'چرا برای دانشجو مهم است؟', body: 'مسیر خیلی از دانشگاه‌های استانبول ترکیبی از مترو، اتوبوس و متروبوس است. استفاده درست از آکتارما در ماه رقم قابل توجهی صرفه‌جویی می‌سازد.' },
+      { heading: 'اشتباه رایج', body: 'فاصله انداختن زیاد بین دو پای سفر، که باعث می‌شود بازه انتقال تمام شود و کرایه کامل کسر شود.' },
+    ],
+    checklist: ['طراحی مسیر با کمترین وقفه بین دو وسیله', 'چک کردن مبلغ کسرشده در پای دوم سفر'],
+    faq: [{ q: 'آکتارما نامحدود است؟', a: 'خیر. در بازه زمانی و تعداد مشخصی اعمال می‌شود.' }],
+    en: {
+      summary: 'Aktarma means consecutive rides within a set time window are charged less than a full fare each.',
+      sections: [
+        { heading: 'Simple definition', body: 'On multi-leg journeys you do not pay the full fare for every leg.' },
+        { heading: 'Why students care', body: 'Many Istanbul campus commutes combine metro, bus and metrobus, so transfers add up.' },
+        { heading: 'Common mistake', body: 'Waiting too long between legs so the transfer window expires.' },
+      ],
+      checklist: ['Minimise the gap between legs', 'Check the fare deducted on the second leg'],
+      faq: [{ q: 'Is it unlimited?', a: 'No, it applies within a set time window and trip count.' }],
+    },
+  },
+  'yok-student-number': {
+    title: { fa: 'شماره YÖK دانشجویی', en: 'YOK student number' },
+    question: { fa: 'شماره YÖK دانشجوی خارجی چیست؟', en: 'What is the YOK student number?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'شماره YÖK شناسه‌ای است که دانشجو با آن در سیستم آموزش عالی ترکیه شناخته می‌شود. دانشجوی خارجی معمولاً شماره موقتی می‌گیرد که با ۹۷ یا ۹۸ شروع می‌شود.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'این شماره کلید شناسایی تو به‌عنوان دانشجو در سامانه‌های رسمی است، از جمله درخواست استانبول کارت دانشجویی.' },
+      { heading: 'چه زمانی صادر می‌شود؟', body: 'بعد از نهایی شدن ثبت‌نام دانشگاه و انتقال اطلاعات به پایگاه رسمی. تازه‌واردها معمولاً باید چند روز صبر کنند.' },
+      { heading: 'اشتباه رایج', body: 'اقدام برای کارت دانشجویی قبل از فعال شدن این شماره؛ نتیجه پیام «دانشجو یافت نشد» است که ربطی به اشتباه تو ندارد.' },
+    ],
+    checklist: ['تأیید نهایی شدن ثبت‌نام از دفتر بین‌الملل', 'یادداشت کردن شماره YÖK', 'تطبیق املای لاتین نام با پاسپورت'],
+    faq: [
+      { q: 'اگر سیستم مرا پیدا نکرد چه کنم؟', a: 'با دفتر بین‌الملل دانشگاه تماس بگیر و بخواه ثبت را در سیستم تأیید کنند، بعد چند روز بعد دوباره امتحان کن.' },
+    ],
+    en: {
+      summary: 'The YOK number identifies you as a student in the Turkish higher-education system. International students usually receive a temporary one starting 97 or 98.',
+      sections: [
+        { heading: 'Simple definition', body: 'It is the key that official systems, including the student Istanbulkart application, use to find you.' },
+        { heading: 'When it is issued', body: 'After enrolment is finalised and synced to the official database, which can take a few days.' },
+        { heading: 'Common mistake', body: 'Applying before the number is active and reading "student not found" as your own error.' },
+      ],
+      checklist: ['Confirm enrolment with the international office', 'Note your YOK number', 'Match the Latin spelling to your passport'],
+      faq: [{ q: 'What if the system cannot find me?', a: 'Ask the international office to confirm registration, then retry in a few days.' }],
+    },
+  },
+  'ogrenci-belgesi': {
+    title: { fa: 'اوگرنجی بلگه‌سی', en: 'Ogrenci Belgesi' },
+    question: { fa: 'اوگرنجی بلگه‌سی یا برگه دانشجویی چیست؟', en: 'What is the Ogrenci Belgesi?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'اوگرنجی بلگه‌سی گواهی دانشجویی است که دانشگاه صادر می‌کند و نشان می‌دهد دانشجو در ترم جاری فعال است.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'یک برگه رسمی از دانشگاه که وضعیت فعال دانشجویی را تأیید می‌کند.' },
+      { heading: 'کجا لازم می‌شود؟', body: 'برای کارت دانشجویی حمل‌ونقل، پرونده اقامت، بعضی امور بانکی و بسیاری از کارهای اداری دیگر.' },
+      { heading: 'اشتباه رایج', body: 'استفاده از برگه قدیمی. تاریخ برگه باید تازه باشد وگرنه پذیرفته نمی‌شود.' },
+    ],
+    checklist: ['دریافت از دفتر دانشجویی یا سیستم دانشگاه', 'کنترل تازه بودن تاریخ', 'نگه داشتن نسخه PDF و چاپی'],
+    faq: [{ q: 'هر ترم باید دوباره بگیرم؟', a: 'برای بیشتر کاربردها بله؛ برگه باید وضعیت ترم جاری را نشان دهد.' }],
+    en: {
+      summary: 'The Ogrenci Belgesi is the university-issued certificate proving you are actively enrolled this term.',
+      sections: [
+        { heading: 'Simple definition', body: 'An official university document confirming active student status.' },
+        { heading: 'Where it is needed', body: 'The student transport card, the residence file, some banking steps and many other procedures.' },
+        { heading: 'Common mistake', body: 'Submitting an outdated copy; the date must be recent.' },
+      ],
+      checklist: ['Request from the student office', 'Check the issue date', 'Keep PDF and printed copies'],
+      faq: [{ q: 'Do I need a new one each term?', a: 'For most uses yes, since it must reflect the current term.' }],
+    },
+  },
+  belbim: {
+    title: { fa: 'بلبیم', en: 'Belbim' },
+    question: { fa: 'بلبیم چیست؟', en: 'What is Belbim?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'Belbim شرکت وابسته به شهرداری کلان‌شهر استانبول است که سامانه استانبول کارت، پرداخت الکترونیکی کرایه و زیرساخت شارژ کارت را اداره می‌کند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'نهادی که پشت صحنه استانبول کارت را می‌گرداند: صدور، شارژ، مسدودسازی و سامانه‌های آنلاین.' },
+      { heading: 'چرا اسمش را می‌بینی؟', body: 'در پورتال درخواست، اپلیکیشن و اطلاعیه‌های رسمی مربوط به کارت، نام Belbim تکرار می‌شود.' },
+      { heading: 'اشتباه رایج', body: 'اعتماد به سایت‌ها یا افراد واسطه‌ای که ادعا می‌کنند نماینده رسمی هستند؛ مسیر درست، پورتال رسمی است.' },
+    ],
+    checklist: ['استفاده فقط از پورتال و اپلیکیشن رسمی', 'ندادن اطلاعات ورود به هیچ واسطه‌ای'],
+    faq: [{ q: 'برای درخواست کارت باید به Belbim مراجعه حضوری کنم؟', a: 'خیر. درخواست از پورتال رسمی انجام می‌شود و در صورت انتخاب، کارت از شعبه تحویل گرفته می‌شود.' }],
+    en: {
+      summary: 'Belbim is the Istanbul Metropolitan Municipality company that operates the Istanbulkart system, electronic fare payment and the top-up infrastructure.',
+      sections: [
+        { heading: 'Simple definition', body: 'The organisation running Istanbulkart issuance, top-ups, blocking and online systems.' },
+        { heading: 'Why you see the name', body: 'It appears across the application portal, the app and official card notices.' },
+        { heading: 'Common mistake', body: 'Trusting intermediaries claiming to be official representatives.' },
+      ],
+      checklist: ['Use only the official portal and app', 'Never share login details'],
+      faq: [{ q: 'Must I visit Belbim in person?', a: 'No. Applications go through the official portal, with optional branch collection.' }],
+    },
+  },
+  'anonim-istanbulkart': {
+    title: { fa: 'کارت آنونیم', en: 'Anonymous Istanbulkart' },
+    question: { fa: 'کارت آنونیم چیست و چه محدودیتی دارد؟', en: 'What is the anonymous card?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'کارت آنونیم نسخه بدون نام استانبول کارت است که بدون مدرک خریده می‌شود، تخفیف دانشجویی ندارد و در صورت گم شدن قابل مسدود کردن نیست.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'کارتی که به هیچ اسمی ثبت نشده؛ مثل پول نقد است و هر کسی می‌تواند از آن استفاده کند.' },
+      { heading: 'کی به درد می‌خورد؟', body: 'روزهای اول ورود، تا وقتی ثبت‌نام دانشگاه نهایی و کارت دانشجویی صادر شود.' },
+      { heading: 'اشتباه رایج', body: 'ماندن روی این کارت برای ماه‌ها. تعرفه کامل تقریباً دو برابر تعرفه دانشجویی است و موجودی گم‌شده هم برنمی‌گردد.' },
+    ],
+    checklist: ['استفاده موقت در روزهای اول', 'اقدام سریع برای کارت دانشجویی', 'نگه نداشتن موجودی زیاد روی کارت آنونیم'],
+    faq: [{ q: 'اگر گم شود موجودی برمی‌گردد؟', a: 'خیر. فقط کارت شخصی‌سازی‌شده قابل مسدود کردن و محافظت است.' }],
+    en: {
+      summary: 'The anonymous card carries no name, is bought without documents, has no student discount and cannot be blocked if lost.',
+      sections: [
+        { heading: 'Simple definition', body: 'A card registered to nobody, effectively like cash.' },
+        { heading: 'When it helps', body: 'The first days after arrival, until the student card is issued.' },
+        { heading: 'Common mistake', body: 'Staying on it for months at nearly double the student fare.' },
+      ],
+      checklist: ['Use temporarily on arrival', 'Apply for the student card quickly', 'Avoid large balances on it'],
+      faq: [{ q: 'Is the balance refunded if lost?', a: 'No. Only personalised cards can be blocked and protected.' }],
+    },
+  },
+  'metrobus-istanbul': {
+    title: { fa: 'متروبوس', en: 'Metrobus' },
+    question: { fa: 'متروبوس چیست؟', en: 'What is the Metrobus?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'متروبوس خط اتوبوس تندروی استانبول با مسیر اختصاصی است که بخش اروپایی و آسیایی را به‌هم وصل می‌کند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'اتوبوسی که در خط اختصاصی خودش حرکت می‌کند و درگیر ترافیک عادی نمی‌شود.' },
+      { heading: 'چرا برای دانشجو مهم است؟', body: 'در ساعات شلوغ معمولاً سریع‌ترین گزینه رفت‌وآمد بین دو قاره است؛ برای دانشجویی که خانه و دانشگاهش در دو سمت است، تفاوت زمانی چشمگیر است.' },
+      { heading: 'اشتباه رایج', body: 'انتخاب متروبوس در اوج شلوغی بدون در نظر گرفتن ازدحام؛ گاهی مسیر ترکیبی با مارمارای راحت‌تر است.' },
+    ],
+    checklist: ['بررسی ساعات اوج شلوغی', 'مقایسه با مسیر مارمارای', 'استفاده از قاعده انتقال برای پای دوم سفر'],
+    faq: [{ q: 'با کارت دانشجویی کار می‌کند؟', a: 'بله، متروبوس بخشی از شبکه یکپارچه استانبول کارت است.' }],
+    en: {
+      summary: 'The Metrobus is Istanbul’s bus rapid transit line on a dedicated corridor connecting the European and Asian sides.',
+      sections: [
+        { heading: 'Simple definition', body: 'A bus running in its own lane, bypassing normal traffic.' },
+        { heading: 'Why students care', body: 'It is often the fastest cross-continent option at rush hour.' },
+        { heading: 'Common mistake', body: 'Choosing it at peak crowding when a Marmaray combination is more comfortable.' },
+      ],
+      checklist: ['Check peak hours', 'Compare with the Marmaray route', 'Use transfer rules for the second leg'],
+      faq: [{ q: 'Does the student card work on it?', a: 'Yes, it is part of the integrated Istanbulkart network.' }],
+    },
+  },
+  marmaray: {
+    title: { fa: 'مارمارای', en: 'Marmaray' },
+    question: { fa: 'مارمارای چیست؟', en: 'What is Marmaray?' },
+    category: 'حمل‌ونقل و زندگی دانشجویی',
+    summary: 'مارمارای خط ریلی حومه‌ای استانبول است که از تونل زیر تنگه بسفر عبور می‌کند و دو قاره را به‌هم وصل می‌کند.',
+    sections: [
+      { heading: 'تعریف ساده', body: 'قطاری که از زیر دریا عبور می‌کند و بخش اروپایی و آسیایی استانبول را به‌هم می‌رساند.' },
+      { heading: 'چرا برای دانشجو مهم است؟', body: 'اگر خانه‌ات در یک سمت و دانشگاهت در سمت دیگر است، مارمارای معمولاً پایدارترین و قابل‌پیش‌بینی‌ترین گزینه از نظر زمان است.' },
+      { heading: 'اشتباه رایج', body: 'نادیده گرفتن مارمارای در برنامه‌ریزی مسیر و ماندن در ترافیک پل‌ها.' },
+    ],
+    checklist: ['بررسی نزدیک‌ترین ایستگاه به خانه و دانشگاه', 'مقایسه زمان با متروبوس', 'استفاده از قاعده انتقال'],
+    faq: [{ q: 'با کارت دانشجویی کار می‌کند؟', a: 'بله، مارمارای بخشی از شبکه یکپارچه استانبول کارت است.' }],
+    en: {
+      summary: 'Marmaray is Istanbul’s commuter rail line running through a tunnel beneath the Bosphorus, linking both continents.',
+      sections: [
+        { heading: 'Simple definition', body: 'A train crossing under the sea between the European and Asian sides.' },
+        { heading: 'Why students care', body: 'It is usually the most time-predictable cross-continent option.' },
+        { heading: 'Common mistake', body: 'Ignoring it and getting stuck in bridge traffic.' },
+      ],
+      checklist: ['Find the nearest stations to home and campus', 'Compare timing with the Metrobus', 'Use transfer rules'],
+      faq: [{ q: 'Does the student card work on it?', a: 'Yes, it is part of the integrated Istanbulkart network.' }],
     },
   },
 });

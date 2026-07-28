@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -646,6 +646,110 @@ function BlogIndex({ darkMode, isFa, onConsultationClick }) {
   );
 }
 
+/* ------------------------- Rich article building blocks -------------------
+ * `dataTables` lets a post carry as many tables as the topic needs (the older
+ * `comparisonRows` is a single fixed 5-column table). A table can pin itself
+ * after a given section via `afterSection`, so long guides stay readable
+ * instead of ending in a wall of tables.
+ * ------------------------------------------------------------------------ */
+
+function ArticleDataTable({ table, darkMode, isFa, glossary }) {
+  const headers = table.headers || [];
+  const minWidth = Math.max(520, headers.length * 170);
+  return (
+    <Reveal
+      id={`table-${table.id}`}
+      as="section"
+      className={`${darkMode ? 'border-white/10 bg-white/[0.04]' : 'border-black/5 bg-white'} scroll-mt-28 overflow-hidden rounded-[24px] border shadow-[0_14px_44px_rgba(7,26,61,0.07)]`}
+    >
+      <div className={`${darkMode ? 'border-white/10' : 'border-black/5'} border-b p-5`}>
+        <h2 className="flex items-start gap-2 text-lg font-black leading-7">
+          <FileText size={18} className="mt-0.5 shrink-0 text-[#C6A768]" />
+          {localizedValue(table.title, isFa)}
+        </h2>
+        {table.subtitle ? (
+          <p className={`${darkMode ? 'text-white/55' : 'text-neutral-500'} mt-1 text-xs font-semibold leading-6`}>
+            {localizedValue(table.subtitle, isFa)}
+          </p>
+        ) : null}
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-start text-sm" style={{ minWidth: `${minWidth}px` }}>
+          <thead className={darkMode ? 'bg-white/[0.04] text-white/65' : 'bg-[#F7F1E8] text-neutral-600'}>
+            <tr>
+              {headers.map((label, index) => (
+                <th key={`${table.id}-h-${index}`} className="px-4 py-3 text-start text-xs font-black">
+                  {localizedValue(label, isFa)}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {(table.rows || []).map((row, rowIndex) => (
+              <tr
+                key={`${table.id}-r-${rowIndex}`}
+                className={`${darkMode ? 'border-white/10' : 'border-black/5'} border-t align-top`}
+              >
+                {(row.cells || []).map((cell, cellIndex) => (
+                  <td
+                    key={`${table.id}-r-${rowIndex}-c-${cellIndex}`}
+                    className={`px-4 py-4 leading-7 ${
+                      cellIndex === 0
+                        ? 'font-black'
+                        : `font-semibold ${darkMode ? 'text-white/70' : 'text-neutral-700'}`
+                    }`}
+                  >
+                    <InlineGlossaryText text={localizedValue(cell, isFa)} glossary={glossary} darkMode={darkMode} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {table.note ? (
+        <p className={`${darkMode ? 'border-white/10 text-white/52' : 'border-black/5 text-neutral-500'} border-t px-5 py-3 text-xs font-semibold leading-6`}>
+          {localizedValue(table.note, isFa)}
+        </p>
+      ) : null}
+    </Reveal>
+  );
+}
+
+/* Numbered walkthrough (01 → 04 …) for "how do I actually apply" content. */
+function ArticleProcessSteps({ steps, title, darkMode, isFa }) {
+  return (
+    <Reveal
+      id="process-steps"
+      as="section"
+      className={`${darkMode ? 'border-[#C6A768]/20 bg-[#C6A768]/[0.07]' : 'border-[#C6A768]/25 bg-[#FFF8E9]'} mt-8 scroll-mt-28 rounded-[24px] border p-5 sm:p-6`}
+    >
+      <h2 className="flex items-center gap-2 text-lg font-black">
+        <Compass size={18} className="text-[#C6A768]" />
+        {localizedValue(title, isFa) || tt('مسیر گام‌به‌گام', 'Step-by-step path', isFa)}
+      </h2>
+      <ol className="mt-5 grid gap-3">
+        {steps.map((step, index) => (
+          <li
+            key={`step-${index}`}
+            className={`${darkMode ? 'bg-white/[0.05]' : 'bg-white'} flex gap-4 rounded-2xl p-4 shadow-[0_8px_26px_rgba(7,26,61,0.06)]`}
+          >
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[#071A3D] text-xs font-black text-[#E7D3A0]">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-black leading-7">{localizedValue(step.title, isFa)}</p>
+              <p className={`${darkMode ? 'text-white/62' : 'text-neutral-600'} mt-1 text-[13px] font-semibold leading-7`}>
+                {localizedValue(step.body, isFa)}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </Reveal>
+  );
+}
+
 /* ============================== ARTICLE VIEW ============================== */
 
 function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
@@ -654,17 +758,45 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
   const [articleStat, setArticleStat] = useState({ avg: 0, ratingCount: 0, commentCount: 0 });
   const [showCommunity, setShowCommunity] = useState(false);
 
-  const toc = useMemo(() => [
-    { id: 'quick-answer', label: tt('پاسخ کوتاه', 'Quick answer', isFa) },
-    ...(post.metricCards?.length ? [{ id: 'work-snapshot', label: tt('نقشه سریع', 'Snapshot', isFa) }] : []),
-    ...(post.comparisonRows?.length ? [{ id: 'degree-rules', label: tt('مقایسه مقطع‌ها', 'Degree comparison', isFa) }] : []),
-    ...(post.salaryBars?.length ? [{ id: 'income-model', label: tt('مدل درآمد', 'Income model', isFa) }] : []),
-    ...copy.sections.map((section, index) => ({ id: `sec-${index}`, label: section.heading })),
-    { id: 'key-takeaways', label: tt('نکات کلیدی', 'Key takeaways', isFa) },
-    { id: 'faq', label: tt('پرسش‌های پرتکرار', 'FAQ', isFa) },
-    { id: 'sources', label: tt('منابع و اعتبار', 'Sources', isFa) },
-    { id: 'community', label: tt('نظرها و امتیاز', 'Ratings & comments', isFa) },
-  ], [copy.sections, isFa, post.comparisonRows?.length, post.metricCards?.length, post.salaryBars?.length]);
+  const dataTables = useMemo(() => post.dataTables || [], [post.dataTables]);
+  // Tables pinned to a section render right after it; the rest collect at the end.
+  const tablesBySection = useMemo(() => {
+    const map = new Map();
+    dataTables.forEach((table) => {
+      if (typeof table.afterSection !== 'number') return;
+      const list = map.get(table.afterSection) || [];
+      list.push(table);
+      map.set(table.afterSection, list);
+    });
+    return map;
+  }, [dataTables]);
+  const trailingTables = useMemo(
+    () => dataTables.filter((table) => typeof table.afterSection !== 'number'),
+    [dataTables]
+  );
+
+  const toc = useMemo(() => {
+    const sectionEntries = [];
+    copy.sections.forEach((section, index) => {
+      sectionEntries.push({ id: `sec-${index}`, label: section.heading });
+      (tablesBySection.get(index) || []).forEach((table) => {
+        sectionEntries.push({ id: `table-${table.id}`, label: localizedValue(table.title, isFa) });
+      });
+    });
+    return [
+      { id: 'quick-answer', label: tt('پاسخ کوتاه', 'Quick answer', isFa) },
+      ...(post.metricCards?.length ? [{ id: 'work-snapshot', label: tt('نقشه سریع', 'Snapshot', isFa) }] : []),
+      ...(post.comparisonRows?.length ? [{ id: 'degree-rules', label: tt('مقایسه مقطع‌ها', 'Degree comparison', isFa) }] : []),
+      ...(post.processSteps?.length ? [{ id: 'process-steps', label: localizedValue(post.processStepsTitle, isFa) || tt('مسیر گام‌به‌گام', 'Step-by-step', isFa) }] : []),
+      ...(post.salaryBars?.length ? [{ id: 'income-model', label: tt('مدل درآمد', 'Income model', isFa) }] : []),
+      ...sectionEntries,
+      ...trailingTables.map((table) => ({ id: `table-${table.id}`, label: localizedValue(table.title, isFa) })),
+      { id: 'key-takeaways', label: tt('نکات کلیدی', 'Key takeaways', isFa) },
+      { id: 'faq', label: tt('پرسش‌های پرتکرار', 'FAQ', isFa) },
+      { id: 'sources', label: tt('منابع و اعتبار', 'Sources', isFa) },
+      { id: 'community', label: tt('نظرها و امتیاز', 'Ratings & comments', isFa) },
+    ];
+  }, [copy.sections, isFa, post.comparisonRows?.length, post.metricCards?.length, post.processSteps?.length, post.processStepsTitle, post.salaryBars?.length, tablesBySection, trailingTables]);
 
   const activeId = useActiveId(toc.map((item) => item.id));
   const comparisonHeaders = post.comparisonHeaders?.length === 5
@@ -931,18 +1063,47 @@ function ArticleReader({ post, darkMode, isFa, onConsultationClick }) {
               </Reveal>
             )}
 
-            {/* Sections */}
+            {post.processSteps?.length > 0 && (
+              <ArticleProcessSteps
+                steps={post.processSteps}
+                title={post.processStepsTitle}
+                darkMode={darkMode}
+                isFa={isFa}
+              />
+            )}
+
+            {/* Sections, with any table pinned to a section rendered right after it */}
             <div className="mt-8 grid gap-8">
               {copy.sections.map((section, index) => (
-                <Reveal id={`sec-${index}`} as="section" key={section.heading} className="scroll-mt-28">
-                  <h2 className="flex items-start gap-2.5 text-xl font-black leading-8 sm:text-2xl">
-                    <BookOpen size={20} className="mt-1 shrink-0 text-[#C6A768]" />
-                    {section.heading}
-                  </h2>
-                  <p className={`${darkMode ? 'text-white/72' : 'text-neutral-700'} mt-3 text-[15px] font-semibold leading-9`}>
-                    <InlineGlossaryText text={section.body} glossary={post.glossary} darkMode={darkMode} />
-                  </p>
-                </Reveal>
+                <Fragment key={section.heading}>
+                  <Reveal id={`sec-${index}`} as="section" className="scroll-mt-28">
+                    <h2 className="flex items-start gap-2.5 text-xl font-black leading-8 sm:text-2xl">
+                      <BookOpen size={20} className="mt-1 shrink-0 text-[#C6A768]" />
+                      {section.heading}
+                    </h2>
+                    <p className={`${darkMode ? 'text-white/72' : 'text-neutral-700'} mt-3 text-[15px] font-semibold leading-9`}>
+                      <InlineGlossaryText text={section.body} glossary={post.glossary} darkMode={darkMode} />
+                    </p>
+                  </Reveal>
+                  {(tablesBySection.get(index) || []).map((table) => (
+                    <ArticleDataTable
+                      key={table.id}
+                      table={table}
+                      darkMode={darkMode}
+                      isFa={isFa}
+                      glossary={post.glossary}
+                    />
+                  ))}
+                </Fragment>
+              ))}
+              {trailingTables.map((table) => (
+                <ArticleDataTable
+                  key={table.id}
+                  table={table}
+                  darkMode={darkMode}
+                  isFa={isFa}
+                  glossary={post.glossary}
+                />
               ))}
             </div>
 
