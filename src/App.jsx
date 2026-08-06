@@ -1,12 +1,18 @@
 import { lazy, memo, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Award, BookOpen, Building2, MapPin, Menu, Newspaper, UserRound, X } from 'lucide-react';
 import ConsultationModal from './components/ConsultationModal';
+import TrackingConsentBanner from './components/TrackingConsentBanner';
 import HeroSection from './components/sections/HeroSection';
 import UniversityMarqueeSection from './components/sections/UniversityMarqueeSection';
 import FloatingActions from './components/FloatingActions';
 import { buildUniversitySlug, istanbulUniversities } from './data/istanbulUniversities';
 import { getUniversityLogo } from './data/universityLogoMap';
 import { cleanCanonicalPath, parseCleanPath } from './lib/routes';
+import {
+  trackConsultationOpen,
+  trackPageView,
+  trackViewContent,
+} from './lib/analytics';
 import { SEO_LANDING_BY_SLUG, SEO_LANDING_PAGES } from './data/seoLandingPages';
 
 const SeoLandingPage = lazy(() => import('./components/pages/SeoLandingPage'));
@@ -60,8 +66,8 @@ const LEGAL_PAGES = {
   privacy: {
     title: { fa: 'حریم خصوصی', en: 'Privacy Policy' },
     note: {
-      fa: 'ACCA EDU اطلاعاتی را که خودتان در فرم مشاوره وارد می‌کنید فقط برای بررسی درخواست، تماس از مسیر انتخابی و ارائه خدمات آموزشی پردازش می‌کند. مبنای این پردازش رضایت شما مطابق قانون حفاظت از داده‌های شخصی ترکیه (KVKK، قانون شماره ۶۶۹۸) است. اطلاعات شما برای تبلیغات بدون رضایت جداگانه استفاده نمی‌شود و جز ارائه‌دهندگان ضروری زیرساخت، در اختیار شخص ثالث قرار نمی‌گیرد. شما می‌توانید درباره داده‌های ذخیره‌شده، اصلاح یا حذف آن‌ها از طریق صفحه تماس با ما درخواست ثبت کنید.',
-      en: 'ACCA EDU processes the details you submit in the consultation form only to review your request, contact you through your chosen channel, and provide education guidance. This processing is based on your consent under Turkey’s Personal Data Protection Law (KVKK, Law No. 6698). We do not use these details for marketing without separate consent or share them beyond essential infrastructure providers. You may request access, correction, or deletion through our contact page.',
+      fa: 'ACCA EDU اطلاعاتی را که خودتان در فرم مشاوره وارد می‌کنید برای بررسی درخواست، تماس از مسیر انتخابی و ارائه خدمات آموزشی پردازش می‌کند. مبنای این پردازش رضایت شما مطابق قانون حفاظت از داده‌های شخصی ترکیه (KVKK، قانون شماره ۶۶۹۸) است. اطلاعات فرم در Supabase ذخیره می‌شود و برای اعلان داخلی درخواست به Telegram منتقل می‌شود. Google Tag Manager و Meta Pixel فقط پس از انتخاب جداگانه شما در تنظیمات حریم خصوصی فعال می‌شوند و برای سنجش عملکرد، انتساب کمپین و ساخت مخاطب ریتارگتینگ استفاده می‌شوند؛ اطلاعاتی مانند نام، شماره تماس، سن، تحصیلات و معدل به این تگ‌های تبلیغاتی ارسال نمی‌شود. می‌توانید انتخاب رهگیری را هر زمان از دکمه تنظیمات حریم خصوصی تغییر دهید و برای دسترسی، اصلاح یا حذف داده‌های ذخیره‌شده از صفحه تماس با ما درخواست ثبت کنید.',
+      en: 'ACCA EDU processes the details you submit in the consultation form to review your request, contact you through your chosen channel, and provide education guidance. This processing is based on your consent under Turkey’s Personal Data Protection Law (KVKK, Law No. 6698). Form details are stored in Supabase and sent to Telegram for internal lead notification. Google Tag Manager and Meta Pixel are activated only after your separate choice in the privacy settings and are used for performance measurement, campaign attribution, and retargeting audiences; details such as your name, contact value, age, education, and GPA are not sent to these advertising tags. You can change your tracking choice at any time from Privacy Settings and request access, correction, or deletion through our contact page.',
     },
   },
   terms: {
@@ -714,7 +720,7 @@ export default function ACCALandingPage() {
       .querySelector('meta[property="og:image"]')
       ?.getAttribute('content');
 
-    setConsultationContext({
+    const nextContext = {
       source: explicitContext.source || 'website_cta',
       page: explicitContext.page || page || 'home',
       title: explicitContext.title || document.title,
@@ -722,6 +728,25 @@ export default function ACCALandingPage() {
       image: explicitContext.image || ogImage || null,
       url: explicitContext.url || window.location.href,
       ...explicitContext,
+    };
+
+    setConsultationContext(nextContext);
+    trackConsultationOpen({
+      cta_location: nextContext.source,
+      page_type: nextContext.page,
+      content_type: nextContext.program
+        ? 'program'
+        : nextContext.university
+          ? 'university'
+          : nextContext.scholarship
+            ? 'scholarship'
+            : 'consultation',
+      content_id:
+        nextContext.program?.id ||
+        nextContext.university?.id ||
+        nextContext.scholarship?.id ||
+        null,
+      language,
     });
     setConsultationOpen(true);
   };
@@ -884,6 +909,36 @@ export default function ACCALandingPage() {
     return () => { cancelled = true; };
   }, [page, isFa, params, staticCanonicalUrl, staticRouteMeta]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const pageType = page || routeAlias?.page || 'home';
+      const contentId =
+        params.get('post') ||
+        params.get('term') ||
+        params.get('profile') ||
+        params.get('university') ||
+        routeAlias?.canonicalPath ||
+        null;
+
+      trackPageView({
+        page_type: pageType,
+        page_path: window.location.pathname,
+        language,
+      });
+
+      if (['programs', 'universities', 'istanbul-map', 'scholarships', 'blog', 'glossary', 'seo'].includes(pageType)) {
+        trackViewContent({
+          page_type: pageType,
+          content_type: pageType === 'blog' ? 'article' : pageType,
+          content_id: contentId,
+          language,
+        });
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [language, page, params, routeAlias]);
+
 
   const handleInstallClick = async () => {
     if (!installPromptEvent) return;
@@ -915,6 +970,7 @@ export default function ACCALandingPage() {
       onDismissInstall={handleDismissInstall}
     />
   );
+  const trackingConsentBanner = <TrackingConsentBanner isFa={isFa} />;
 
   let pageContent = null;
 
@@ -1419,7 +1475,14 @@ export default function ACCALandingPage() {
   // Floating actions (PWA install + WhatsApp + Instagram) are intentionally
   // landing-page only — sub-pages (universities / programs / scholarships)
   // render without them.
-  if (pageContent) return pageContent;
+  if (pageContent) {
+    return (
+      <>
+        {pageContent}
+        {trackingConsentBanner}
+      </>
+    );
+  }
 
   return (
     <>
@@ -2583,6 +2646,7 @@ export default function ACCALandingPage() {
         isFa={isFa}
         context={consultationContext}
       />
+      {trackingConsentBanner}
       </div>
     </>
   );
