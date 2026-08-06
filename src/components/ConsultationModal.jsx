@@ -11,12 +11,13 @@ import {
 
 const initialForm = {
   firstName: '', lastName: '', age: '', education: '', gpa: '',
-  contactMethod: 'whatsapp', contactValue: '', privacyAccepted: false,
+  contactMethod: 'whatsapp', contactValue: '',
   company: '',
 };
 
 const FORM_TIMEOUT_MS = 12_000;
 const MIN_HUMAN_SUBMIT_MS = 1_200;
+const PRIVACY_NOTICE_VERSION = 'consultation-form-notice-v1';
 const TRACKED_START_FIELDS = new Set([
   'firstName', 'lastName', 'age', 'education', 'gpa', 'contactValue',
 ]);
@@ -36,17 +37,25 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
   const openedAtRef = useRef(0);
   const formStartTrackedRef = useRef(false);
   const dialogRef = useRef(null);
+  const onCloseRef = useRef(onClose);
   const previousFocusRef = useRef(null);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   const closeModal = useCallback(() => {
     setShowPrivacy(false);
     setSubmitted(false);
     setError('');
-    onClose();
-  }, [onClose]);
+    onCloseRef.current();
+  }, []);
 
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open) {
+      openedAtRef.current = 0;
+      return undefined;
+    }
     openedAtRef.current = Date.now();
     formStartTrackedRef.current = false;
     previousFocusRef.current = document.activeElement instanceof HTMLElement
@@ -106,18 +115,20 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
     contactTitle: isFa ? 'راه ارتباطی دلخواه' : 'Preferred contact method',
     contactHint: isFa ? 'شماره یا آیدی همین شبکه' : 'Number or username on this channel',
     promise: isFa ? 'مشاوره رایگان است و در کمتر از یک ساعت با شما ارتباط می‌گیریم.' : 'Consultation is free and we will contact you in less than one hour.',
-    privacy: isFa ? 'با ثبت این درخواست، پردازش اطلاعاتم برای پاسخ‌گویی به مشاوره را طبق قانون KVKK و سیاست حریم خصوصی می‌پذیرم.' : 'I consent to processing my details for this consultation under KVKK and the Privacy Policy.',
-    privacyLink: isFa ? 'مطالعه سیاست حریم خصوصی' : 'Read the Privacy Policy',
-    privacyTitle: isFa ? 'سیاست حریم خصوصی و KVKK' : 'Privacy Policy and KVKK',
+    privacy: isFa ? 'با ارسال فرم، اطلاعات شما فقط برای بررسی درخواست مشاوره و تماس درباره همین درخواست استفاده می‌شود.' : 'By submitting this form, your information will only be used to review your consultation request and contact you about this request.',
+    privacyLink: isFa ? 'نحوه استفاده از اطلاعات' : 'How your information is used',
+    privacyTitle: isFa ? 'نحوه استفاده از اطلاعات' : 'How your information is used',
     privacyBody: isFa
       ? [
           'ACCA EDU اطلاعاتی را که خودتان در این فرم وارد می‌کنید فقط برای بررسی درخواست، تماس از مسیر انتخابی و ارائه مشاوره آموزشی پردازش می‌کند.',
-          'مبنای این پردازش، رضایت شما مطابق قانون حفاظت از داده‌های شخصی ترکیه (KVKK، قانون شماره ۶۶۹۸) است. اطلاعات فرم در Supabase ذخیره و برای اعلان داخلی درخواست به Telegram منتقل می‌شود.',
+          'اطلاعات به‌صورت الکترونیکی از همین فرم جمع‌آوری می‌شود. مبنای حقوقی، ضرورت پردازش مستقیم برای اقدام به درخواست مشاوره‌ای است که خودتان آغاز کرده‌اید و برقراری یا اجرای رابطه خدماتی مرتبط، در حدود ماده ۵/۲(c) قانون KVKK است.',
+          'اطلاعات فرم در زیرساخت Supabase در منطقه اروپا ذخیره می‌شود و برای اعلان داخلی درخواست به Telegram منتقل می‌شود؛ استفاده از این ارائه‌دهندگان می‌تواند شامل پردازش برون‌مرزی مشمول ماده ۹ KVKK باشد.',
           'رضایت رهگیری تبلیغاتی از این فرم جداست و در تنظیمات حریم خصوصی انتخاب می‌شود. نام، راه تماس، سن، تحصیلات و معدل به Google Tag Manager یا Meta Pixel ارسال نمی‌شود. می‌توانید برای دسترسی، اصلاح یا حذف اطلاعات خود از طریق صفحه تماس با ما درخواست ثبت کنید.',
         ]
       : [
           'ACCA EDU processes the information you enter in this form only to review your request, contact you through your selected channel, and provide education guidance.',
-          'This processing is based on your consent under Turkey’s Personal Data Protection Law (KVKK, Law No. 6698). Form details are stored in Supabase and sent to Telegram for internal lead notification.',
+          'The details are collected electronically through this form. The legal basis is processing directly necessary to act on the consultation request you initiated and to establish or perform the related service relationship, within Article 5(2)(c) of Turkey’s KVKK.',
+          'Form details are stored in Supabase infrastructure in the EU region and sent to Telegram for internal lead notification; using these providers may involve cross-border processing governed by Article 9 of the KVKK.',
           'Advertising tracking consent is separate from this form and is selected in Privacy Settings. Your name, contact value, age, education, and GPA are not sent to Google Tag Manager or Meta Pixel. You may request access, correction, or deletion through our contact page.',
         ],
     backToForm: isFa ? 'بازگشت به فرم مشاوره' : 'Back to consultation form',
@@ -177,12 +188,18 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
     const contactValue = form.contactValue.trim();
     const eventId = createEventId('lead');
     const consent = getTrackingConsent();
+    const privacyNoticeShownAt = new Date(openedAtRef.current || Date.now()).toISOString();
     const sourceContext = buildSourceContext({
       context,
       attribution: getAttributionSnapshot(),
       eventId,
       consent,
       language: isFa ? 'fa' : 'en',
+      privacyNotice: {
+        shown: true,
+        version: PRIVACY_NOTICE_VERSION,
+        shown_at: privacyNoticeShownAt,
+      },
     });
     const leadPayload = {
       first_name: cleanText(form.firstName, 80),
@@ -200,8 +217,10 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
       source_title: cleanText(context?.title || document.title, 240),
       source_image_url: cleanText(context?.image, 2_000) || null,
       source_context: sourceContext,
-      privacy_consent: form.privacyAccepted,
-      privacy_consent_at: new Date().toISOString(),
+      privacy_consent: false,
+      privacy_consent_at: null,
+      privacy_notice_version: PRIVACY_NOTICE_VERSION,
+      privacy_notice_shown_at: privacyNoticeShownAt,
       status: 'new',
     };
 
@@ -318,8 +337,8 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
             </Field>
 
             <div className="col-span-2 flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-bold leading-6 text-emerald-700"><ShieldCheck size={22} className="mt-0.5 shrink-0" /><span>{copy.promise}</span></div>
-            <label className="col-span-2 flex cursor-pointer items-start gap-3 text-xs font-bold leading-6 opacity-75">
-              <input required type="checkbox" checked={form.privacyAccepted} onChange={(e) => updateField('privacyAccepted', e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-emerald-600" />
+            <div className="col-span-2 flex items-start gap-3 text-xs font-bold leading-6 opacity-75">
+              <ShieldCheck size={20} className="mt-0.5 shrink-0 text-emerald-600" aria-hidden="true" />
               <span>
                 {copy.privacy}{' '}
                 <button
@@ -330,10 +349,10 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
                   {copy.privacyLink}
                 </button>
               </span>
-            </label>
+            </div>
             {submitted && <div role="status" aria-live="polite" className="col-span-2 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-600">{copy.success}</div>}
             {error && <div role="alert" className="col-span-2 rounded-2xl border border-red-400/30 bg-red-400/10 px-5 py-4 text-sm font-black text-red-500">{error}</div>}
-            <button type="submit" disabled={submitting || !form.privacyAccepted} className="col-span-2 rounded-2xl bg-black px-8 py-4 text-base font-black text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">{submitting ? copy.sending : copy.send}</button>
+            <button type="submit" disabled={submitting} className="col-span-2 rounded-2xl bg-black px-8 py-4 text-base font-black text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">{submitting ? copy.sending : copy.send}</button>
           </form>
           )}
         </div>
@@ -374,7 +393,7 @@ function pickContextRecord(record, keys) {
   return Object.keys(picked).length ? picked : null;
 }
 
-function buildSourceContext({ context, attribution, eventId, consent, language }) {
+function buildSourceContext({ context, attribution, eventId, consent, language, privacyNotice }) {
   const safeContext = {
     source: cleanText(context?.source || 'website_cta', 120),
     page: cleanText(context?.page || 'home', 120),
@@ -394,6 +413,7 @@ function buildSourceContext({ context, attribution, eventId, consent, language }
     attribution,
     event_id: eventId,
     language,
+    privacy_notice: privacyNotice,
     tracking_consent: {
       analytics: Boolean(consent?.analytics),
       marketing: Boolean(consent?.marketing),
