@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { registerServiceWorker } from './registerServiceWorker'
-import { initDeferredAnalytics } from './lib/analytics'
+import { initAnalytics } from './lib/analytics'
 import { initScrollRestoration } from './lib/scrollRestoration'
 
 initScrollRestoration()
+initAnalytics()
 
 // Auto-recover from stale-deploy chunk failures. When a new build ships, an old
 // cached index.html / service worker can point at a chunk hash that no longer
@@ -83,4 +84,3 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>
 )
 registerServiceWorker()
-initDeferredAnalytics()

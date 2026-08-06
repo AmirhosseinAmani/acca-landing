@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Local environment configuration (keep the documented template tracked).
+.env
+.env.*
+!.env.example
+
 # Internal knowledge-base exports must not be published to the repo.
 acca-knowledge-bank/
 acca-knowledge-bank.zip

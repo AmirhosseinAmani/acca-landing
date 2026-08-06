@@ -1,11 +1,25 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Camera, MessageCircle, Send, ShieldCheck, X } from 'lucide-react';
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../constants/supabase';
+import {
+  createEventId,
+  getAttributionSnapshot,
+  getTrackingConsent,
+  trackLead,
+  trackLeadFormStart,
+} from '../lib/analytics';
 
 const initialForm = {
   firstName: '', lastName: '', age: '', education: '', gpa: '',
   contactMethod: 'whatsapp', contactValue: '', privacyAccepted: false,
+  company: '',
 };
+
+const FORM_TIMEOUT_MS = 12_000;
+const MIN_HUMAN_SUBMIT_MS = 1_200;
+const TRACKED_START_FIELDS = new Set([
+  'firstName', 'lastName', 'age', 'education', 'gpa', 'contactValue',
+]);
 
 const contactMethods = [
   { id: 'whatsapp', icon: MessageCircle, fa: 'واتساپ', en: 'WhatsApp' },
@@ -19,20 +33,66 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const openedAtRef = useRef(0);
+  const formStartTrackedRef = useRef(false);
+  const dialogRef = useRef(null);
+  const previousFocusRef = useRef(null);
+
+  const closeModal = useCallback(() => {
+    setShowPrivacy(false);
+    setSubmitted(false);
+    setError('');
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
-    if (!open) {
-      setShowPrivacy(false);
-      return undefined;
-    }
-    const handleKeyDown = (event) => event.key === 'Escape' && onClose();
+    if (!open) return undefined;
+    openedAtRef.current = Date.now();
+    formStartTrackedRef.current = false;
+    previousFocusRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+
+    const getFocusableElements = () => Array.from(dialogRef.current?.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+    ) || []).filter((element) => !element.hasAttribute('hidden'));
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeModal();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const focusable = getFocusableElements();
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    const focusTimer = window.setTimeout(() => getFocusableElements()[0]?.focus(), 0);
     document.body.style.overflow = 'hidden';
     window.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.clearTimeout(focusTimer);
       document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
+      if (previousFocusRef.current?.isConnected) {
+        previousFocusRef.current.focus({ preventScroll: true });
+      }
+      previousFocusRef.current = null;
     };
-  }, [onClose, open]);
+  }, [closeModal, open]);
 
   const copy = useMemo(() => ({
     title: isFa ? 'رزرو مشاوره رایگان' : 'Book a free consultation',
@@ -52,13 +112,13 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
     privacyBody: isFa
       ? [
           'ACCA EDU اطلاعاتی را که خودتان در این فرم وارد می‌کنید فقط برای بررسی درخواست، تماس از مسیر انتخابی و ارائه مشاوره آموزشی پردازش می‌کند.',
-          'مبنای این پردازش، رضایت شما مطابق قانون حفاظت از داده‌های شخصی ترکیه (KVKK، قانون شماره ۶۶۹۸) است. اطلاعات شما بدون رضایت جداگانه برای تبلیغات استفاده نمی‌شود.',
-          'داده‌ها جز در اختیار ارائه‌دهندگان ضروری زیرساخت قرار نمی‌گیرد. شما می‌توانید برای دسترسی، اصلاح یا حذف اطلاعات خود از طریق صفحه تماس با ما درخواست ثبت کنید.',
+          'مبنای این پردازش، رضایت شما مطابق قانون حفاظت از داده‌های شخصی ترکیه (KVKK، قانون شماره ۶۶۹۸) است. اطلاعات فرم در Supabase ذخیره و برای اعلان داخلی درخواست به Telegram منتقل می‌شود.',
+          'رضایت رهگیری تبلیغاتی از این فرم جداست و در تنظیمات حریم خصوصی انتخاب می‌شود. نام، راه تماس، سن، تحصیلات و معدل به Google Tag Manager یا Meta Pixel ارسال نمی‌شود. می‌توانید برای دسترسی، اصلاح یا حذف اطلاعات خود از طریق صفحه تماس با ما درخواست ثبت کنید.',
         ]
       : [
           'ACCA EDU processes the information you enter in this form only to review your request, contact you through your selected channel, and provide education guidance.',
-          'This processing is based on your consent under Turkey’s Personal Data Protection Law (KVKK, Law No. 6698). Your details are not used for marketing without separate consent.',
-          'Data is not shared beyond essential infrastructure providers. You may request access, correction, or deletion through our contact page.',
+          'This processing is based on your consent under Turkey’s Personal Data Protection Law (KVKK, Law No. 6698). Form details are stored in Supabase and sent to Telegram for internal lead notification.',
+          'Advertising tracking consent is separate from this form and is selected in Privacy Settings. Your name, contact value, age, education, and GPA are not sent to Google Tag Manager or Meta Pixel. You may request access, correction, or deletion through our contact page.',
         ],
     backToForm: isFa ? 'بازگشت به فرم مشاوره' : 'Back to consultation form',
     send: isFa ? 'ارسال درخواست مشاوره' : 'Send consultation request',
@@ -66,6 +126,7 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
     close: isFa ? 'بستن' : 'Close',
     success: isFa ? 'درخواست ثبت شد؛ حداکثر تا یک ساعت آینده از مسیر انتخابی با شما تماس می‌گیریم.' : 'Request saved. We will contact you through your chosen channel within one hour.',
     error: isFa ? 'ارسال درخواست انجام نشد. لطفاً چند لحظه دیگر دوباره تلاش کنید.' : 'The request could not be sent. Please try again in a moment.',
+    tooFast: isFa ? 'لطفاً یک لحظه صبر کنید و دوباره دکمه ارسال را بزنید.' : 'Please wait a moment, then press send again.',
   }), [isFa]);
 
   if (!open) return null;
@@ -74,52 +135,105 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
     setSubmitted(false);
     setError('');
     setForm((current) => ({ ...current, [field]: value }));
+
+    if (
+      !formStartTrackedRef.current &&
+      TRACKED_START_FIELDS.has(field) &&
+      String(value || '').trim()
+    ) {
+      formStartTrackedRef.current = true;
+      trackLeadFormStart({
+        page_type: context?.page || 'home',
+        cta_location: context?.source || 'website_cta',
+        language: isFa ? 'fa' : 'en',
+      });
+    }
+  };
+
+  const updateContactMethod = (method) => {
+    setSubmitted(false);
+    setError('');
+    setForm((current) => ({
+      ...current,
+      contactMethod: method,
+      contactValue: current.contactMethod === method ? current.contactValue : '',
+    }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // A hidden honeypot plus a minimum interaction time blocks basic form bots
+    // without collecting or transmitting their payload. Server-side limits are
+    // still required for determined abuse.
+    if (form.company) return;
+    if (Date.now() - openedAtRef.current < MIN_HUMAN_SUBMIT_MS) {
+      setError(copy.tooFast);
+      return;
+    }
+
     setSubmitting(true);
     setError('');
     const contactValue = form.contactValue.trim();
+    const eventId = createEventId('lead');
+    const consent = getTrackingConsent();
+    const sourceContext = buildSourceContext({
+      context,
+      attribution: getAttributionSnapshot(),
+      eventId,
+      consent,
+      language: isFa ? 'fa' : 'en',
+    });
     const leadPayload = {
-      first_name: form.firstName.trim(),
-      last_name: form.lastName.trim(),
+      first_name: cleanText(form.firstName, 80),
+      last_name: cleanText(form.lastName, 80),
       age: form.age ? Number(form.age) : null,
-      education: form.education.trim(),
-      gpa: form.gpa.trim(),
+      education: cleanText(form.education, 120),
+      gpa: cleanText(form.gpa, 20),
       phone: form.contactMethod === 'whatsapp' ? contactValue : '',
       email: '',
       contact_method: form.contactMethod,
-      contact_value: contactValue,
+      contact_value: cleanText(contactValue, 120),
       source: 'website',
-      source_page: context?.page || window.location.pathname,
-      source_url: context?.url || window.location.href,
-      source_title: context?.title || document.title,
-      source_image_url: context?.image || null,
-      source_context: context || {},
+      source_page: cleanText(context?.page || window.location.pathname, 120),
+      source_url: cleanSourceUrl(context?.url || window.location.href),
+      source_title: cleanText(context?.title || document.title, 240),
+      source_image_url: cleanText(context?.image, 2_000) || null,
+      source_context: sourceContext,
       privacy_consent: form.privacyAccepted,
       privacy_consent_at: new Date().toISOString(),
       status: 'new',
     };
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), FORM_TIMEOUT_MS);
 
     try {
       const response = await fetch(`${SUPABASE_URL}/rest/v1/consultation_leads`, {
         method: 'POST',
         headers: {
           apikey: SUPABASE_PUBLISHABLE_KEY,
-          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
           'Content-Type': 'application/json',
           Prefer: 'return=minimal',
         },
         body: JSON.stringify(leadPayload),
+        signal: controller.signal,
       });
       if (!response.ok) throw new Error(await response.text());
       setForm(initialForm);
       setSubmitted(true);
+      trackLead({
+        event_id: eventId,
+        contact_method: form.contactMethod,
+        page_type: context?.page || 'home',
+        cta_location: context?.source || 'website_cta',
+        language: isFa ? 'fa' : 'en',
+      });
     } catch (requestError) {
       console.error(requestError);
       setError(copy.error);
     } finally {
+      window.clearTimeout(timeout);
       setSubmitting(false);
     }
   };
@@ -129,16 +243,16 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
 
   return (
     <div className="fixed inset-0 z-[80] overflow-y-auto overscroll-contain" dir={isFa ? 'rtl' : 'ltr'}>
-      <button type="button" aria-label={copy.close} className="fixed inset-0 bg-black/55 backdrop-blur-md" onClick={onClose} />
+      <button type="button" aria-label={copy.close} className="fixed inset-0 bg-black/55 backdrop-blur-md" onClick={closeModal} />
       <div className="relative z-10 flex min-h-full items-center justify-center p-4 py-7 sm:py-10">
-        <div role="dialog" aria-modal="true" aria-labelledby="consultation-title" className="w-full max-w-2xl rounded-[32px] border border-white/75 bg-[rgba(245,244,242,0.88)] p-5 text-black shadow-[0_30px_120px_rgba(0,0,0,0.32)] backdrop-blur-[30px] sm:p-7">
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="consultation-title" className="w-full max-w-2xl rounded-[32px] border border-white/75 bg-[rgba(245,244,242,0.88)] p-5 text-black shadow-[0_30px_120px_rgba(0,0,0,0.32)] backdrop-blur-[30px] sm:p-7">
           <div className="mb-5 flex items-start justify-between gap-4">
             <div>
               <div className="mb-2 text-xs font-black uppercase tracking-[0.2em] text-emerald-700">ACCA CONSULTATION</div>
               <h2 id="consultation-title" className="text-2xl font-black sm:text-3xl">{copy.title}</h2>
               <p className="mt-2 text-sm font-medium leading-6 opacity-65">{copy.desc}</p>
             </div>
-            <button type="button" onClick={onClose} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/5" aria-label={copy.close}><X size={20} /></button>
+            <button type="button" onClick={closeModal} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-black/5" aria-label={copy.close}><X size={20} /></button>
           </div>
 
           {!showPrivacy && context?.title && (
@@ -170,25 +284,37 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
               </button>
             </section>
           ) : (
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 sm:gap-4">
-            <Field label={copy.firstName}><input required autoComplete="given-name" className={inputClass} value={form.firstName} onChange={(e) => updateField('firstName', e.target.value)} /></Field>
-            <Field label={copy.lastName}><input required autoComplete="family-name" className={inputClass} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></Field>
+          <form onSubmit={handleSubmit} className="relative grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="pointer-events-none absolute h-px w-px overflow-hidden opacity-0" aria-hidden="true">
+              <label>
+                Company
+                <input
+                  name="company"
+                  tabIndex="-1"
+                  autoComplete="off"
+                  value={form.company}
+                  onChange={(event) => updateField('company', event.target.value)}
+                />
+              </label>
+            </div>
+            <Field label={copy.firstName}><input required maxLength="80" autoComplete="given-name" className={inputClass} value={form.firstName} onChange={(e) => updateField('firstName', e.target.value)} /></Field>
+            <Field label={copy.lastName}><input required maxLength="80" autoComplete="family-name" className={inputClass} value={form.lastName} onChange={(e) => updateField('lastName', e.target.value)} /></Field>
             <Field label={copy.age}><input required min="12" max="80" type="number" inputMode="numeric" className={inputClass} value={form.age} onChange={(e) => updateField('age', e.target.value)} /></Field>
-            <Field label={copy.education}><input required className={inputClass} value={form.education} onChange={(e) => updateField('education', e.target.value)} /></Field>
-            <Field label={copy.gpa} className="col-span-2 sm:col-span-1"><input required inputMode="decimal" className={inputClass} value={form.gpa} onChange={(e) => updateField('gpa', e.target.value)} /></Field>
+            <Field label={copy.education}><input required maxLength="120" className={inputClass} value={form.education} onChange={(e) => updateField('education', e.target.value)} /></Field>
+            <Field label={copy.gpa} className="col-span-2 sm:col-span-1"><input required maxLength="20" inputMode="decimal" className={inputClass} value={form.gpa} onChange={(e) => updateField('gpa', e.target.value)} /></Field>
 
             <div className="col-span-2">
               <div className="mb-2 text-sm font-black opacity-70">{copy.contactTitle}</div>
               <div className="grid grid-cols-3 gap-2">
                 {contactMethods.map(({ id, icon: Icon, fa, en }) => {
                   const active = form.contactMethod === id;
-                  return <button key={id} type="button" aria-pressed={active} onClick={() => updateField('contactMethod', id)} className={`${active ? 'border-emerald-500 bg-emerald-500/12 text-emerald-600' : 'border-black/10 bg-white/70'} flex items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-xs font-black transition`}><Icon size={18} /><span>{isFa ? fa : en}</span></button>;
+                  return <button key={id} type="button" aria-pressed={active} onClick={() => updateContactMethod(id)} className={`${active ? 'border-emerald-500 bg-emerald-500/12 text-emerald-600' : 'border-black/10 bg-white/70'} flex items-center justify-center gap-2 rounded-2xl border px-2 py-3 text-xs font-black transition`}><Icon size={18} /><span>{isFa ? fa : en}</span></button>;
                 })}
               </div>
             </div>
 
             <Field label={`${copy.contactHint} (${isFa ? selectedMethod?.fa : selectedMethod?.en})`} className="col-span-2">
-              <input required dir="ltr" autoComplete={form.contactMethod === 'whatsapp' ? 'tel' : 'off'} inputMode={form.contactMethod === 'whatsapp' ? 'tel' : 'text'} placeholder={form.contactMethod === 'whatsapp' ? '+90 5xx xxx xx xx' : '@username'} className={`${inputClass} text-left`} value={form.contactValue} onChange={(e) => updateField('contactValue', e.target.value)} />
+              <input required minLength="3" maxLength="120" pattern={form.contactMethod === 'whatsapp' ? '[+0-9()\\s-]{7,25}' : '@?[A-Za-z0-9._-]{3,120}'} dir="ltr" autoComplete={form.contactMethod === 'whatsapp' ? 'tel' : 'off'} inputMode={form.contactMethod === 'whatsapp' ? 'tel' : 'text'} placeholder={form.contactMethod === 'whatsapp' ? '+90 5xx xxx xx xx' : '@username'} className={`${inputClass} text-left`} value={form.contactValue} onChange={(e) => updateField('contactValue', e.target.value)} />
             </Field>
 
             <div className="col-span-2 flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm font-bold leading-6 text-emerald-700"><ShieldCheck size={22} className="mt-0.5 shrink-0" /><span>{copy.promise}</span></div>
@@ -205,8 +331,8 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
                 </button>
               </span>
             </label>
-            {submitted && <div className="col-span-2 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-600">{copy.success}</div>}
-            {error && <div className="col-span-2 rounded-2xl border border-red-400/30 bg-red-400/10 px-5 py-4 text-sm font-black text-red-500">{error}</div>}
+            {submitted && <div role="status" aria-live="polite" className="col-span-2 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-sm font-black text-emerald-600">{copy.success}</div>}
+            {error && <div role="alert" className="col-span-2 rounded-2xl border border-red-400/30 bg-red-400/10 px-5 py-4 text-sm font-black text-red-500">{error}</div>}
             <button type="submit" disabled={submitting || !form.privacyAccepted} className="col-span-2 rounded-2xl bg-black px-8 py-4 text-base font-black text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40">{submitting ? copy.sending : copy.send}</button>
           </form>
           )}
@@ -218,4 +344,61 @@ export default function ConsultationModal({ open, onClose, isFa, context }) {
 
 function Field({ label, children, className = '' }) {
   return <label className={`${className} block`}><span className="mb-2 block text-sm font-black opacity-70">{label}</span>{children}</label>;
+}
+
+function cleanText(value, maxLength) {
+  return String(value || '').trim().slice(0, maxLength);
+}
+
+function cleanSourceUrl(value) {
+  try {
+    const url = new URL(String(value || ''), window.location.origin);
+    if (!/^https?:$/.test(url.protocol)) return '';
+    url.search = '';
+    url.hash = '';
+    return cleanText(url.toString(), 2_000);
+  } catch {
+    return '';
+  }
+}
+
+function pickContextRecord(record, keys) {
+  if (!record || typeof record !== 'object') return null;
+  const picked = {};
+  keys.forEach((key) => {
+    const value = record[key];
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      picked[key] = typeof value === 'string' ? cleanText(value, 240) : value;
+    }
+  });
+  return Object.keys(picked).length ? picked : null;
+}
+
+function buildSourceContext({ context, attribution, eventId, consent, language }) {
+  const safeContext = {
+    source: cleanText(context?.source || 'website_cta', 120),
+    page: cleanText(context?.page || 'home', 120),
+    title: cleanText(context?.title, 240) || null,
+    subtitle: cleanText(context?.subtitle, 300) || null,
+    program: pickContextRecord(context?.program, [
+      'id', 'name', 'program', 'university', 'city', 'degree', 'language',
+    ]),
+    university: pickContextRecord(context?.university, ['id', 'name', 'slug', 'city']),
+    scholarship: pickContextRecord(context?.scholarship, [
+      'id', 'program', 'university', 'degree', 'language', 'priceAmount', 'currency',
+    ]),
+  };
+
+  return {
+    ...safeContext,
+    attribution,
+    event_id: eventId,
+    language,
+    tracking_consent: {
+      analytics: Boolean(consent?.analytics),
+      marketing: Boolean(consent?.marketing),
+      version: consent?.version || null,
+      updated_at: consent?.updatedAt || null,
+    },
+  };
 }
